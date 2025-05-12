@@ -1,110 +1,353 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Sizzy Central V1</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>murasaki's center V1 | adding more soon (y'all BETTER know who made this website.)</title>
     <style>
-        /* Modern Glowing Title */
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rubik:wght@400;700&display=swap');
         
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            margin: 0;
-            color: white;
+        :root {
+            --primary: #00a8ff;
+            --secondary: #ff2d75;
+            --dark: #0d1b2a;
+            --light: #e0e1dd;
         }
         
-        /* Wavy + Glowing Header */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Rubik', sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+        }
+        
+        /* Dynamic Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #0d1b2a, #1b263b, #415a77, #778da9);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            z-index: -1;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* PlayStation-Style Header */
         .header {
             text-align: center;
-            padding: 30px 0;
-            background: rgba(0, 0, 0, 0.4);
-            margin-bottom: 20px;
+            padding: 2rem 0;
         }
         
         .title {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 3em;
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-            animation: wave 3s ease-in-out infinite;
+            text-shadow: 0 0 15px rgba(0, 168, 255, 0.5);
+            animation: pulse 2s infinite alternate;
         }
         
-        @keyframes wave {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
         }
         
-        /* Navigation Tabs */
+        /* PlayStation-Style Tabs */
         .tabs {
             display: flex;
             justify-content: center;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 10px;
-            border-bottom: 2px solid #ff00cc;
+            gap: 1rem;
+            padding: 1rem;
+            margin-bottom: 2rem;
         }
         
         .tab {
-            margin: 0 15px;
-            padding: 10px 20px;
+            padding: 0.8rem 1.5rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50px;
             cursor: pointer;
-            background: #3333ff;
-            border-radius: 5px;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            border: 2px solid transparent;
         }
         
-        .tab:hover {
-            background: #ff00cc;
-            transform: scale(1.1);
+        .tab:hover, .tab.active {
+            background: rgba(0, 168, 255, 0.2);
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 168, 255, 0.2);
         }
         
-        /* Game Containers */
-        .game {
-            background: rgba(255, 255, 255, 0.1);
+        /* Game Grid (PlayStation-Style Cards) */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .game-card {
+            background: rgba(13, 27, 42, 0.7);
             border-radius: 15px;
-            padding: 20px;
-            margin: 20px auto;
-            max-width: 800px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(0, 168, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
         
-        h2 {
-            color: #ff00cc;
-            text-shadow: 0 0 5px rgba(255, 0, 204, 0.5);
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 168, 255, 0.3);
+            border-color: var(--primary);
+        }
+        
+        .game-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        
+        .game-info {
+            padding: 1rem;
+        }
+        
+        .game-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .game-info p {
+            color: rgba(224, 225, 221, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .play-btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .play-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 168, 255, 0.5);
+        }
+        
+        /* Game Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .modal-content {
+            width: 90%;
+            height: 80%;
+            background: var(--dark);
+            border-radius: 15px;
+            border: 2px solid var(--primary);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 101;
+        }
+        
+        .game-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
     </style>
 </head>
 <body>
-    <!-- Glowing Wavy Header -->
-    <div class="header">
-        <div class="title">SIZZY CENTRAL V1</div>
-    </div>
+    <!-- Animated Background -->
+    <div class="bg-animation"></div>
     
-    <!-- Navigation Tabs -->
+    <!-- Header -->
+    <header class="header">
+        <h1 class="title">SIZZY CENTRAL V1</h1>
+    </header>
+    
+    <!-- PlayStation-Style Tabs -->
     <div class="tabs">
-        <div class="tab" onclick="window.location.href='#'">Home</div>
-        <div class="tab" onclick="window.location.href='#'">Arcade</div>
-        <div class="tab" onclick="window.location.href='#'">Retro</div>
-        <div class="tab" onclick="window.location.href='#'">About</div>
+        <div class="tab active" data-category="all">All Games</div>
+        <div class="tab" data-category="arcade">Arcade</div>
+        <div class="tab" data-category="sports">Sports</div>
+        <div class="tab" data-category="retro">Retro</div>
+        <div class="tab" data-category="action">Action</div>
     </div>
     
-    <!-- Games Section -->
-    <div class="game">
-        <h2>Snake Game</h2>
-        <iframe src="https://playsnake.org/" width="100%" height="450" frameborder="0"></iframe>
+    <!-- Game Grid -->
+    <div class="game-grid">
+        <!-- Arcade Games -->
+        <div class="game-card" data-category="arcade">
+            <img src="https://i.imgur.com/JXQ2WQa.png" alt="Slope">
+            <div class="game-info">
+                <h3>Slope</h3>
+                <p>Navigate a 3D course at high speed!</p>
+                <a href="#" class="play-btn" data-game="https://slope-game.com/">PLAY NOW</a>
+            </div>
+        </div>
+        
+        <!-- Sports Games -->
+        <div class="game-card" data-category="sports">
+            <img src="https://i.imgur.com/5XZJQ9W.png" alt="Basketball Stars">
+            <div class="game-info">
+                <h3>Basketball Stars</h3>
+                <p>1v1 street basketball showdowns!</p>
+                <a href="#" class="play-btn" data-game="https://www.crazygames.com/game/basketball-stars">PLAY NOW</a>
+            </div>
+        </div>
+        
+        <div class="game-card" data-category="sports">
+            <img src="https://i.imgur.com/8QZQ9WX.png" alt="Basketball Random">
+            <div class="game-info">
+                <h3>Basketball Random</h3>
+                <p>Chaotic multiplayer basketball!</p>
+                <a href="#" class="play-btn" data-game="https://poki.com/en/g/basketball-random">PLAY NOW</a>
+            </div>
+        </div>
+        
+        <div class="game-card" data-category="sports">
+            <img src="https://i.imgur.com/9XZJQ9W.png" alt="Volley Random">
+            <div class="game-info">
+                <h3>Volley Random</h3>
+                <p>Crazy physics volleyball!</p>
+                <a href="#" class="play-btn" data-game="https://poki.com/en/g/volley-random">PLAY NOW</a>
+            </div>
+        </div>
+        
+        <!-- Retro Games -->
+        <div class="game-card" data-category="retro">
+            <img src="https://i.imgur.com/7XZJQ9W.png" alt="Pac-Man">
+            <div class="game-info">
+                <h3>Pac-Man</h3>
+                <p>Classic arcade maze chase!</p>
+                <a href="#" class="play-btn" data-game="https://www.retrogames.cc/embed/17620-pac-man.html">PLAY NOW</a>
+            </div>
+        </div>
+        
+        <!-- Action Games -->
+        <div class="game-card" data-category="action">
+            <img src="https://i.imgur.com/6XZJQ9W.png" alt="Minecraft Classic">
+            <div class="game-info">
+                <h3>Minecraft Classic</h3>
+                <p>Browser-based block building!</p>
+                <a href="#" class="play-btn" data-game="https://classic.minecraft.net">PLAY NOW</a>
+            </div>
+        </div>
     </div>
     
-    <div class="game">
-        <h2>Dino Run</h2>
-        <iframe src="https://chromedino.com/" width="100%" height="200" frameborder="0"></iframe>
+    <!-- Game Modal (Popup) -->
+    <div class="modal">
+        <div class="modal-content">
+            <button class="close-btn">X</button>
+            <iframe class="game-frame" src="" allowfullscreen></iframe>
+        </div>
     </div>
     
-    <div class="game">
-        <h2>Pac-Man</h2>
-        <iframe src="https://www.retrogames.cc/embed/17620-pac-man.html" width="100%" height="450" frameborder="0"></iframe>
-    </div>
+    <script>
+        // Tab Filtering
+        const tabs = document.querySelectorAll('.tab');
+        const gameCards = document.querySelectorAll('.game-card');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                const category = tab.dataset.category;
+                gameCards.forEach(card => {
+                    if (category === 'all' || card.dataset.category === category) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+        
+        // Game Modal
+        const modal = document.querySelector('.modal');
+        const playBtns = document.querySelectorAll('.play-btn');
+        const closeBtn = document.querySelector('.close-btn');
+        const gameFrame = document.querySelector('.game-frame');
+        
+        playBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const gameUrl = btn.dataset.game;
+                gameFrame.src = gameUrl;
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+        
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+            gameFrame.src = '';
+            document.body.style.overflow = 'auto';
+        });
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                gameFrame.src = '';
+                document.body.style.overflow = 'auto';
+            }
+        });
+    </script>
 </body>
 </html>
