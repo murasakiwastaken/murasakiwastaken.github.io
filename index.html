@@ -5,8 +5,208 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>murasaki's center V1 | adding more soon</title>
     <style>
-        /* [Previous CSS remains exactly the same until .modal styles] */
-
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rubik:wght@400;700&display=swap');
+        
+        :root {
+            --primary: #00a8ff;
+            --secondary: #ff2d75;
+            --dark: #0d1b2a;
+            --light: #e0e1dd;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rubik', sans-serif;
+        }
+        
+        body {
+            background: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+        }
+        
+        /* Dynamic Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #0d1b2a, #1b263b, #415a77, #778da9);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            z-index: -1;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* PlayStation-Style Header */
+        .header {
+            text-align: center;
+            padding: 2rem 0;
+        }
+        
+        .title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px rgba(0, 168, 255, 0.5);
+            animation: pulse 2s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+        
+        /* PlayStation-Style Tabs - FIXED ALIGNMENT */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .tab {
+            padding: 0.8rem 1.5rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            border: 2px solid transparent;
+            font-family: 'Rubik', sans-serif;
+        }
+        
+        .tab:hover, .tab.active {
+            background: rgba(0, 168, 255, 0.2);
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 168, 255, 0.2);
+        }
+        
+        /* Game Grid (PlayStation-Style Cards) */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .game-card {
+            background: rgba(13, 27, 42, 0.7);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(0, 168, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 168, 255, 0.3);
+            border-color: var(--primary);
+        }
+        
+        .game-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        
+        .game-info {
+            padding: 1rem;
+        }
+        
+        .game-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .game-info p {
+            color: rgba(224, 225, 221, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .play-btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .play-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 168, 255, 0.5);
+        }
+        
+        /* Game Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            width: 90%;
+            height: 80%;
+            background: var(--dark);
+            border-radius: 15px;
+            border: 2px solid var(--primary);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 101;
+        }
+        
+        .game-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
         /* Chatroom Specific Styles */
         .chat-container {
             display: none;
@@ -17,6 +217,7 @@
             border: 2px solid var(--primary);
             box-shadow: 0 5px 15px rgba(0, 168, 255, 0.2);
             overflow: hidden;
+            font-family: 'Rubik', sans-serif;
         }
 
         .chat-container.active {
@@ -76,6 +277,7 @@
             background: rgba(224, 225, 221, 0.1);
             color: var(--light);
             margin-right: 1rem;
+            font-family: 'Rubik', sans-serif;
         }
 
         .chat-input:focus {
@@ -92,6 +294,7 @@
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s ease;
+            font-family: 'Rubik', sans-serif;
         }
 
         .send-btn:hover {
@@ -106,10 +309,14 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.9);
-            display: flex;
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 200;
+        }
+
+        .username-modal.active {
+            display: flex;
         }
 
         .username-modal-content {
@@ -132,6 +339,7 @@
             color: var(--light);
             text-align: center;
             font-size: 1.2rem;
+            font-family: 'Rubik', sans-serif;
         }
 
         .username-input:focus {
@@ -148,6 +356,7 @@
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s ease;
+            font-family: 'Rubik', sans-serif;
         }
 
         .set-username-btn:hover {
@@ -157,7 +366,13 @@
     </style>
 </head>
 <body>
-    <!-- [Previous HTML remains exactly the same until the tabs section] -->
+    <!-- Animated Background -->
+    <div class="bg-animation"></div>
+    
+    <!-- Header -->
+    <header class="header">
+        <h1 class="title">murasaki's center V1 | adding more soon (y'all BETTER know who made this website.)</h1>
+    </header>
     
     <!-- PlayStation-Style Tabs -->
     <div class="tabs">
@@ -171,7 +386,70 @@
     
     <!-- Game Grid -->
     <div class="game-grid">
-        <!-- [Your existing game cards remain exactly the same] -->
+        <!-- Arcade Games -->
+        <div class="game-card" data-category="arcade">
+            <img src="https://watchdocumentaries.com/wp-content/uploads/slope-game.jpg" alt="Slope">
+            <div class="game-info">
+                <h3>Slope</h3>
+                <p>Navigate a 3D course at high speed!</p>
+                <a href="#" class="play-btn" data-game="https://slope-game.com/">PLAY NOW</a>
+            </div>
+        </div>
+        
+        <!-- Sports Games -->
+        <div class="game-card" data-category="sports">
+            <img src="https://static.keygames.com/5/93515/96655/1200x630/basketball-stars.webp" alt="Basketball Stars">
+            <div class="game-info">
+                <h3>Basketball Stars</h3>
+                <p>1v1 street basketball showdowns!</p>
+                <a href="#" class="play-btn" data-game="https://basketballstarsonline.github.io/file/">PLAY NOW</a>
+            </div>
+        </div>
+        
+        <div class="game-card" data-category="sports">
+            <img src="https://images.crazygames.com/basket-random_16x9/20240617090207/basket-random_16x9-cover?auto=format,compress&q=75&cs=strip" alt="Basketball Random">
+            <div class="game-info">
+                <h3>Basketball Random</h3>
+                <p>Chaotic multiplayer basketball!</p>
+                <a href="#" class="play-btn" data-game="https://basketball-random.github.io/file/">PLAY NOW</a>
+            </div>
+        </div>
+        <div class="game-card" data-category="sports">
+            <img src="https://cdn6.aptoide.com/imgs/8/9/e/89e683612d0604ef467252311c614782_screen.jpg?w=324" alt="Penalty Shooters 2">
+            <div class="game-info">
+                <h3>Penalty Shooters 2</h3>
+                <p>Test your penalty shooting skills in this exciting sports game!</p>
+                <a href="#" class="play-btn" data-game="//html5.gamedistribution.com/rvvASMiM/571b9df027e449f78e3869ba19658754/index.html">PLAY NOW</a>
+            </div>
+        </div>
+        <div class="game-card" data-category="sports">
+            <img src="https://images.crazygames.com/volley-random/20230131173658/volley-random-cover?auto=format,compress&q=75&cs=strip" alt="Volley Random">
+            <div class="game-info">
+                <h3>Volley Random</h3>
+                <p>Crazy physics volleyball!</p>
+                <a href="#" class="play-btn" data-game="https://bolaa1.github.io/file/">PLAY NOW</a>
+            </div>
+        </div>
+        
+        <!-- Retro Games -->
+        <div class="game-card" data-category="retro">
+            <img src="https://muralsyourway.vtexassets.com/arquivos/ids/274926/Pacman-Game-Wall-Mural.jpg?v=638229015907170000" alt="Pac-Man">
+            <div class="game-info">
+                <h3>Pac-Man</h3>
+                <p>Classic arcade maze chase!</p>
+                <a href="#" class="play-btn" data-game="https://www.google.com/logos/2010/pacman10-i.html">PLAY NOW</a>
+            </div>
+        </div>
+        
+        <!-- Action Games -->
+        <div class="game-card" data-category="action">
+            <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Minecraft Classic">
+            <div class="game-info">
+                <h3>Minecraft Classic (Eaglercraft)</h3>
+                <p>Browser-based block building!</p>
+                <a href="#" class="play-btn" data-game="https://eaglauncher.vercel.app">PLAY NOW</a>
+            </div>
+        </div>
     </div>
     
     <!-- Chatroom Container -->
@@ -198,12 +476,16 @@
         </div>
     </div>
     
-    <!-- [Your existing game modal remains the same] -->
+    <!-- Game Modal (Popup) -->
+    <div class="modal">
+        <div class="modal-content">
+            <button class="close-btn">X</button>
+            <iframe class="game-frame" src="" allowfullscreen></iframe>
+        </div>
+    </div>
     
     <script>
-        // [Previous JavaScript remains the same until the tabs section]
-
-        // Tab Filtering - Updated to include chatroom
+        // Tab Filtering
         const tabs = document.querySelectorAll('.tab');
         const gameCards = document.querySelectorAll('.game-card');
         const chatContainer = document.getElementById('chatroom');
@@ -233,6 +515,37 @@
                 }
             });
         });
+        
+        // Game Modal
+        const modal = document.querySelector('.modal');
+        const playBtns = document.querySelectorAll('.play-btn');
+        const closeBtn = document.querySelector('.close-btn');
+        const gameFrame = document.querySelector('.game-frame');
+        
+        playBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const gameUrl = btn.dataset.game;
+                gameFrame.src = gameUrl;
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+        
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+            gameFrame.src = '';
+            document.body.style.overflow = 'auto';
+        });
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                gameFrame.src = '';
+                document.body.style.overflow = 'auto';
+            }
+        });
 
         // Chatroom Functionality
         const usernameModal = document.getElementById('username-modal');
@@ -247,9 +560,9 @@
         // Check if username is set
         function checkUsername() {
             if (!username) {
-                usernameModal.style.display = 'flex';
+                usernameModal.classList.add('active');
             } else {
-                usernameModal.style.display = 'none';
+                usernameModal.classList.remove('active');
                 loadChatHistory();
             }
         }
@@ -260,7 +573,7 @@
             if (newUsername) {
                 username = newUsername;
                 localStorage.setItem('chatUsername', username);
-                usernameModal.style.display = 'none';
+                usernameModal.classList.remove('active');
                 loadChatHistory();
                 
                 // Add welcome message
@@ -278,9 +591,16 @@
             }
         });
         
+        // Also allow Enter key to set username
+        usernameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                setUsernameBtn.click();
+            }
+        });
+        
         // Load chat history from localStorage
         function loadChatHistory() {
-            const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || [];
+            const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
             chatMessages.innerHTML = '';
             
             chatHistory.forEach(msg => {
@@ -343,8 +663,6 @@
                 sendMessage();
             }
         });
-        
-        // [Rest of your existing JavaScript remains the same]
     </script>
 </body>
 </html>
