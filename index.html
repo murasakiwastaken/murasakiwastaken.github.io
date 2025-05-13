@@ -6,21 +6,135 @@
     <title>murasaki's center V1 | adding more soon</title>
     
     <!-- Firebase Integration -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <!-- Add this with your other Firebase scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
       // Your Firebase Config
-      const firebaseConfig = {
-        apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
-        authDomain: "chatroommurasaki.firebaseapp.com",
-        projectId: "chatroommurasaki",
-        storageBucket: "chatroommurasaki.firebasestorage.app",
-        messagingSenderId: "649572971936",
-        appId: "1:649572971936:web:5d0aaf1be9f09cb428a0c5",
-        measurementId: "G-1113622WQQ"
-      };
-      firebase.initializeApp(firebaseConfig);
+     // Initialize Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
+    authDomain: "chatroommurasaki.firebaseapp.com",
+    projectId: "chatroommurasaki",
+    storageBucket: "chatroommurasaki.appspot.com",
+    messagingSenderId: "649572971936",
+    appId: "1:649572971936:web:5d0aaf1be9f09cb428a0c5",
+    measurementId: "G-1113622WQQ"
+};
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const auth = firebase.auth();
+
+// Auth UI Elements
+const authStatus = document.getElementById('auth-status');
+const authForm = document.getElementById('auth-form');
+const userNameSpan = document.getElementById('user-name');
+const signOutBtn = document.getElementById('sign-out-btn');
+const signInBtn = document.getElementById('sign-in-btn');
+const signUpBtn = document.getElementById('sign-up-btn');
+const emailInput = document.getElementById('email-input');
+const passwordInput = document.getElementById('password-input');
+
+// Auth State Listener
+auth.onAuthStateChanged(user => {
+    if (user) {
+        // User is signed in
+        authStatus.style.display = 'block';
+        authForm.style.display = 'none';
+        userNameSpan.textContent = user.email;
+        
+        // Store user info in localStorage
+        localStorage.setItem('currentUser', JSON.stringify({
+            uid: user.uid,
+            email: user.email
+        }));
+        
+        // Check if user has a username in database
+        checkUsernameInDatabase(user.uid);
+    } else {
+        // User is signed out
+        authStatus.style.display = 'none';
+        authForm.style.display = 'block';
+        localStorage.removeItem('currentUser');
+    }
+});
+
+// Auth Functions
+function signIn(email, password) {
+    auth.signInWithEmailAndPassword(email, password)
+        .catch(error => {
+            alert(error.message);
+        });
+}
+
+function signUp(email, password) {
+    auth.createUserWithEmailAndPassword(email, password)
+        .then(userCredential => {
+            // Create user profile in database
+            const user = userCredential.user;
+            database.ref('users/' + user.uid).set({
+                email: user.email,
+                createdAt: firebase.database.ServerValue.TIMESTAMP
+            });
+        })
+        .catch(error => {
+            alert(error.message);
+        });
+}
+
+function signOut() {
+    auth.signOut();
+}
+
+// Check if user has a username in database
+function checkUsernameInDatabase(uid) {
+    database.ref('users/' + uid + '/username').once('value')
+        .then(snapshot => {
+            if (!snapshot.exists()) {
+                // Show username modal if no username set
+                document.getElementById('username-modal').classList.add('active');
+            }
+        });
+}
+
+// Event Listeners
+signInBtn.addEventListener('click', () => {
+    signIn(emailInput.value, passwordInput.value);
+});
+
+signUpBtn.addEventListener('click', () => {
+    signUp(emailInput.value, passwordInput.value);
+});
+
+signOutBtn.addEventListener('click', signOut);
+
+// Allow Enter key to submit forms
+emailInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') signIn(emailInput.value, passwordInput.value);
+});
+
+passwordInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') signIn(emailInput.value, passwordInput.value);
+});
+
+// Modify your existing username system to save to database
+document.getElementById('set-username-btn').addEventListener('click', () => {
+    const username = document.getElementById('username-input').value.trim();
+    if (username) {
+        const user = auth.currentUser;
+        if (user) {
+            // Save username to database
+            database.ref('users/' + user.uid).update({
+                username: username
+            }).then(() => {
+                document.getElementById('username-modal').classList.remove('active');
+                localStorage.setItem('chatUsername', username);
+            });
+        }
+    }
+});
     </script>
 
     <style>
@@ -254,7 +368,48 @@
             padding: 1rem;
             background: rgba(13, 27, 42, 0.5);
         }
+        /* Auth Styles */
+.auth-container {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 1rem;
+    border-radius: 10px;
+    margin: 1rem auto;
+    max-width: 400px;
+    text-align: center;
+    border: 1px solid var(--primary);
+}
 
+.auth-btn {
+    padding: 0.5rem 1rem;
+    margin: 0.5rem;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.auth-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
+}
+
+#email-input, #password-input {
+    width: 100%;
+    padding: 0.8rem;
+    margin: 0.5rem 0;
+    border-radius: 50px;
+    border: none;
+    background: rgba(224, 225, 221, 0.1);
+    color: var(--light);
+    text-align: center;
+}
+
+#email-input:focus, #password-input:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
+}
         .message {
             margin-bottom: 1rem;
             padding: 0.8rem;
@@ -321,8 +476,7 @@
             box-shadow: 0 0 15px rgba(0, 168, 255, 0.5);
         }
 
-        /* Enhanced Auth Modal Styles */
-        .auth-modal {
+        .username-modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -335,11 +489,11 @@
             z-index: 200;
         }
 
-        .auth-modal.active {
+        .username-modal.active {
             display: flex;
         }
 
-        .auth-modal-content {
+        .username-modal-content {
             background: var(--dark);
             padding: 2rem;
             border-radius: 15px;
@@ -349,52 +503,24 @@
             width: 90%;
         }
 
-        .auth-tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .auth-tab {
-            padding: 0.5rem 1.5rem;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 50px;
-            cursor: pointer;
-            margin: 0 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .auth-tab.active {
-            background: rgba(0, 168, 255, 0.2);
-            border: 1px solid var(--primary);
-        }
-
-        .auth-form {
-            display: none;
-        }
-
-        .auth-form.active {
-            display: block;
-        }
-
-        .auth-input {
+        .username-input {
             width: 100%;
             padding: 1rem;
-            margin: 0.8rem 0;
+            margin: 1rem 0;
             border-radius: 50px;
             border: none;
             background: rgba(224, 225, 221, 0.1);
             color: var(--light);
             text-align: center;
-            font-size: 1rem;
+            font-size: 1.2rem;
         }
 
-        .auth-input:focus {
+        .username-input:focus {
             outline: none;
             box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
         }
 
-        .auth-btn {
+        .set-username-btn {
             padding: 0.8rem 2rem;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             color: white;
@@ -403,28 +529,11 @@
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s ease;
-            margin-top: 1rem;
-            width: 100%;
         }
 
-        .auth-btn:hover {
+        .set-username-btn:hover {
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(0, 168, 255, 0.5);
-        }
-
-        .auth-error {
-            color: var(--secondary);
-            margin: 0.5rem 0;
-            min-height: 1.5rem;
-            font-size: 0.9rem;
-        }
-
-        .auth-switch {
-            color: var(--primary);
-            cursor: pointer;
-            margin-top: 1rem;
-            display: block;
-            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -434,7 +543,19 @@
     <header class="header">
         <h1 class="title">murasaki's center V1 | adding more soon (y'all BETTER know who made this website.)</h1>
     </header>
-    
+    <!-- Add this near your tabs section -->
+<div class="auth-container">
+    <div id="auth-status" style="display: none;">
+        Welcome, <span id="user-name"></span>!
+        <button id="sign-out-btn" class="auth-btn">Sign Out</button>
+    </div>
+    <div id="auth-form" style="display: none;">
+        <input type="email" id="email-input" placeholder="Email">
+        <input type="password" id="password-input" placeholder="Password">
+        <button id="sign-in-btn" class="auth-btn">Sign In</button>
+        <button id="sign-up-btn" class="auth-btn">Sign Up</button>
+    </div>
+</div>
     <div class="tabs">
         <div class="tab active" data-category="all">All Games</div>
         <div class="tab" data-category="arcade">Arcade</div>
@@ -444,29 +565,27 @@
         <div class="tab" data-category="chatroom">Chatroom</div>
     </div>
     
-    <div class="game-grid">
-        <!-- Slope Game -->
-        <div class="game-card" data-category="arcade">
-            <img src="https://watchdocumentaries.com/wp-content/uploads/slope-game.jpg" alt="Slope">
-            <div class="game-info">
-                <h3>Slope</h3>
-                <p>Navigate a 3D course at high speed!</p>
-                <a href="#" class="play-btn" data-game="https://slope-game.github.io/rungame/slope/">PLAY NOW</a>
-            </div>
+  <div class="game-grid">
+    <!-- Slope Game -->
+    <div class="game-card" data-category="arcade">
+        <img src="https://watchdocumentaries.com/wp-content/uploads/slope-game.jpg" alt="Slope">
+        <div class="game-info">
+            <h3>Slope</h3>
+            <p>Navigate a 3D course at high speed!</p>
+            <a href="#" class="play-btn" data-game="https://slope-game.github.io/rungame/slope/">PLAY NOW</a>
         </div>
-        
-        <!-- Cookie Clicker -->
-        <div class="game-card" data-category="arcade">
-            <img src="https://www.thumbculture.co.uk/wp-content/uploads/2021/08/Cookies-1024x597.png" alt="Cookie Clicker">
-            <div class="game-info">
-                <h3>Cookie Clicker</h3>
-                <p>Click the cookie to earn points!</p>
-                <a href="#" class="play-btn" data-game="https://cyrillbrito.github.io/cookieclicker/">PLAY NOW</a>
-            </div>
+    </div>
+    
+    <!-- Cookie Clicker -->
+    <div class="game-card" data-category="arcade">
+        <img src="https://www.thumbculture.co.uk/wp-content/uploads/2021/08/Cookies-1024x597.png" alt="Cookie Clicker">
+        <div class="game-info">
+            <h3>Cookie Clicker</h3>
+            <p>Click the cookie to earn points!</p>
+            <a href="#" class="play-btn" data-game="https://cyrillbrito.github.io/cookieclicker/">PLAY NOW</a>
         </div>
-        
-        <!-- Basketball Stars -->
-        <div class="game-card" data-category="sports">
+    </div>
+      <div class="game-card" data-category="sports">
             <img src="https://static.keygames.com/5/93515/96655/1200x630/basketball-stars.webp" alt="Basketball Stars">
             <div class="game-info">
                 <h3>Basketball Stars</h3>
@@ -475,7 +594,6 @@
             </div>
         </div>
         
-        <!-- Basketball Random -->
         <div class="game-card" data-category="sports">
             <img src="https://images.crazygames.com/basket-random_16x9/20240617090207/basket-random_16x9-cover?auto=format,compress&q=75&cs=strip" alt="Basketball Random">
             <div class="game-info">
@@ -484,8 +602,6 @@
                 <a href="#" class="play-btn" data-game="https://basketball-random.github.io/file/">PLAY NOW</a>
             </div>
         </div>
-        
-        <!-- Penalty Shooters 2 -->
         <div class="game-card" data-category="sports">
             <img src="https://cdn6.aptoide.com/imgs/8/9/e/89e683612d0604ef467252311c614782_screen.jpg?w=324" alt="Penalty Shooters 2">
             <div class="game-info">
@@ -494,8 +610,6 @@
                 <a href="#" class="play-btn" data-game="//html5.gamedistribution.com/rvvASMiM/571b9df027e449f78e3869ba19658754/index.html">PLAY NOW</a>
             </div>
         </div>
-        
-        <!-- Volley Random -->
         <div class="game-card" data-category="sports">
             <img src="https://images.crazygames.com/volley-random/20230131173658/volley-random-cover?auto=format,compress&q=75&cs=strip" alt="Volley Random">
             <div class="game-info">
@@ -505,7 +619,6 @@
             </div>
         </div>
         
-        <!-- Pac-Man -->
         <div class="game-card" data-category="retro">
             <img src="https://muralsyourway.vtexassets.com/arquivos/ids/274926/Pacman-Game-Wall-Mural.jpg?v=638229015907170000" alt="Pac-Man">
             <div class="game-info">
@@ -515,7 +628,6 @@
             </div>
         </div>
         
-        <!-- Minecraft Classic -->
         <div class="game-card" data-category="action">
             <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Minecraft Classic">
             <div class="game-info">
@@ -524,19 +636,22 @@
                 <a href="#" class="play-btn" data-game="https://eaglauncher.vercel.app">PLAY NOW</a>
             </div>
         </div>
-        
-        <!-- Cluster Rush -->
-        <div class="game-card" data-category="action">
+                  <div class="game-card" data-category="action">
             <img src="https://static.hahagames.com/media/2024/05/01/012c0e6b-0438-4b67-a852-029d4082928c.jpg" alt="Cluster Rush">
             <div class="game-info">
                 <h3>Cluster Rush</h3>
-                <p>Jump between fast-moving platforms!</p>
+                <p>Jump on and off trucks like you're bouncing off dick</p>
                 <a href="#" class="play-btn" data-game="https://htmlxm.github.io/h8/cluster-rush/">PLAY NOW</a>
             </div>
         </div>
-    </div>
+    <!-- Other games continue below... -->
+ <!--   <div class="game-card" data-category="sports">
+     <!--   <!-- Basketball Stars content -->
+    <!-- </div>
     
-    <!-- Chatroom Container -->
+    <!-- All other game cards -->
+</div>  <!-- This is the ONLY closing game-grid div -->
+    
     <div class="chat-container" id="chatroom">
         <div class="chat-header">
             <h2>Community Chat</h2>
@@ -548,36 +663,15 @@
         </div>
     </div>
     
-    <!-- Enhanced Auth Modal -->
-    <div class="auth-modal" id="auth-modal">
-        <div class="auth-modal-content">
-            <div class="auth-tabs">
-                <div class="auth-tab active" id="login-tab">Login</div>
-                <div class="auth-tab" id="signup-tab">Sign Up</div>
-            </div>
-            
-            <!-- Login Form -->
-            <div class="auth-form active" id="login-form">
-                <input type="email" class="auth-input" id="login-email" placeholder="Email">
-                <input type="password" class="auth-input" id="login-password" placeholder="Password">
-                <div class="auth-error" id="login-error"></div>
-                <button class="auth-btn" id="login-btn">Login</button>
-                <span class="auth-switch" id="show-signup">Don't have an account? Sign up</span>
-            </div>
-            
-            <!-- Sign Up Form -->
-            <div class="auth-form" id="signup-form">
-                <input type="text" class="auth-input" id="signup-username" placeholder="Choose a username" maxlength="20">
-                <input type="email" class="auth-input" id="signup-email" placeholder="Email">
-                <input type="password" class="auth-input" id="signup-password" placeholder="Password (min 6 characters)">
-                <div class="auth-error" id="signup-error"></div>
-                <button class="auth-btn" id="signup-btn">Create Account</button>
-                <span class="auth-switch" id="show-login">Already have an account? Login</span>
-            </div>
+    <div class="username-modal" id="username-modal">
+        <div class="username-modal-content">
+            <h2>Choose Your Username</h2>
+            <p>This name will be displayed with your messages</p>
+            <input type="text" class="username-input" id="username-input" placeholder="Enter username..." maxlength="20">
+            <button class="set-username-btn" id="set-username-btn">Join Chat</button>
         </div>
     </div>
     
-    <!-- Game Modal -->
     <div class="modal">
         <div class="modal-content">
             <button class="close-btn">X</button>
@@ -587,255 +681,129 @@
     
     <script>
         // ======================
-        // AUTHENTICATION SYSTEM
+        // FIREBASE CHAT SYSTEM
         // ======================
-        const authModal = document.getElementById('auth-modal');
-        const loginTab = document.getElementById('login-tab');
-        const signupTab = document.getElementById('signup-tab');
-        const loginForm = document.getElementById('login-form');
-        const signupForm = document.getElementById('signup-form');
-        const showSignup = document.getElementById('show-signup');
-        const showLogin = document.getElementById('show-login');
-        
-        // Tab switching
-        loginTab.addEventListener('click', () => {
-            loginTab.classList.add('active');
-            signupTab.classList.remove('active');
-            loginForm.classList.add('active');
-            signupForm.classList.remove('active');
-            document.getElementById('login-error').textContent = '';
-        });
-        
-        signupTab.addEventListener('click', () => {
-            signupTab.classList.add('active');
-            loginTab.classList.remove('active');
-            signupForm.classList.add('active');
-            loginForm.classList.remove('active');
-            document.getElementById('signup-error').textContent = '';
-        });
-        
-        showSignup.addEventListener('click', () => signupTab.click());
-        showLogin.addEventListener('click', () => loginTab.click());
-
-        // Firebase Auth Functions
-        const loginEmail = document.getElementById('login-email');
-        const loginPassword = document.getElementById('login-password');
-        const loginBtn = document.getElementById('login-btn');
-        const loginError = document.getElementById('login-error');
-        
-        const signupUsername = document.getElementById('signup-username');
-        const signupEmail = document.getElementById('signup-email');
-        const signupPassword = document.getElementById('signup-password');
-        const signupBtn = document.getElementById('signup-btn');
-        const signupError = document.getElementById('signup-error');
-        
-        // Check if username exists
-        async function isUsernameTaken(username) {
-            const snapshot = await firebase.database().ref('usernames/' + username).once('value');
-            return snapshot.exists();
-        }
-        
-        // Login function
-        loginBtn.addEventListener('click', async () => {
-            const email = loginEmail.value.trim();
-            const password = loginPassword.value.trim();
-            
-            if (!email || !password) {
-                loginError.textContent = 'Please fill in all fields';
-                return;
-            }
-            
-            try {
-                loginError.textContent = 'Logging in...';
-                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                
-                // Get username from database
-                const snapshot = await firebase.database().ref('users/' + user.uid).once('value');
-                const userData = snapshot.val();
-                
-                if (userData && userData.username) {
-                    localStorage.setItem('chatUsername', userData.username);
-                    authModal.classList.remove('active');
-                    checkUsername();
-                } else {
-                    loginError.textContent = 'User data not found. Please sign up again.';
-                    await firebase.auth().signOut();
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                loginError.textContent = error.message;
-            }
-        });
-        
-        // Signup function
-        signupBtn.addEventListener('click', async () => {
-            const username = signupUsername.value.trim();
-            const email = signupEmail.value.trim();
-            const password = signupPassword.value.trim();
-            
-            if (!username || !email || !password) {
-                signupError.textContent = 'Please fill in all fields';
-                return;
-            }
-            
-            if (password.length < 6) {
-                signupError.textContent = 'Password must be at least 6 characters';
-                return;
-            }
-            
-            if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-                signupError.textContent = 'Username can only contain letters, numbers and underscores';
-                return;
-            }
-            
-            try {
-                signupError.textContent = 'Checking username...';
-                
-                // Check if username is taken
-                const usernameTaken = await isUsernameTaken(username);
-                if (usernameTaken) {
-                    signupError.textContent = 'Username already taken';
-                    return;
-                }
-                
-                signupError.textContent = 'Creating account...';
-                
-                // Create auth account
-                const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                
-                // Store user data
-                await firebase.database().ref('users/' + user.uid).set({
-                    username: username,
-                    email: email,
-                    createdAt: firebase.database.ServerValue.TIMESTAMP
-                });
-                
-                // Reserve username
-                await firebase.database().ref('usernames/' + username).set(user.uid);
-                
-                // Set local storage
-                localStorage.setItem('chatUsername', username);
-                authModal.classList.remove('active');
-                checkUsername();
-                
-                // Welcome message
-                const chatRef = firebase.database().ref('chat');
-                chatRef.push({
-                    username: 'System',
-                    message: `${username} joined the chat!`,
-                    timestamp: Date.now()
-                });
-                
-            } catch (error) {
-                console.error('Signup error:', error);
-                signupError.textContent = error.message;
-            }
-        });
-        
-        // Auth state observer
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                // User is signed in
-                console.log('User signed in:', user.email);
-            } else {
-                // User is signed out
-                console.log('User signed out');
-                // Show auth modal if no username in local storage
-                if (!localStorage.getItem('chatUsername')) {
-                    authModal.classList.add('active');
-                }
-            }
-        });
-        
-        // Initialize auth check
-        function checkAuth() {
-            const username = localStorage.getItem('chatUsername');
-            if (!username) {
-                authModal.classList.add('active');
-            }
-        }
-        
-        // ======================
-        // CHAT SYSTEM
-        // ======================
+        const usernameModal = document.getElementById('username-modal');
+        const usernameInput = document.getElementById('username-input');
+        const setUsernameBtn = document.getElementById('set-username-btn');
         const messageInput = document.getElementById('message-input');
         const sendBtn = document.getElementById('send-btn');
         const chatMessages = document.getElementById('chat-messages');
-        
-        // Initialize chat
-        function checkUsername() {
-            const username = localStorage.getItem('chatUsername');
-            if (!username) {
-                authModal.classList.add('active');
-            } else {
-                loadChatHistory();
-            }
-        }
-        
-        // Load chat history from Firebase
-        function loadChatHistory() {
-            const chatRef = firebase.database().ref('chat');
-            chatRef.limitToLast(100).on('value', (snapshot) => {
-                chatMessages.innerHTML = '';
-                
-                snapshot.forEach((childSnapshot) => {
-                    const msg = childSnapshot.val();
-                    displayMessage(msg);
-                });
-                
-                scrollToBottom();
+
+        // Firebase connection
+        const database = firebase.database();
+        const chatRef = database.ref('chat');
+
+        let username = localStorage.getItem('chatUsername') || '';
+
+        // Username handling
+       function checkUsername() {
+    const user = auth.currentUser;
+    if (user) {
+        database.ref('users/' + user.uid + '/username').once('value')
+            .then(snapshot => {
+                if (snapshot.exists()) {
+                    username = snapshot.val();
+                    localStorage.setItem('chatUsername', username);
+                    usernameModal.classList.remove('active');
+                    loadChatHistory();
+                } else {
+                    usernameModal.classList.add('active');
+                    usernameInput.focus();
+                }
             });
+    }
+}
+
+        function setUsername() {
+          const newUsername = usernameInput.value.trim();
+          if (newUsername) {
+            username = newUsername;
+            localStorage.setItem('chatUsername', username);
+            usernameModal.classList.remove('active');
+            
+            // System welcome message
+            chatRef.push({
+              username: 'System',
+              message: `${username} joined the chat!`,
+              timestamp: Date.now()
+            });
+          }
         }
-        
+
+        // Real-time message listener
+        function loadChatHistory() {
+          chatRef.limitToLast(100).on('value', (snapshot) => {
+            chatMessages.innerHTML = ''; // Clear current messages
+            
+            snapshot.forEach((childSnapshot) => {
+              const msg = childSnapshot.val();
+              displayMessage(msg);
+            });
+            
+            scrollToBottom();
+          });
+        }
+
         // Display messages with fancy formatting
         function displayMessage({ username, message, timestamp }) {
-            const isCurrentUser = username === localStorage.getItem('chatUsername');
-            const isSystem = username === 'System';
-            
-            const messageEl = document.createElement('div');
-            messageEl.className = `message ${isCurrentUser ? 'your-message' : ''} ${isSystem ? 'system-message' : ''}`;
-            
-            const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            messageEl.innerHTML = `
-                <span class="message-username" style="color: ${isSystem ? '#ff2d75' : '#00a8ff'}">${username}:</span>
-                <span class="message-text">${message}</span>
-                <div class="message-time">${time}</div>
-            `;
-            
-            chatMessages.appendChild(messageEl);
-            scrollToBottom();
+          const isCurrentUser = username === localStorage.getItem('chatUsername');
+          const isSystem = username === 'System';
+          
+          const messageEl = document.createElement('div');
+          messageEl.className = `message ${isCurrentUser ? 'your-message' : ''} ${isSystem ? 'system-message' : ''}`;
+          
+          const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          
+          messageEl.innerHTML = `
+            <span class="message-username" style="color: ${isSystem ? '#ff2d75' : '#00a8ff'}">${username}:</span>
+            <span class="message-text">${message}</span>
+            <div class="message-time">${time}</div>
+          `;
+          
+          chatMessages.appendChild(messageEl);
+          scrollToBottom();
         }
-        
+
         function scrollToBottom() {
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+          chatMessages.scrollTop = chatMessages.scrollHeight;
         }
-        
+
         // Send new messages
-        function sendMessage() {
-            const message = messageInput.value.trim();
-            const username = localStorage.getItem('chatUsername');
-            if (message && username) {
-                const chatRef = firebase.database().ref('chat');
+  // Update your sendMessage function to use auth user
+function sendMessage() {
+    const message = messageInput.value.trim();
+    const user = auth.currentUser;
+    
+    if (message && user) {
+        // Get username from database or use email
+        database.ref('users/' + user.uid + '/username').once('value')
+            .then(snapshot => {
+                const username = snapshot.exists() ? snapshot.val() : user.email.split('@')[0];
+                
                 chatRef.push({
-                    username,
-                    message,
+                    uid: user.uid,
+                    username: username,
+                    message: message,
                     timestamp: Date.now()
                 });
+                
                 messageInput.value = '';
-            }
-        }
-        
-        // Event listeners for sending messages
+            });
+    }
+}
+
+        // Event listeners
+        setUsernameBtn.addEventListener('click', setUsername);
+        usernameInput.addEventListener('keypress', (e) => e.key === 'Enter' && setUsername());
         sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-        
+        messageInput.addEventListener('keypress', (e) => e.key === 'Enter' && sendMessage());
+
+        // Initialize chat
+        checkUsername();
+
         // ======================
-        // GAME SYSTEM
+        // GAME SYSTEM (ORIGINAL CODE)
         // ======================
         // Tab Filtering
         const tabs = document.querySelectorAll('.tab');
@@ -894,11 +862,6 @@
                 gameFrame.src = '';
                 document.body.style.overflow = 'auto';
             }
-        });
-        
-        // Initialize on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            checkAuth();
         });
     </script>
 </body>
