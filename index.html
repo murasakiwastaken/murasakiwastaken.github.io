@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>murasaki's center V1 | adding more soon</title>
+    <!-- Add these before your other scripts -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+  // Replace with your Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
+  authDomain: "chatroommurasaki.firebaseapp.com",
+  projectId: "chatroommurasaki",
+  storageBucket: "chatroommurasaki.firebasestorage.app",
+  messagingSenderId: "649572971936",
+  appId: "1:649572971936:web:5d0aaf1be9f09cb428a0c5",
+  measurementId: "G-1113622WQQ"
+};
+  firebase.initializeApp(firebaseConfig);
+</script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rubik:wght@400;700&display=swap');
         
@@ -548,121 +564,115 @@
         });
 
         // Chatroom Functionality
-        const usernameModal = document.getElementById('username-modal');
-        const usernameInput = document.getElementById('username-input');
-        const setUsernameBtn = document.getElementById('set-username-btn');
-        const messageInput = document.getElementById('message-input');
-        const sendBtn = document.getElementById('send-btn');
-        const chatMessages = document.getElementById('chat-messages');
-        
-        let username = localStorage.getItem('chatUsername') || '';
-        
-        // Check if username is set
-        function checkUsername() {
-            if (!username) {
-                usernameModal.classList.add('active');
-            } else {
-                usernameModal.classList.remove('active');
-                loadChatHistory();
-            }
-        }
-        
-        // Set username
-        setUsernameBtn.addEventListener('click', () => {
-            const newUsername = usernameInput.value.trim();
-            if (newUsername) {
-                username = newUsername;
-                localStorage.setItem('chatUsername', username);
-                usernameModal.classList.remove('active');
-                loadChatHistory();
-                
-                // Add welcome message
-                addMessage({
-                    username: 'System',
-                    message: `${username} has joined the chat!`,
-                    timestamp: new Date().toISOString()
-                });
-                
-                saveMessage({
-                    username: 'System',
-                    message: `${username} has joined the chat!`,
-                    timestamp: new Date().toISOString()
-                });
-            }
-        });
-        
-        // Also allow Enter key to set username
-        usernameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                setUsernameBtn.click();
-            }
-        });
-        
-        // Load chat history from localStorage
-        function loadChatHistory() {
-            const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-            chatMessages.innerHTML = '';
-            
-            chatHistory.forEach(msg => {
-                addMessage(msg);
-            });
-            
-            // Scroll to bottom
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        // Add a message to the chat display
-        function addMessage({ username, message, timestamp }) {
-            const messageElement = document.createElement('div');
-            messageElement.className = 'message';
-            
-            const time = new Date(timestamp);
-            const timeString = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            messageElement.innerHTML = `
-                <span class="message-username">${username}:</span>
-                <span>${message}</span>
-                <div class="message-time">${timeString}</div>
-            `;
-            
-            chatMessages.appendChild(messageElement);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        // Save a message to localStorage
-        function saveMessage({ username, message, timestamp }) {
-            const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-            
-            // Keep only the last 100 messages to prevent localStorage overflow
-            if (chatHistory.length >= 100) {
-                chatHistory.shift();
-            }
-            
-            chatHistory.push({ username, message, timestamp });
-            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-        }
-        
-        // Send message
-        function sendMessage() {
-            const message = messageInput.value.trim();
-            if (message && username) {
-                const timestamp = new Date().toISOString();
-                const messageData = { username, message, timestamp };
-                
-                addMessage(messageData);
-                saveMessage(messageData);
-                
-                messageInput.value = '';
-            }
-        }
-        
-        // Event listeners for sending messages
-        sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
+     // Chatroom Functionality with Firebase
+const usernameModal = document.getElementById('username-modal');
+const usernameInput = document.getElementById('username-input');
+const setUsernameBtn = document.getElementById('set-username-btn');
+const messageInput = document.getElementById('message-input');
+const sendBtn = document.getElementById('send-btn');
+const chatMessages = document.getElementById('chat-messages');
+
+// Get a reference to the database service
+const database = firebase.database();
+const chatRef = database.ref('chat');
+
+let username = localStorage.getItem('chatUsername') || '';
+
+// Check if username is set
+function checkUsername() {
+  if (!username) {
+    usernameModal.classList.add('active');
+    usernameInput.focus();
+  } else {
+    usernameModal.classList.remove('active');
+    loadChatHistory();
+  }
+}
+
+// Set username
+setUsernameBtn.addEventListener('click', setUsername);
+usernameInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') setUsername();
+});
+
+function setUsername() {
+  const newUsername = usernameInput.value.trim();
+  if (newUsername) {
+    username = newUsername;
+    localStorage.setItem('chatUsername', username);
+    usernameModal.classList.remove('active');
+    loadChatHistory();
+    
+    // Add system message
+    addMessage({
+      username: 'System',
+      message: `${username} has joined the chat!`,
+      timestamp: Date.now()
+    });
+    
+    // Save system message to Firebase
+    chatRef.push({
+      username: 'System',
+      message: `${username} has joined the chat!`,
+      timestamp: Date.now()
+    });
+  }
+}
+
+// Load chat history from Firebase
+function loadChatHistory() {
+  chatRef.limitToLast(100).on('value', (snapshot) => {
+    chatMessages.innerHTML = '';
+    snapshot.forEach((childSnapshot) => {
+      const msg = childSnapshot.val();
+      addMessage(msg);
+    });
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+}
+
+// Add a message to the chat display
+function addMessage({ username, message, timestamp }) {
+  const messageElement = document.createElement('div');
+  messageElement.className = 'message';
+  
+  const time = new Date(timestamp);
+  const timeString = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  
+  messageElement.innerHTML = `
+    <span class="message-username">${username}:</span>
+    <span>${message}</span>
+    <div class="message-time">${timeString}</div>
+  `;
+  
+  chatMessages.appendChild(messageElement);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Send message to Firebase
+function sendMessage() {
+  const message = messageInput.value.trim();
+  if (message && username) {
+    const messageData = {
+      username,
+      message,
+      timestamp: Date.now()
+    };
+    
+    // Save to Firebase
+    chatRef.push(messageData);
+    messageInput.value = '';
+  }
+}
+
+// Event listeners for sending messages
+sendBtn.addEventListener('click', sendMessage);
+messageInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+// Initialize chat when page loads
+checkUsername();
     </script>
 </body>
 </html>
