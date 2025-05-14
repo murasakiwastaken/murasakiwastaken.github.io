@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
       const firebaseConfig = {
         apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
@@ -186,7 +187,22 @@
         .hidden {
             display: none;
         }
-        
+        /* Add to your CSS */
+.ai-typing {
+    font-style: italic;
+    color: rgba(224, 225, 221, 0.7);
+}
+
+@keyframes blink {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.4; }
+}
+
+.ai-typing::after {
+    content: "...";
+    animation: blink 1.5s infinite;
+}
         /* Content that will be hidden until auth */
         .protected-content {
             display: none;
@@ -1556,57 +1572,72 @@ messageInput.addEventListener('keypress', function(e) {
         function scrollFeedbackToBottom() {
             feedbackMessages.scrollTop = feedbackMessages.scrollHeight;
         }
+// ======================
+// ENHANCED AI ASSISTANT
+// ======================
+const aiResponses = {
+    // Website-specific responses
+    "hello": "Hello! I'm your AI assistant. How can I help you today?",
+    "features": "You can request new features using the feedback button in the bottom right corner!",
+    "games": "We have games in these categories: Arcade, Sports, Retro, Action. Use the tabs to browse them!",
+    "contact": "You can reach out through the feedback system or chat with other users here.",
+    "help": "I can help with: Website questions (type '/ai help site') or General knowledge (type '/ai your question')",
+    "help site": "Ask me about: Games, Features, Feedback, Account help",
+    
+    // Default responses
+    "default": "I'm not sure about that. Try asking about the website or a general knowledge question."
+};
 
-        // ======================
-        // AI ASSISTANT
-        // ======================
-        const aiResponses = {
-            "hello": "Hello! How can I help you with the site today?",
-            "features": "You can request new features using the feedback button in the bottom right corner!",
-            "games": "We have a variety of games in different categories. Check out the tabs at the top to browse them!",
-            "contact": "You can reach out through the feedback system or join our chatroom to talk with other users.",
-            "help": "I can help with questions about the site, games, or features. Just ask!",
-            "default": "I'm not sure about that, but you can ask me about the site features, games, or how to use the feedback system."
-        };
+async function getAIResponse(question) {
+  try {
+    const response = await fetch('/api/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question })
+    });
+    return await response.json();
+  } catch (error) {
+    return "AI is unavailable right now.";
+  }
+}
 
-        function getAIResponse(question) {
-            const lowerQuestion = question.toLowerCase();
+// Modified chat input handler
+messageInput.addEventListener('keypress', async function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        const message = messageInput.value.trim();
+        if (message.toLowerCase().startsWith('/ai')) {
+            e.preventDefault();
+            const question = message.substring(3).trim();
             
-            if (lowerQuestion.includes('hello') || lowerQuestion.includes('hi')) {
-                return aiResponses.hello;
-            } else if (lowerQuestion.includes('feature')) {
-                return aiResponses.features;
-            } else if (lowerQuestion.includes('game')) {
-                return aiResponses.games;
-            } else if (lowerQuestion.includes('contact') || lowerQuestion.includes('support')) {
-                return aiResponses.contact;
-            } else if (lowerQuestion.includes('help')) {
-                return aiResponses.help;
-            } else {
-                return aiResponses.default;
-            }
+            // Show "AI is typing" indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'message system-message';
+            typingIndicator.innerHTML = `
+                <span class="message-username" style="color: #ff2d75">AI Assistant:</span>
+                <span class="message-text">Thinking...</span>
+            `;
+            chatMessages.appendChild(typingIndicator);
+            scrollToBottom();
+            
+            // Get AI response
+            const response = await getAIResponse(question);
+            
+            // Remove typing indicator
+            chatMessages.removeChild(typingIndicator);
+            
+            // Create a new message reference
+            const newMessageRef = chatRef.push();
+            newMessageRef.set({
+                username: 'AI Assistant',
+                message: response,
+                timestamp: Date.now(),
+                isSystem: true
+            });
+            
+            messageInput.value = '';
         }
-
-        // Add AI to chatroom
-        messageInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                const message = messageInput.value.trim();
-                if (message.toLowerCase().startsWith('/ai')) {
-                    e.preventDefault();
-                    const question = message.substring(3).trim();
-                    const response = getAIResponse(question);
-                    
-                    // Display AI response in chat
-                    chatRef.push({
-                        username: 'AI Assistant',
-                        message: response,
-                        timestamp: Date.now()
-                    });
-                    
-                    messageInput.value = '';
-                }
-            }
-        });
+    }
+});
     </script>
 </body>
 </html>
