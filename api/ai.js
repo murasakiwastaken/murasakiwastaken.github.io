@@ -1,7 +1,10 @@
-// api/ai.js
 export default async (req, res) => {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Content-Type', 'application/json');
+
   try {
-    const { question } = req.body;
+    const { question } = JSON.parse(req.body);
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -16,12 +19,19 @@ export default async (req, res) => {
       })
     });
 
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    
     const data = await response.json();
     res.status(200).json({ 
-      response: data.choices[0]?.message?.content || "No response" 
+      success: true,
+      reply: data.choices[0]?.message?.content || "No response generated"
     });
     
   } catch (error) {
-    res.status(500).json({ error: "AI failed to respond" });
+    console.error("AI Error:", error);
+    res.status(500).json({ 
+      success: false,
+      error: "AI service error: " + error.message 
+    });
   }
 };
