@@ -6,67 +6,21 @@
     <title>murasaki's center V1 | adding more soon</title>
     
     <!-- Firebase Integration -->
-
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
-      // Your Firebase Config
       const firebaseConfig = {
         apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
         authDomain: "chatroommurasaki.firebaseapp.com",
         projectId: "chatroommurasaki",
-        storageBucket: "chatroommurasaki.firebasestorage.app",
+        storageBucket: "chatroommurasaki.appspot.com",
         messagingSenderId: "649572971936",
         appId: "1:649572971936:web:5d0aaf1be9f09cb428a0c5",
         measurementId: "G-1113622WQQ"
       };
       firebase.initializeApp(firebaseConfig);
     </script>
-<script>
-  const auth = firebase.auth();
-
-  function signup() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    auth.createUserWithEmailAndPassword(email, password)
-      .then(userCredential => {
-        document.getElementById("auth-status").innerText = "Signup successful!";
-      })
-      .catch(error => {
-        document.getElementById("auth-status").innerText = error.message;
-      });
-  }
-
-  function login() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    auth.signInWithEmailAndPassword(email, password)
-      .then(userCredential => {
-        document.getElementById("auth-status").innerText = "Login successful!";
-      })
-      .catch(error => {
-        document.getElementById("auth-status").innerText = error.message;
-      });
-  }
-
-  function logout() {
-    auth.signOut()
-      .then(() => {
-        document.getElementById("auth-status").innerText = "Logged out.";
-      });
-  }
-
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      document.getElementById("auth-status").innerText = `Logged in as ${user.email}`;
-    } else {
-      document.getElementById("auth-status").innerText = "Not logged in.";
-    }
-  });
-</script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rubik:wght@400;700&display=swap');
         
@@ -75,6 +29,8 @@
             --secondary: #ff2d75;
             --dark: #0d1b2a;
             --light: #e0e1dd;
+            --success: #4CAF50;
+            --error: #f44336;
         }
         
         * {
@@ -87,7 +43,9 @@
         body {
             background: var(--dark);
             color: var(--light);
-            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         
         .bg-animation {
@@ -108,20 +66,127 @@
             100% { background-position: 0% 50%; }
         }
         
+        /* Main Layout Structure */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Auth System Styles */
+        .auth-container {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(13, 27, 42, 0.9);
+            border-radius: 10px;
+            border: 2px solid var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 168, 255, 0.3);
+        }
+        
+        .auth-title {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .auth-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid rgba(0, 168, 255, 0.3);
+            background: rgba(224, 225, 221, 0.1);
+            color: var(--light);
+            font-size: 1rem;
+        }
+        
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        
+        .auth-btn.secondary {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .auth-status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+            text-align: center;
+            display: none;
+        }
+        
+        .auth-status.success {
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+            display: block;
+        }
+        
+        .auth-status.error {
+            background: rgba(244, 67, 54, 0.1);
+            color: var(--error);
+            border: 1px solid var(--error);
+            display: block;
+        }
+        
+        .user-info {
+            text-align: center;
+            padding: 15px;
+        }
+        
+        .user-welcome {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Content that will be hidden until auth */
+        .protected-content {
+            display: none;
+        }
+        
+        .visible {
+            display: block;
+        }
+        
+        /* Header Styles */
         .header {
             text-align: center;
             padding: 2rem 0;
+            position: relative;
+            z-index: 10;
         }
         
         .title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 3.5rem;
+            font-size: clamp(2rem, 5vw, 3.5rem);
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
             text-shadow: 0 0 15px rgba(0, 168, 255, 0.5);
             animation: pulse 2s infinite alternate;
+            margin-bottom: 1rem;
         }
         
         @keyframes pulse {
@@ -129,6 +194,7 @@
             100% { transform: scale(1.05); }
         }
         
+        /* Tabs Navigation */
         .tabs {
             display: flex;
             justify-content: center;
@@ -155,13 +221,13 @@
             box-shadow: 0 10px 20px rgba(0, 168, 255, 0.2);
         }
         
+        /* Game Grid */
         .game-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 2rem;
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
+            padding: 1rem;
+            width: 100%;
         }
         
         .game-card {
@@ -217,57 +283,11 @@
             box-shadow: 0 0 15px rgba(0, 168, 255, 0.5);
         }
         
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            width: 90%;
-            height: 80%;
-            background: var(--dark);
-            border-radius: 15px;
-            border: 2px solid var(--primary);
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .close-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: var(--secondary);
-            color: white;
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 101;
-        }
-        
-        .game-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        
         /* Chatroom Styles */
         .chat-container {
             display: none;
             max-width: 800px;
+            width: 100%;
             margin: 2rem auto;
             background: rgba(13, 27, 42, 0.8);
             border-radius: 15px;
@@ -365,6 +385,7 @@
             box-shadow: 0 0 15px rgba(0, 168, 255, 0.5);
         }
 
+        /* Username Modal */
         .username-modal {
             position: fixed;
             top: 0;
@@ -424,170 +445,404 @@
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(0, 168, 255, 0.5);
         }
+
+        /* Game Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            width: 90%;
+            height: 80%;
+            background: var(--dark);
+            border-radius: 15px;
+            border: 2px solid var(--primary);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 101;
+        }
+        
+        .game-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.2rem;
+            }
+            
+            .tabs {
+                gap: 0.5rem;
+            }
+            
+            .tab {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .game-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1.8rem;
+            }
+            
+            .game-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
-    <div id="auth-container" style="text-align:center; padding:2rem;">
-    <h2>Login or Signup</h2>
-    <input type="email" id="email" placeholder="Email" /><br><br>
-    <input type="password" id="password" placeholder="Password" /><br><br>
-    <button onclick="signup()">Sign Up</button>
-    <button onclick="login()">Log In</button>
-    <button onclick="logout()">Log Out</button>
-    <p id="auth-status" style="color:lime;"></p>
-</div>
-
 <body>
     <div class="bg-animation"></div>
     
-    <header class="header">
-        <h1 class="title">murasaki's center V1 | adding more soon (y'all BETTER know who made this website.)</h1>
-    </header>
-    
-    <div class="tabs">
-        <div class="tab active" data-category="all">All Games</div>
-        <div class="tab" data-category="arcade">Arcade</div>
-        <div class="tab" data-category="sports">Sports</div>
-        <div class="tab" data-category="retro">Retro</div>
-        <div class="tab" data-category="action">Action</div>
-        <div class="tab" data-category="chatroom">Chatroom</div>
-    </div>
-    
-  <div class="game-grid">
-    <!-- Slope Game -->
-    <div class="game-card" data-category="arcade">
-        <img src="https://watchdocumentaries.com/wp-content/uploads/slope-game.jpg" alt="Slope">
-        <div class="game-info">
-            <h3>Slope</h3>
-            <p>Navigate a 3D course at high speed!</p>
-            <a href="#" class="play-btn" data-game="https://slope-game.github.io/rungame/slope/">PLAY NOW</a>
-        </div>
-    </div>
-    
-    <!-- Cookie Clicker -->
-    <div class="game-card" data-category="arcade">
-        <img src="https://www.thumbculture.co.uk/wp-content/uploads/2021/08/Cookies-1024x597.png" alt="Cookie Clicker">
-        <div class="game-info">
-            <h3>Cookie Clicker</h3>
-            <p>Click the cookie to earn points!</p>
-            <a href="#" class="play-btn" data-game="https://cyrillbrito.github.io/cookieclicker/">PLAY NOW</a>
-        </div>
-    </div>
-      <div class="game-card" data-category="sports">
-            <img src="https://static.keygames.com/5/93515/96655/1200x630/basketball-stars.webp" alt="Basketball Stars">
-            <div class="game-info">
-                <h3>Basketball Stars</h3>
-                <p>1v1 street basketball showdowns!</p>
-                <a href="#" class="play-btn" data-game="https://basketballstarsonline.github.io/file/">PLAY NOW</a>
+    <div class="main-container">
+        <!-- Auth Container (always visible) -->
+        <div class="auth-container">
+            <!-- Login Form -->
+            <div id="login-form">
+                <h2 class="auth-title">Login to Your Account</h2>
+                <input type="text" id="username" class="auth-input" placeholder="Username" required>
+                <input type="password" id="password" class="auth-input" placeholder="Password" required>
+                <button id="login-btn" class="auth-btn">Log In</button>
+                <div id="auth-status" class="auth-status"></div>
+                <p style="text-align: center; color: #e0e1dd;">
+                    Don't have an account? <a href="#" id="show-signup" style="color: #00a8ff;">Sign Up</a>
+                </p>
+            </div>
+            
+            <!-- Signup Form (hidden by default) -->
+            <div id="signup-form" class="hidden">
+                <h2 class="auth-title">Create New Account</h2>
+                <input type="text" id="new-username" class="auth-input" placeholder="Choose a username" required>
+                <input type="password" id="new-password" class="auth-input" placeholder="Create password (min 6 chars)" required>
+                <button id="signup-btn" class="auth-btn">Sign Up</button>
+                <div id="signup-status" class="auth-status"></div>
+                <p style="text-align: center; color: #e0e1dd;">
+                    Already have an account? <a href="#" id="show-login" style="color: #00a8ff;">Log In</a>
+                </p>
+            </div>
+            
+            <!-- User Info (shown when logged in) -->
+            <div id="user-info" class="hidden">
+                <h3 class="user-welcome">Welcome, <span id="display-username"></span>!</h3>
+                <button id="logout-btn" class="auth-btn secondary">Log Out</button>
             </div>
         </div>
-        
-        <div class="game-card" data-category="sports">
-            <img src="https://images.crazygames.com/basket-random_16x9/20240617090207/basket-random_16x9-cover?auto=format,compress&q=75&cs=strip" alt="Basketball Random">
-            <div class="game-info">
-                <h3>Basketball Random</h3>
-                <p>Chaotic multiplayer basketball!</p>
-                <a href="#" class="play-btn" data-game="https://basketball-random.github.io/file/">PLAY NOW</a>
+
+        <!-- Protected Content (hidden until auth) -->
+        <div id="protected-content" class="protected-content">
+            <header class="header">
+                <h1 class="title">murasaki's center V1 | adding more soon</h1>
+            </header>
+            
+            <div class="tabs">
+                <div class="tab active" data-category="all">All Games</div>
+                <div class="tab" data-category="arcade">Arcade</div>
+                <div class="tab" data-category="sports">Sports</div>
+                <div class="tab" data-category="retro">Retro</div>
+                <div class="tab" data-category="action">Action</div>
+                <div class="tab" data-category="chatroom">Chatroom</div>
             </div>
-        </div>
-        <div class="game-card" data-category="sports">
-            <img src="https://cdn6.aptoide.com/imgs/8/9/e/89e683612d0604ef467252311c614782_screen.jpg?w=324" alt="Penalty Shooters 2">
-            <div class="game-info">
-                <h3>Penalty Shooters 2</h3>
-                <p>Test your penalty shooting skills in this exciting sports game!</p>
-                <a href="#" class="play-btn" data-game="//html5.gamedistribution.com/rvvASMiM/571b9df027e449f78e3869ba19658754/index.html">PLAY NOW</a>
+            
+            <div class="game-grid">
+                <!-- Slope Game -->
+                <div class="game-card" data-category="arcade">
+                    <img src="https://watchdocumentaries.com/wp-content/uploads/slope-game.jpg" alt="Slope">
+                    <div class="game-info">
+                        <h3>Slope</h3>
+                        <p>Navigate a 3D course at high speed!</p>
+                        <a href="#" class="play-btn" data-game="https://slope-game.github.io/rungame/slope/">PLAY NOW</a>
+                    </div>
+                </div>
+                
+                <!-- Cookie Clicker -->
+                <div class="game-card" data-category="arcade">
+                    <img src="https://www.thumbculture.co.uk/wp-content/uploads/2021/08/Cookies-1024x597.png" alt="Cookie Clicker">
+                    <div class="game-info">
+                        <h3>Cookie Clicker</h3>
+                        <p>Click the cookie to earn points!</p>
+                        <a href="#" class="play-btn" data-game="https://cyrillbrito.github.io/cookieclicker/">PLAY NOW</a>
+                    </div>
+                </div>
+                
+                <!-- Other game cards... -->
             </div>
-        </div>
-        <div class="game-card" data-category="sports">
-            <img src="https://images.crazygames.com/volley-random/20230131173658/volley-random-cover?auto=format,compress&q=75&cs=strip" alt="Volley Random">
-            <div class="game-info">
-                <h3>Volley Random</h3>
-                <p>Crazy physics volleyball!</p>
-                <a href="#" class="play-btn" data-game="https://bolaa1.github.io/file/">PLAY NOW</a>
+            
+            <div class="chat-container" id="chatroom">
+                <div class="chat-header">
+                    <h2>Community Chat</h2>
+                </div>
+                <div class="chat-messages" id="chat-messages"></div>
+                <div class="chat-input-area">
+                    <input type="text" class="chat-input" id="message-input" placeholder="Type your message...">
+                    <button class="send-btn" id="send-btn">Send</button>
+                </div>
             </div>
-        </div>
-        
-        <div class="game-card" data-category="retro">
-            <img src="https://muralsyourway.vtexassets.com/arquivos/ids/274926/Pacman-Game-Wall-Mural.jpg?v=638229015907170000" alt="Pac-Man">
-            <div class="game-info">
-                <h3>Pac-Man</h3>
-                <p>Classic arcade maze chase!</p>
-                <a href="#" class="play-btn" data-game="https://www.google.com/logos/2010/pacman10-i.html">PLAY NOW</a>
+            
+            <div class="username-modal" id="username-modal">
+                <div class="username-modal-content">
+                    <h2>Choose Your Username</h2>
+                    <p>This name will be displayed with your messages</p>
+                    <input type="text" class="username-input" id="username-input" placeholder="Enter username..." maxlength="20">
+                    <button class="set-username-btn" id="set-username-btn">Join Chat</button>
+                </div>
             </div>
-        </div>
-        
-        <div class="game-card" data-category="action">
-            <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Minecraft Classic">
-            <div class="game-info">
-                <h3>Minecraft Classic (Eaglercraft)</h3>
-                <p>Browser-based block building!</p>
-                <a href="#" class="play-btn" data-game="https://eaglauncher.vercel.app">PLAY NOW</a>
+            
+            <div class="modal">
+                <div class="modal-content">
+                    <button class="close-btn">X</button>
+                    <iframe class="game-frame" src="" allowfullscreen></iframe>
+                </div>
             </div>
-        </div>
-                  <div class="game-card" data-category="action">
-            <img src="https://static.hahagames.com/media/2024/05/01/012c0e6b-0438-4b67-a852-029d4082928c.jpg" alt="Cluster Rush">
-            <div class="game-info">
-                <h3>Cluster Rush</h3>
-                <p>Jump on and off trucks like you're bouncing off dick</p>
-                <a href="#" class="play-btn" data-game="https://htmlxm.github.io/h8/cluster-rush/">PLAY NOW</a>
-            </div>
-        </div>
-    <!-- Other games continue below... -->
- <!--   <div class="game-card" data-category="sports">
-     <!--   <!-- Basketball Stars content -->
-    <!-- </div>
-    
-    <!-- All other game cards -->
-</div>  <!-- This is the ONLY closing game-grid div -->
-    
-    <div class="chat-container" id="chatroom">
-        <div class="chat-header">
-            <h2>Community Chat</h2>
-        </div>
-        <div class="chat-messages" id="chat-messages"></div>
-        <div class="chat-input-area">
-            <input type="text" class="chat-input" id="message-input" placeholder="Type your message...">
-            <button class="send-btn" id="send-btn">Send</button>
         </div>
     </div>
-    
-    <div class="username-modal" id="username-modal">
-        <div class="username-modal-content">
-            <h2>Choose Your Username</h2>
-            <p>This name will be displayed with your messages</p>
-            <input type="text" class="username-input" id="username-input" placeholder="Enter username..." maxlength="20">
-            <button class="set-username-btn" id="set-username-btn">Join Chat</button>
-        </div>
-    </div>
-    
-    <div class="modal">
-        <div class="modal-content">
-            <button class="close-btn">X</button>
-            <iframe class="game-frame" src="" allowfullscreen></iframe>
-        </div>
-    </div>
-    
+
     <script>
+        // ======================
+        // SIMPLIFIED AUTH SYSTEM
+        // ======================
+        const auth = firebase.auth();
+        const database = firebase.database();
+        
+        // DOM Elements
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const userInfo = document.getElementById('user-info');
+        const showSignup = document.getElementById('show-signup');
+        const showLogin = document.getElementById('show-login');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const newUsernameInput = document.getElementById('new-username');
+        const newPasswordInput = document.getElementById('new-password');
+        const authStatus = document.getElementById('auth-status');
+        const signupStatus = document.getElementById('signup-status');
+        const displayUsername = document.getElementById('display-username');
+        const protectedContent = document.getElementById('protected-content');
+
+        // Toggle between login and signup forms
+        showSignup.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.classList.add('hidden');
+            signupForm.classList.remove('hidden');
+            clearStatus();
+        });
+        
+        showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            signupForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            clearStatus();
+        });
+        
+        // Login function
+        loginBtn.addEventListener('click', () => {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            if (!username || !password) {
+                showError(authStatus, 'Please enter both username and password');
+                return;
+            }
+            
+            // For demo, we'll use username@example.com as the email
+            const email = `${username}@example.com`;
+            
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    showSuccess(authStatus, 'Login successful!');
+                    updateUI(username);
+                    showProtectedContent();
+                })
+                .catch((error) => {
+                    showError(authStatus, getErrorMessage(error));
+                })
+                .finally(() => {
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Log In';
+                });
+        });
+        
+        // Signup function
+        signupBtn.addEventListener('click', () => {
+            const username = newUsernameInput.value.trim();
+            const password = newPasswordInput.value.trim();
+            
+            if (!username || !password) {
+                showError(signupStatus, 'Please enter both username and password');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError(signupStatus, 'Password must be at least 6 characters');
+                return;
+            }
+            
+            // For demo, we'll use username@example.com as the email
+            const email = `${username}@example.com`;
+            
+            signupBtn.disabled = true;
+            signupBtn.textContent = 'Creating account...';
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    showSuccess(signupStatus, 'Account created successfully!');
+                    updateUI(username);
+                    showProtectedContent();
+                })
+                .catch((error) => {
+                    showError(signupStatus, getErrorMessage(error));
+                })
+                .finally(() => {
+                    signupBtn.disabled = false;
+                    signupBtn.textContent = 'Sign Up';
+                });
+        });
+        
+        // Logout function
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut()
+                .then(() => {
+                    loginForm.classList.remove('hidden');
+                    signupForm.classList.add('hidden');
+                    userInfo.classList.add('hidden');
+                    protectedContent.classList.remove('visible');
+                    clearInputs();
+                    clearStatus();
+                })
+                .catch((error) => {
+                    console.error('Logout error:', error);
+                });
+        });
+        
+        // Show protected content after auth
+        function showProtectedContent() {
+            protectedContent.classList.add('visible');
+        }
+        
+        // Auth state listener
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Extract username from email (username@example.com)
+                const username = user.email.split('@')[0];
+                updateUI(username);
+                showProtectedContent();
+            } else {
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+                userInfo.classList.add('hidden');
+                protectedContent.classList.remove('visible');
+            }
+        });
+        
+        // Helper functions
+        function updateUI(username) {
+            loginForm.classList.add('hidden');
+            signupForm.classList.add('hidden');
+            userInfo.classList.remove('hidden');
+            displayUsername.textContent = username;
+            clearInputs();
+            clearStatus();
+        }
+        
+        function clearInputs() {
+            usernameInput.value = '';
+            passwordInput.value = '';
+            newUsernameInput.value = '';
+            newPasswordInput.value = '';
+        }
+        
+        function clearStatus() {
+            authStatus.classList.remove('success', 'error');
+            authStatus.style.display = 'none';
+            signupStatus.classList.remove('success', 'error');
+            signupStatus.style.display = 'none';
+        }
+        
+        function showError(element, message) {
+            element.textContent = message;
+            element.classList.remove('success');
+            element.classList.add('error');
+            element.style.display = 'block';
+        }
+        
+        function showSuccess(element, message) {
+            element.textContent = message;
+            element.classList.remove('error');
+            element.classList.add('success');
+            element.style.display = 'block';
+        }
+        
+        function getErrorMessage(error) {
+            switch (error.code) {
+                case 'auth/wrong-password':
+                    return 'Incorrect password';
+                case 'auth/user-not-found':
+                    return 'Username not found';
+                case 'auth/email-already-in-use':
+                    return 'Username already taken';
+                case 'auth/weak-password':
+                    return 'Password must be at least 6 characters';
+                default:
+                    return 'Login failed. Please try again.';
+            }
+        }
+
         // ======================
         // FIREBASE CHAT SYSTEM
         // ======================
         const usernameModal = document.getElementById('username-modal');
-        const usernameInput = document.getElementById('username-input');
+        const chatUsernameInput = document.getElementById('username-input');
         const setUsernameBtn = document.getElementById('set-username-btn');
         const messageInput = document.getElementById('message-input');
         const sendBtn = document.getElementById('send-btn');
         const chatMessages = document.getElementById('chat-messages');
 
-        // Firebase connection
-        const database = firebase.database();
-        const chatRef = database.ref('chat');
-
-        let username = localStorage.getItem('chatUsername') || '';
+        let chatUsername = localStorage.getItem('chatUsername') || '';
 
         // Username handling
         function checkUsername() {
-          if (!username) {
+          if (!chatUsername) {
             usernameModal.classList.add('active');
-            usernameInput.focus();
+            chatUsernameInput.focus();
           } else {
             usernameModal.classList.remove('active');
             loadChatHistory();
@@ -595,16 +850,16 @@
         }
 
         function setUsername() {
-          const newUsername = usernameInput.value.trim();
+          const newUsername = chatUsernameInput.value.trim();
           if (newUsername) {
-            username = newUsername;
-            localStorage.setItem('chatUsername', username);
+            chatUsername = newUsername;
+            localStorage.setItem('chatUsername', chatUsername);
             usernameModal.classList.remove('active');
             
             // System welcome message
             chatRef.push({
               username: 'System',
-              message: `${username} joined the chat!`,
+              message: `${chatUsername} joined the chat!`,
               timestamp: Date.now()
             });
           }
@@ -651,9 +906,9 @@
         // Send new messages
         function sendMessage() {
           const message = messageInput.value.trim();
-          if (message && username) {
+          if (message && chatUsername) {
             chatRef.push({
-              username,
+              username: chatUsername,
               message,
               timestamp: Date.now()
             });
@@ -663,15 +918,19 @@
 
         // Event listeners
         setUsernameBtn.addEventListener('click', setUsername);
-        usernameInput.addEventListener('keypress', (e) => e.key === 'Enter' && setUsername());
+        chatUsernameInput.addEventListener('keypress', (e) => e.key === 'Enter' && setUsername());
         sendBtn.addEventListener('click', sendMessage);
         messageInput.addEventListener('keypress', (e) => e.key === 'Enter' && sendMessage());
 
-        // Initialize chat
-        checkUsername();
+        // Initialize chat when user is logged in
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                checkUsername();
+            }
+        });
 
         // ======================
-        // GAME SYSTEM (ORIGINAL CODE)
+        // GAME SYSTEM
         // ======================
         // Tab Filtering
         const tabs = document.querySelectorAll('.tab');
