@@ -6,7 +6,7 @@
     <title>murasaki's center V1 | adding more soon</title>
     
     <!-- Firebase Integration -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
@@ -562,8 +562,7 @@
             </div>
         </div>
 
-        <!-- Protected Content (hidden until auth) -->
-        <div id="protected-content" class="protected-content">
+    <div id="protected-content" class="protected-content">
             <header class="header">
                 <h1 class="title">murasaki's center V1 | adding more soon</h1>
             </header>
@@ -598,9 +597,78 @@
                     </div>
                 </div>
                 
-                <!-- Other game cards... -->
+                <!-- Basketball Stars -->
+                <div class="game-card" data-category="sports">
+                    <img src="https://static.keygames.com/5/93515/96655/1200x630/basketball-stars.webp" alt="Basketball Stars">
+                    <div class="game-info">
+                        <h3>Basketball Stars</h3>
+                        <p>1v1 street basketball showdowns!</p>
+                        <a href="#" class="play-btn" data-game="https://basketballstarsonline.github.io/file/">PLAY NOW</a>
+                    </div>
+                </div>
+                
+                <!-- Basketball Random -->
+                <div class="game-card" data-category="sports">
+                    <img src="https://images.crazygames.com/basket-random_16x9/20240617090207/basket-random_16x9-cover?auto=format,compress&q=75&cs=strip" alt="Basketball Random">
+                    <div class="game-info">
+                        <h3>Basketball Random</h3>
+                        <p>Chaotic multiplayer basketball!</p>
+                        <a href="#" class="play-btn" data-game="https://basketball-random.github.io/file/">PLAY NOW</a>
+                    </div>
+                </div>
+                
+                <!-- Penalty Shooters 2 -->
+                <div class="game-card" data-category="sports">
+                    <img src="https://cdn6.aptoide.com/imgs/8/9/e/89e683612d0604ef467252311c614782_screen.jpg?w=324" alt="Penalty Shooters 2">
+                    <div class="game-info">
+                        <h3>Penalty Shooters 2</h3>
+                        <p>Test your penalty shooting skills!</p>
+                        <a href="#" class="play-btn" data-game="//html5.gamedistribution.com/rvvASMiM/571b9df027e449f78e3869ba19658754/index.html">PLAY NOW</a>
+                    </div>
+                </div>
+                
+                <!-- Volley Random -->
+                <div class="game-card" data-category="sports">
+                    <img src="https://images.crazygames.com/volley-random/20230131173658/volley-random-cover?auto=format,compress&q=75&cs=strip" alt="Volley Random">
+                    <div class="game-info">
+                        <h3>Volley Random</h3>
+                        <p>Crazy physics volleyball!</p>
+                        <a href="#" class="play-btn" data-game="https://bolaa1.github.io/file/">PLAY NOW</a>
+                    </div>
+                </div>
+                
+                <!-- Pac-Man -->
+                <div class="game-card" data-category="retro">
+                    <img src="https://muralsyourway.vtexassets.com/arquivos/ids/274926/Pacman-Game-Wall-Mural.jpg?v=638229015907170000" alt="Pac-Man">
+                    <div class="game-info">
+                        <h3>Pac-Man</h3>
+                        <p>Classic arcade maze chase!</p>
+                        <a href="#" class="play-btn" data-game="https://www.google.com/logos/2010/pacman10-i.html">PLAY NOW</a>
+                    </div>
+                </div>
+                
+                <!-- Minecraft Classic -->
+                <div class="game-card" data-category="action">
+                    <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Minecraft Classic">
+                    <div class="game-info">
+                        <h3>Minecraft Classic</h3>
+                        <p>Browser-based block building!</p>
+                        <a href="#" class="play-btn" data-game="https://eaglauncher.vercel.app">PLAY NOW</a>
+                    </div>
+                </div>
+                
+                <!-- Cluster Rush -->
+                <div class="game-card" data-category="action">
+                    <img src="https://static.hahagames.com/media/2024/05/01/012c0e6b-0438-4b67-a852-029d4082928c.jpg" alt="Cluster Rush">
+                    <div class="game-info">
+                        <h3>Cluster Rush</h3>
+                        <p>Jump on and off speeding trucks!</p>
+                        <a href="#" class="play-btn" data-game="https://htmlxm.github.io/h8/cluster-rush/">PLAY NOW</a>
+                    </div>
+                </div>
             </div>
             
+            <!-- Chatroom -->
             <div class="chat-container" id="chatroom">
                 <div class="chat-header">
                     <h2>Community Chat</h2>
@@ -612,6 +680,7 @@
                 </div>
             </div>
             
+     <!-- Username Modal -->
             <div class="username-modal" id="username-modal">
                 <div class="username-modal-content">
                     <h2>Choose Your Username</h2>
@@ -621,6 +690,7 @@
                 </div>
             </div>
             
+            <!-- Game Modal -->
             <div class="modal">
                 <div class="modal-content">
                     <button class="close-btn">X</button>
@@ -629,6 +699,7 @@
             </div>
         </div>
     </div>
+
 
     <script>
         // ======================
@@ -826,8 +897,8 @@
             }
         }
 
-        // ======================
-        // FIREBASE CHAT SYSTEM
+      // ======================
+        // CHAT SYSTEM (FIXED)
         // ======================
         const usernameModal = document.getElementById('username-modal');
         const chatUsernameInput = document.getElementById('username-input');
@@ -835,98 +906,104 @@
         const messageInput = document.getElementById('message-input');
         const sendBtn = document.getElementById('send-btn');
         const chatMessages = document.getElementById('chat-messages');
+        const chatRef = database.ref('chat'); // Added missing chatRef
 
         let chatUsername = localStorage.getItem('chatUsername') || '';
 
+        // Initialize chat when protected content is shown
+        function showProtectedContent() {
+            protectedContent.classList.add('visible');
+            checkUsername(); // Initialize chat when content becomes visible
+        }
+
         // Username handling
         function checkUsername() {
-          if (!chatUsername) {
-            usernameModal.classList.add('active');
-            chatUsernameInput.focus();
-          } else {
-            usernameModal.classList.remove('active');
-            loadChatHistory();
-          }
+            if (!chatUsername) {
+                usernameModal.classList.add('active');
+                chatUsernameInput.focus();
+            } else {
+                usernameModal.classList.remove('active');
+                loadChatHistory();
+            }
         }
 
         function setUsername() {
-          const newUsername = chatUsernameInput.value.trim();
-          if (newUsername) {
-            chatUsername = newUsername;
-            localStorage.setItem('chatUsername', chatUsername);
-            usernameModal.classList.remove('active');
-            
-            // System welcome message
-            chatRef.push({
-              username: 'System',
-              message: `${chatUsername} joined the chat!`,
-              timestamp: Date.now()
-            });
-          }
+            const newUsername = chatUsernameInput.value.trim();
+            if (newUsername) {
+                chatUsername = newUsername;
+                localStorage.setItem('chatUsername', chatUsername);
+                usernameModal.classList.remove('active');
+                
+                // System welcome message
+                chatRef.push({
+                    username: 'System',
+                    message: `${chatUsername} joined the chat!`,
+                    timestamp: Date.now()
+                });
+                
+                loadChatHistory();
+            }
         }
 
-        // Real-time message listener
+        // Load chat history with persistent data
         function loadChatHistory() {
-          chatRef.limitToLast(100).on('value', (snapshot) => {
-            chatMessages.innerHTML = ''; // Clear current messages
-            
-            snapshot.forEach((childSnapshot) => {
-              const msg = childSnapshot.val();
-              displayMessage(msg);
+            chatRef.limitToLast(100).on('value', (snapshot) => {
+                chatMessages.innerHTML = '';
+                
+                snapshot.forEach((childSnapshot) => {
+                    const msg = childSnapshot.val();
+                    displayMessage(msg);
+                });
+                
+                scrollToBottom();
             });
-            
-            scrollToBottom();
-          });
         }
 
-        // Display messages with fancy formatting
+        // Display messages
         function displayMessage({ username, message, timestamp }) {
-          const isCurrentUser = username === localStorage.getItem('chatUsername');
-          const isSystem = username === 'System';
-          
-          const messageEl = document.createElement('div');
-          messageEl.className = `message ${isCurrentUser ? 'your-message' : ''} ${isSystem ? 'system-message' : ''}`;
-          
-          const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          
-          messageEl.innerHTML = `
-            <span class="message-username" style="color: ${isSystem ? '#ff2d75' : '#00a8ff'}">${username}:</span>
-            <span class="message-text">${message}</span>
-            <div class="message-time">${time}</div>
-          `;
-          
-          chatMessages.appendChild(messageEl);
-          scrollToBottom();
+            const isCurrentUser = username === chatUsername;
+            const isSystem = username === 'System';
+            
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${isCurrentUser ? 'your-message' : ''} ${isSystem ? 'system-message' : ''}`;
+            
+            const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageEl.innerHTML = `
+                <span class="message-username" style="color: ${isSystem ? '#ff2d75' : '#00a8ff'}">${username}:</span>
+                <span class="message-text">${message}</span>
+                <div class="message-time">${time}</div>
+            `;
+            
+            chatMessages.appendChild(messageEl);
+            scrollToBottom();
         }
 
         function scrollToBottom() {
-          chatMessages.scrollTop = chatMessages.scrollHeight;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Send new messages
+        // Send message function (fixed)
         function sendMessage() {
-          const message = messageInput.value.trim();
-          if (message && chatUsername) {
-            chatRef.push({
-              username: chatUsername,
-              message,
-              timestamp: Date.now()
-            });
-            messageInput.value = '';
-          }
+            const message = messageInput.value.trim();
+            if (message && chatUsername) {
+                chatRef.push({
+                    username: chatUsername,
+                    message,
+                    timestamp: Date.now()
+                });
+                messageInput.value = '';
+            }
         }
 
-        // Event listeners
+        // Event listeners for chat
         setUsernameBtn.addEventListener('click', setUsername);
-        chatUsernameInput.addEventListener('keypress', (e) => e.key === 'Enter' && setUsername());
+        chatUsernameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') setUsername();
+        });
         sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => e.key === 'Enter' && sendMessage());
-
-        // Initialize chat when user is logged in
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                checkUsername();
-            }
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
         });
 
         // ======================
