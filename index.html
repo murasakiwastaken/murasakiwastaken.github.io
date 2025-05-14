@@ -187,7 +187,20 @@
         .hidden {
             display: none;
         }
+.ai-typing {
+    color: rgba(224, 225, 221, 0.7);
+    font-style: italic;
+}
 
+.ai-typing::after {
+    content: '...';
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
         .ai-error {
   color: #ff6b6b;
   font-style: italic;
@@ -1310,37 +1323,38 @@ function deleteMessage(messageKey) {
         });
         sendBtn.addEventListener('click', sendMessage);
         
+// Replace your message input event listener with this:
 messageInput.addEventListener('keypress', async function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    const message = messageInput.value.trim();
-    
-    if (message.toLowerCase().startsWith('/ai')) {
-      e.preventDefault();
-      const question = message.substring(3).trim();
-      
-      // Show typing indicator
-      const typingId = `typing-${Date.now()}`;
-      chatMessages.innerHTML += `
-        <div id="${typingId}" class="message system-message">
-          <span class="message-username">AI Assistant:</span>
-          <span class="message-text">Thinking...</span>
-        </div>
-      `;
-      
-      const response = await getAIResponse(question);
-      
-      // Replace typing with response
-      const typingElement = document.getElementById(typingId);
-      if (typingElement) {
-        typingElement.innerHTML = `
-          <span class="message-username">AI Assistant:</span>
-          <span class="message-text">${response}</span>
-        `;
-      }
-      
-      messageInput.value = '';
+    if (e.key === 'Enter' && !e.shiftKey) {
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        if (message.toLowerCase().startsWith('/ai')) {
+            e.preventDefault();
+            const question = message.substring(3).trim();
+            
+            // Show typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'message system-message ai-typing';
+            typingIndicator.innerHTML = `
+                <span class="message-username">AI Assistant:</span>
+                <span class="message-text">Thinking...</span>
+            `;
+            chatMessages.appendChild(typingIndicator);
+            scrollToBottom();
+            
+            // Get response (instantly since it's local now)
+            const response = getAIResponse(question);
+            
+            // Replace typing with response
+            typingIndicator.innerHTML = `
+                <span class="message-username">AI Assistant:</span>
+                <span class="message-text">${response}</span>
+            `;
+            
+            messageInput.value = '';
+        }
     }
-  }
 });
 
         // ======================
@@ -1590,32 +1604,53 @@ messageInput.addEventListener('keypress', async function(e) {
 // ======================
 // ENHANCED AI ASSISTANT
 // ======================
+// Replace your aiResponses object with this:
 const aiResponses = {
     // Website-specific responses
     "hello": "Hello! I'm your AI assistant. How can I help you today?",
-    "features": "You can request new features using the feedback button in the bottom right corner!",
-    "games": "We have games in these categories: Arcade, Sports, Retro, Action. Use the tabs to browse them!",
-    "contact": "You can reach out through the feedback system or chat with other users here.",
-    "help": "I can help with: Website questions (type '/ai help site') or General knowledge (type '/ai your question')",
-    "help site": "Ask me about: Games, Features, Feedback, Account help",
+    "hi": "Hi there! What can I do for you?",
+    "help": "I can help with: Games, Features, Account issues. Try asking about these!",
+    "games": "We have these game categories: Arcade, Sports, Retro, Action. Click the tabs above!",
+    "features": "Want a new feature? Use the feedback button in the bottom right corner!",
+    "contact": "You can reach me through the chat or feedback system.",
     
-    // Default responses
-    "default": "I'm not sure about that. Try asking about the website or a general knowledge question."
+    // Common questions
+    "how are you": "I'm just a computer program, but I'm functioning well! How can I help?",
+    "what's up": "Not much, just waiting to help you with the website!",
+    "who are you": "I'm your AI assistant for this gaming website!",
+    
+    // Default response
+    "default": "I'm not sure about that. Try asking about games, features, or type 'help' for options."
 };
 
-async function getAIResponse(question) {
-  try {
-    const response = await fetch('https://your-vercel-app.vercel.app/api/ai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question })
-    });
-    const data = await response.json();
-    return data.response || aiResponses.default;
-  } catch (error) {
-    console.error("AI Error:", error);
+// Update your getAIResponse function:
+function getAIResponse(question) {
+    const lowerQuestion = question.toLowerCase().trim();
+    
+    // Check for direct matches first
+    if (aiResponses[lowerQuestion]) {
+        return aiResponses[lowerQuestion];
+    }
+    
+    // Check for partial matches
+    if (lowerQuestion.includes('hello') || lowerQuestion.includes('hi')) {
+        return aiResponses.hello;
+    }
+    if (lowerQuestion.includes('game')) {
+        return aiResponses.games;
+    }
+    if (lowerQuestion.includes('feature')) {
+        return aiResponses.features;
+    }
+    if (lowerQuestion.includes('help')) {
+        return aiResponses.help;
+    }
+    if (lowerQuestion.includes('contact')) {
+        return aiResponses.contact;
+    }
+    
+    // Return default if no match
     return aiResponses.default;
-  }
 }
 async function sendMessageToAI(message) {
   try {
