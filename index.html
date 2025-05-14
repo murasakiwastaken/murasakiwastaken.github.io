@@ -6,9 +6,10 @@
     <title>murasaki's center V1 | adding more soon</title>
     
     <!-- Firebase Integration -->
-      <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
     <script>
       const firebaseConfig = {
         apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
@@ -494,6 +495,194 @@
             border: none;
         }
 
+        /* Feedback System Styles */
+        .feedback-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0, 168, 255, 0.3);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .feedback-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 168, 255, 0.4);
+        }
+
+        .feedback-modal {
+            position: fixed;
+            bottom: 90px;
+            right: 30px;
+            width: 350px;
+            max-height: 500px;
+            background: rgba(13, 27, 42, 0.95);
+            border-radius: 15px;
+            border: 2px solid var(--primary);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .feedback-modal.active {
+            display: flex;
+        }
+
+        .feedback-modal-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .feedback-header {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .feedback-header h3 {
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .close-feedback {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        .feedback-messages {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: rgba(13, 27, 42, 0.7);
+        }
+
+        .feedback-message {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(0, 168, 255, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .feedback-message.user {
+            background: rgba(0, 168, 255, 0.2);
+            border-left: 3px solid var(--secondary);
+        }
+
+        .feedback-message p {
+            margin: 5px 0;
+            word-break: break-word;
+        }
+
+        .feedback-message .message-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: rgba(224, 225, 221, 0.7);
+            margin-bottom: 5px;
+        }
+
+        .feedback-message .media-attachment {
+            margin-top: 10px;
+            max-width: 100%;
+            border-radius: 5px;
+        }
+
+        .feedback-input-area {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 2px solid var(--primary);
+        }
+
+        .feedback-input-area textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 168, 255, 0.3);
+            background: rgba(224, 225, 221, 0.1);
+            color: var(--light);
+            resize: none;
+            min-height: 60px;
+            margin-bottom: 10px;
+        }
+
+        .feedback-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .media-upload-btn {
+            padding: 8px 12px;
+            background: rgba(0, 168, 255, 0.1);
+            border-radius: 5px;
+            cursor: pointer;
+            color: var(--primary);
+            border: 1px dashed var(--primary);
+            transition: all 0.2s ease;
+        }
+
+        .media-upload-btn:hover {
+            background: rgba(0, 168, 255, 0.2);
+        }
+
+        #send-feedback {
+            padding: 8px 20px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        #send-feedback:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
+        }
+
+        .media-preview {
+            margin-top: 10px;
+            display: none;
+        }
+
+        .media-preview img, .media-preview video {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        .remove-media {
+            background: var(--error);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
         /* Responsive Adjustments */
         @media (max-width: 768px) {
             .title {
@@ -512,6 +701,12 @@
             .game-grid {
                 grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             }
+
+            .feedback-modal {
+                width: 300px;
+                right: 15px;
+                bottom: 80px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -521,6 +716,17 @@
             
             .game-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .feedback-modal {
+                width: 280px;
+                right: 10px;
+            }
+
+            .feedback-btn {
+                padding: 10px 15px;
+                right: 15px;
+                bottom: 20px;
             }
         }
     </style>
@@ -562,7 +768,7 @@
             </div>
         </div>
 
-    <div id="protected-content" class="protected-content">
+        <div id="protected-content" class="protected-content">
             <header class="header">
                 <h1 class="title">murasaki's center V1 | adding more soon</h1>
             </header>
@@ -680,7 +886,7 @@
                 </div>
             </div>
             
-     <!-- Username Modal -->
+            <!-- Username Modal -->
             <div class="username-modal" id="username-modal">
                 <div class="username-modal-content">
                     <h2>Choose Your Username</h2>
@@ -700,6 +906,32 @@
         </div>
     </div>
 
+    <!-- Feedback Button and Modal -->
+    <div class="feedback-btn" id="feedback-btn">
+        <span>Feedback</span>
+        <i class="feedback-icon">💬</i>
+    </div>
+
+    <div class="feedback-modal" id="feedback-modal">
+        <div class="feedback-modal-content">
+            <div class="feedback-header">
+                <h3>Feature Requests & Feedback</h3>
+                <button class="close-feedback">&times;</button>
+            </div>
+            <div class="feedback-messages" id="feedback-messages"></div>
+            <div class="feedback-input-area">
+                <textarea id="feedback-input" placeholder="What feature would you like to see?"></textarea>
+                <div class="feedback-actions">
+                    <label for="media-upload" class="media-upload-btn">
+                        <input type="file" id="media-upload" accept="image/*,video/*" style="display: none;">
+                        📎 Attach
+                    </label>
+                    <button id="send-feedback">Send</button>
+                </div>
+                <div id="media-preview" class="media-preview"></div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // ======================
@@ -707,6 +939,7 @@
         // ======================
         const auth = firebase.auth();
         const database = firebase.database();
+        const storage = firebase.storage();
         
         // DOM Elements
         const loginForm = document.getElementById('login-form');
@@ -897,8 +1130,8 @@
             }
         }
 
-      // ======================
-        // CHAT SYSTEM (FIXED)
+        // ======================
+        // CHAT SYSTEM
         // ======================
         const usernameModal = document.getElementById('username-modal');
         const chatUsernameInput = document.getElementById('username-input');
@@ -906,7 +1139,7 @@
         const messageInput = document.getElementById('message-input');
         const sendBtn = document.getElementById('send-btn');
         const chatMessages = document.getElementById('chat-messages');
-        const chatRef = database.ref('chat'); // Added missing chatRef
+        const chatRef = database.ref('chat');
 
         let chatUsername = localStorage.getItem('chatUsername') || '';
 
@@ -983,7 +1216,7 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Send message function (fixed)
+        // Send message function
         function sendMessage() {
             const message = messageInput.value.trim();
             if (message && chatUsername) {
@@ -1003,7 +1236,7 @@
         });
         sendBtn.addEventListener('click', sendMessage);
         messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
+            if (e.key === 'Enter' && !e.shiftKey) sendMessage();
         });
 
         // ======================
@@ -1065,6 +1298,240 @@
                 modal.classList.remove('active');
                 gameFrame.src = '';
                 document.body.style.overflow = 'auto';
+            }
+        });
+
+        // ======================
+        // FEEDBACK SYSTEM
+        // ======================
+        const feedbackBtn = document.getElementById('feedback-btn');
+        const feedbackModal = document.getElementById('feedback-modal');
+        const closeFeedback = document.querySelector('.close-feedback');
+        const feedbackMessages = document.getElementById('feedback-messages');
+        const feedbackInput = document.getElementById('feedback-input');
+        const sendFeedbackBtn = document.getElementById('send-feedback');
+        const mediaUpload = document.getElementById('media-upload');
+        const mediaPreview = document.getElementById('media-preview');
+
+        // Firebase reference for feedback
+        const feedbackRef = database.ref('feedback');
+
+        let selectedFile = null;
+
+        // Toggle feedback modal
+        feedbackBtn.addEventListener('click', () => {
+            feedbackModal.classList.toggle('active');
+            if (feedbackModal.classList.contains('active')) {
+                loadFeedbackMessages();
+            }
+        });
+
+        closeFeedback.addEventListener('click', () => {
+            feedbackModal.classList.remove('active');
+        });
+
+        // Handle media upload
+        mediaUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                selectedFile = file;
+                
+                // Show preview
+                mediaPreview.innerHTML = '';
+                mediaPreview.style.display = 'block';
+                
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        mediaPreview.appendChild(img);
+                        
+                        // Add remove button
+                        const removeBtn = document.createElement('button');
+                        removeBtn.className = 'remove-media';
+                        removeBtn.innerHTML = '×';
+                        removeBtn.addEventListener('click', () => {
+                            selectedFile = null;
+                            mediaUpload.value = '';
+                            mediaPreview.style.display = 'none';
+                        });
+                        mediaPreview.appendChild(removeBtn);
+                    };
+                    reader.readAsDataURL(file);
+                } else if (file.type.startsWith('video/')) {
+                    const video = document.createElement('video');
+                    video.controls = true;
+                    video.src = URL.createObjectURL(file);
+                    mediaPreview.appendChild(video);
+                    
+                    // Add remove button
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-media';
+                    removeBtn.innerHTML = '×';
+                    removeBtn.addEventListener('click', () => {
+                        selectedFile = null;
+                        mediaUpload.value = '';
+                        mediaPreview.style.display = 'none';
+                        URL.revokeObjectURL(video.src);
+                    });
+                    mediaPreview.appendChild(removeBtn);
+                }
+            }
+        });
+
+        // Send feedback
+        sendFeedbackBtn.addEventListener('click', sendFeedback);
+        feedbackInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendFeedback();
+            }
+        });
+
+        function sendFeedback() {
+            const message = feedbackInput.value.trim();
+            if (!message && !selectedFile) return;
+            
+            const feedbackData = {
+                message,
+                userId: auth.currentUser?.uid || 'anonymous',
+                username: auth.currentUser?.email?.split('@')[0] || 'Guest',
+                timestamp: Date.now(),
+                status: 'pending'
+            };
+            
+            // Upload file if exists
+            if (selectedFile) {
+                const storageRef = storage.ref(`feedback/${Date.now()}_${selectedFile.name}`);
+                const uploadTask = storageRef.put(selectedFile);
+                
+                uploadTask.on('state_changed',
+                    null,
+                    (error) => {
+                        console.error('Upload error:', error);
+                        // Send without media if upload fails
+                        feedbackRef.push(feedbackData);
+                    },
+                    () => {
+                        // Get download URL and add to feedback
+                        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                            feedbackData.mediaUrl = downloadURL;
+                            feedbackData.mediaType = selectedFile.type.startsWith('image/') ? 'image' : 'video';
+                            feedbackRef.push(feedbackData);
+                        });
+                    }
+                );
+            } else {
+                feedbackRef.push(feedbackData);
+            }
+            
+            feedbackInput.value = '';
+            selectedFile = null;
+            mediaUpload.value = '';
+            mediaPreview.style.display = 'none';
+            
+            // Add temporary local message
+            addFeedbackMessage({
+                message,
+                username: feedbackData.username,
+                timestamp: feedbackData.timestamp,
+                mediaUrl: feedbackData.mediaUrl,
+                mediaType: feedbackData.mediaType
+            }, true);
+        }
+
+        function loadFeedbackMessages() {
+            feedbackRef.limitToLast(20).on('value', (snapshot) => {
+                feedbackMessages.innerHTML = '';
+                snapshot.forEach((childSnapshot) => {
+                    const feedback = childSnapshot.val();
+                    addFeedbackMessage(feedback, feedback.username === (auth.currentUser?.email?.split('@')[0] || 'Guest'));
+                });
+                scrollFeedbackToBottom();
+            });
+        }
+
+        function addFeedbackMessage(feedback, isCurrentUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `feedback-message ${isCurrentUser ? 'user' : ''}`;
+            
+            const time = new Date(feedback.timestamp).toLocaleString();
+            
+            let mediaHtml = '';
+            if (feedback.mediaUrl) {
+                if (feedback.mediaType === 'image') {
+                    mediaHtml = `<img src="${feedback.mediaUrl}" class="media-attachment" alt="Attached image">`;
+                } else {
+                    mediaHtml = `<video src="${feedback.mediaUrl}" class="media-attachment" controls></video>`;
+                }
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="message-meta">
+                    <span>${feedback.username}</span>
+                    <span>${time}</span>
+                </div>
+                ${feedback.message ? `<p>${feedback.message}</p>` : ''}
+                ${mediaHtml}
+            `;
+            
+            feedbackMessages.appendChild(messageDiv);
+            scrollFeedbackToBottom();
+        }
+
+        function scrollFeedbackToBottom() {
+            feedbackMessages.scrollTop = feedbackMessages.scrollHeight;
+        }
+
+        // ======================
+        // AI ASSISTANT
+        // ======================
+        const aiResponses = {
+            "hello": "Hello! How can I help you with the site today?",
+            "features": "You can request new features using the feedback button in the bottom right corner!",
+            "games": "We have a variety of games in different categories. Check out the tabs at the top to browse them!",
+            "contact": "You can reach out through the feedback system or join our chatroom to talk with other users.",
+            "help": "I can help with questions about the site, games, or features. Just ask!",
+            "default": "I'm not sure about that, but you can ask me about the site features, games, or how to use the feedback system."
+        };
+
+        function getAIResponse(question) {
+            const lowerQuestion = question.toLowerCase();
+            
+            if (lowerQuestion.includes('hello') || lowerQuestion.includes('hi')) {
+                return aiResponses.hello;
+            } else if (lowerQuestion.includes('feature')) {
+                return aiResponses.features;
+            } else if (lowerQuestion.includes('game')) {
+                return aiResponses.games;
+            } else if (lowerQuestion.includes('contact') || lowerQuestion.includes('support')) {
+                return aiResponses.contact;
+            } else if (lowerQuestion.includes('help')) {
+                return aiResponses.help;
+            } else {
+                return aiResponses.default;
+            }
+        }
+
+        // Add AI to chatroom
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                const message = messageInput.value.trim();
+                if (message.toLowerCase().startsWith('/ai')) {
+                    e.preventDefault();
+                    const question = message.substring(3).trim();
+                    const response = getAIResponse(question);
+                    
+                    // Display AI response in chat
+                    chatRef.push({
+                        username: 'AI Assistant',
+                        message: response,
+                        timestamp: Date.now()
+                    });
+                    
+                    messageInput.value = '';
+                }
             }
         });
     </script>
