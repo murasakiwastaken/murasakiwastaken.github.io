@@ -1590,53 +1590,60 @@ const aiResponses = {
 
 async function getAIResponse(question) {
   try {
-    const response = await fetch('/api/ai', {
+    const res = await fetch('/api/ai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question })
     });
-    return await response.json();
+    const data = await res.json();
+    return data.response || "Sorry, I couldn't understand that.";
   } catch (error) {
-    return "AI is unavailable right now.";
+    return "AI service is currently unavailable.";
+  }
+}
+async function sendMessageToAI(message) {
+  try {
+    const response = await fetch('/api/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: message })
+    });
+
+    const data = await response.json();
+    
+    if (data.success) {
+      return data.reply;
+    } else {
+      console.error("Backend Error:", data.error);
+      return "Sorry, I encountered an error. Please try again.";
+    }
+  } catch (error) {
+    console.error("Network Error:", error);
+    return "AI service is currently unavailable. (Network error)";
   }
 }
 
-// Modified chat input handler
-messageInput.addEventListener('keypress', async function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        const message = messageInput.value.trim();
-        if (message.toLowerCase().startsWith('/ai')) {
-            e.preventDefault();
-            const question = message.substring(3).trim();
-            
-            // Show "AI is typing" indicator
-            const typingIndicator = document.createElement('div');
-            typingIndicator.className = 'message system-message';
-            typingIndicator.innerHTML = `
-                <span class="message-username" style="color: #ff2d75">AI Assistant:</span>
-                <span class="message-text">Thinking...</span>
-            `;
-            chatMessages.appendChild(typingIndicator);
-            scrollToBottom();
-            
-            // Get AI response
-            const response = await getAIResponse(question);
-            
-            // Remove typing indicator
-            chatMessages.removeChild(typingIndicator);
-            
-            // Create a new message reference
-            const newMessageRef = chatRef.push();
-            newMessageRef.set({
-                username: 'AI Assistant',
-                message: response,
-                timestamp: Date.now(),
-                isSystem: true
-            });
-            
-            messageInput.value = '';
-        }
-    }
+// In your chat submission handler:
+sendBtn.addEventListener('click', async () => {
+  const message = messageInput.value.trim();
+  if (!message) return;
+
+  // Show "AI is typing" indicator
+  const typingId = Date.now();
+  chatMessages.innerHTML += `
+    <div id="${typingId}" class="message system-message">
+      <span class="message-username">AI Assistant:</span>
+      <span class="message-text">Typing...</span>
+    </div>
+  `;
+
+  const aiResponse = await sendMessageToAI(message);
+  
+  // Replace typing indicator with actual response
+  document.getElementById(typingId).innerHTML = `
+    <span class="message-username">AI Assistant:</span>
+    <span class="message-text">${aiResponse}</span>
+  `;
 });
     </script>
 </body>
