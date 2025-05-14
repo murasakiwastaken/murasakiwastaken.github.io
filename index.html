@@ -187,6 +187,11 @@
         .hidden {
             display: none;
         }
+
+        .ai-error {
+  color: #ff6b6b;
+  font-style: italic;
+}
         /* Add to your CSS */
 .ai-typing {
     font-style: italic;
@@ -1304,28 +1309,38 @@ function deleteMessage(messageKey) {
             if (e.key === 'Enter') setUsername();
         });
         sendBtn.addEventListener('click', sendMessage);
-messageInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        const message = messageInput.value.trim();
-        if (message.toLowerCase().startsWith('/ai')) {
-            e.preventDefault();
-            const question = message.substring(3).trim();
-            const response = getAIResponse(question);
-            
-            // Create a new message reference to get a key
-            const newMessageRef = chatRef.push();
-            
-            // Display AI response in chat
-            newMessageRef.set({
-                username: 'AI Assistant',
-                message: response,
-                timestamp: Date.now(),
-                isSystem: true
-            });
-            
-            messageInput.value = '';
-        }
+        
+messageInput.addEventListener('keypress', async function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    const message = messageInput.value.trim();
+    
+    if (message.toLowerCase().startsWith('/ai')) {
+      e.preventDefault();
+      const question = message.substring(3).trim();
+      
+      // Show typing indicator
+      const typingId = `typing-${Date.now()}`;
+      chatMessages.innerHTML += `
+        <div id="${typingId}" class="message system-message">
+          <span class="message-username">AI Assistant:</span>
+          <span class="message-text">Thinking...</span>
+        </div>
+      `;
+      
+      const response = await getAIResponse(question);
+      
+      // Replace typing with response
+      const typingElement = document.getElementById(typingId);
+      if (typingElement) {
+        typingElement.innerHTML = `
+          <span class="message-username">AI Assistant:</span>
+          <span class="message-text">${response}</span>
+        `;
+      }
+      
+      messageInput.value = '';
     }
+  }
 });
 
         // ======================
@@ -1590,15 +1605,16 @@ const aiResponses = {
 
 async function getAIResponse(question) {
   try {
-    const res = await fetch('/api/ai', {
+    const response = await fetch('https://your-vercel-app.vercel.app/api/ai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question })
     });
-    const data = await res.json();
-    return data.response || "Sorry, I couldn't understand that.";
+    const data = await response.json();
+    return data.response || aiResponses.default;
   } catch (error) {
-    return "AI service is currently unavailable.";
+    console.error("AI Error:", error);
+    return aiResponses.default;
   }
 }
 async function sendMessageToAI(message) {
