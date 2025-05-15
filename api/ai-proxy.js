@@ -1,7 +1,7 @@
 // api/ai-proxy.js
-import axios from 'axios';
+const axios = require('axios');
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   // Add CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST');
@@ -16,8 +16,6 @@ export default async function handler(req, res) {
     if (!question) {
       return res.status(400).json({ error: 'Question is required' });
     }
-
-    console.log('Received question:', question); // Debug log
 
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
@@ -35,14 +33,13 @@ export default async function handler(req, res) {
     );
 
     const answer = response.data.choices[0]?.message?.content?.trim() || "No response from AI";
-    console.log('AI response:', answer); // Debug log
     res.status(200).json({ response: answer });
 
   } catch (error) {
-    console.error('Full error:', error); // Detailed logging
+    console.error('Error:', error.response?.data || error.message);
     res.status(500).json({ 
       error: 'AI request failed',
-      details: error.response?.data || error.message 
+      details: error.message 
     });
   }
-}
+};
