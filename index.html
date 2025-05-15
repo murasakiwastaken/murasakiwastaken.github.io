@@ -1323,35 +1323,15 @@ function deleteMessage(messageKey) {
         });
         sendBtn.addEventListener('click', sendMessage);
         
-// Replace your message input event listener with this:
-messageInput.addEventListener('keypress', async function(e) {
+messageInput.addEventListener('keypress', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
         const message = messageInput.value.trim();
-        if (!message) return;
-
-        if (message.toLowerCase().startsWith('/ai')) {
-            e.preventDefault();
-            const question = message.substring(3).trim();
-            
-            // Show typing indicator
-            const typingIndicator = document.createElement('div');
-            typingIndicator.className = 'message system-message ai-typing';
-            typingIndicator.innerHTML = `
-                <span class="message-username">AI Assistant:</span>
-                <span class="message-text">Thinking...</span>
-            `;
-            chatMessages.appendChild(typingIndicator);
-            scrollToBottom();
-            
-            // Get response (instantly since it's local now)
-            const response = getAIResponse(question);
-            
-            // Replace typing with response
-            typingIndicator.innerHTML = `
-                <span class="message-username">AI Assistant:</span>
-                <span class="message-text">${response}</span>
-            `;
-            
+        if (message && chatUsername) {
+            chatRef.push({
+                username: chatUsername,
+                message,
+                timestamp: Date.now()
+            });
             messageInput.value = '';
         }
     }
