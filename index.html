@@ -863,21 +863,26 @@
         }
     </style>
 </head>
-    <script>
-  // Improved redirect with fallback
-  if(window.location.hostname === 'murasakiwastaken.github.io') {
-    // Store original path to preserve deep links
-    const originalPath = window.location.pathname;
-    const newUrl = 'https://murasakiwastaken.vercel.app' + originalPath;
-    
-    // Try replacing state first (for single-page apps)
-    if(window.history.replaceState) {
-      window.history.replaceState(null, null, newUrl);
+ <script>
+  // Enhanced redirect that handles more edge cases
+  (function() {
+    // Check if we're on GitHub Pages
+    if (window.location.hostname === 'murasakiwastaken.github.io') {
+      // Preserve the path and query parameters
+      const newUrl = new URL('https://murasakiwastaken.vercel.app');
+      newUrl.pathname = window.location.pathname;
+      newUrl.search = window.location.search;
+      newUrl.hash = window.location.hash;
+      
+      // Use replace instead of href to prevent back button issues
+      window.location.replace(newUrl.toString());
+      
+      // Fallback in case replace is blocked
+      setTimeout(function() {
+        window.location.href = newUrl.toString();
+      }, 100);
     }
-    
-    // Redirect
-    window.location.href = newUrl;
-  }
+  })();
 </script>
 <body>
     <div class="bg-animation"></div>
