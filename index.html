@@ -863,6 +863,22 @@
         }
     </style>
 </head>
+    <script>
+  // Improved redirect with fallback
+  if(window.location.hostname === 'murasakiwastaken.github.io') {
+    // Store original path to preserve deep links
+    const originalPath = window.location.pathname;
+    const newUrl = 'https://murasakiwastaken.vercel.app' + originalPath;
+    
+    // Try replacing state first (for single-page apps)
+    if(window.history.replaceState) {
+      window.history.replaceState(null, null, newUrl);
+    }
+    
+    // Redirect
+    window.location.href = newUrl;
+  }
+</script>
 <body>
     <div class="bg-animation"></div>
     
@@ -912,7 +928,7 @@
                 <div class="tab" data-category="retro">Retro</div>
                 <div class="tab" data-category="action">Action</div>
                 <div class="tab" data-category="chatroom">Chatroom</div>
-                <div class="tab" data-category="ai-assistant">AI Assistant (BROKEN RIGHT NOW, WILL NOT WORK!)</div>
+                <div class="tab" data-category="ai-assistant">AI Assistant [NEW!]</div>
             </div>
             
             <div class="game-grid">
