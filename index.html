@@ -863,11 +863,6 @@
         }
     </style>
 </head>
-<script>
-  if(window.location.hostname === 'murasakiwastaken.github.io') {
-    window.location.href = 'https://murasakiwastaken.vercel.app';
-  }
-</script>
 <body>
     <div class="bg-animation"></div>
     
@@ -1575,189 +1570,211 @@
                 document.body.style.overflow = 'auto';
             }
         });
+// ======================
+// FEEDBACK SYSTEM - UPDATED
+// ======================
+const feedbackBtn = document.getElementById('feedback-btn');
+const feedbackModal = document.getElementById('feedback-modal');
+const closeFeedback = document.querySelector('.close-feedback');
+const feedbackMessages = document.getElementById('feedback-messages');
+const feedbackInput = document.getElementById('feedback-input');
+const sendFeedbackBtn = document.getElementById('send-feedback');
+const mediaUpload = document.getElementById('media-upload');
+const mediaPreview = document.getElementById('media-preview');
 
-        // ======================
-        // FEEDBACK SYSTEM
-        // ======================
-        const feedbackBtn = document.getElementById('feedback-btn');
-        const feedbackModal = document.getElementById('feedback-modal');
-        const closeFeedback = document.querySelector('.close-feedback');
-        const feedbackMessages = document.getElementById('feedback-messages');
-        const feedbackInput = document.getElementById('feedback-input');
-        const sendFeedbackBtn = document.getElementById('send-feedback');
-        const mediaUpload = document.getElementById('media-upload');
-        const mediaPreview = document.getElementById('media-preview');
+// Firebase reference for feedback
+const feedbackRef = database.ref('feedback');
 
-        // Firebase reference for feedback
-        const feedbackRef = database.ref('feedback');
+let selectedFile = null;
+let feedbackListener = null;
 
-        let selectedFile = null;
-
-        // Toggle feedback modal
-        feedbackBtn.addEventListener('click', () => {
-            feedbackModal.classList.toggle('active');
-            if (feedbackModal.classList.contains('active')) {
-                loadFeedbackMessages();
-            }
-        });
-
-        closeFeedback.addEventListener('click', () => {
-            feedbackModal.classList.remove('active');
-        });
-
-        // Handle media upload
-        mediaUpload.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                selectedFile = file;
-                
-                // Show preview
-                mediaPreview.innerHTML = '';
-                mediaPreview.style.display = 'block';
-                
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        mediaPreview.appendChild(img);
-                        
-                        // Add remove button
-                        const removeBtn = document.createElement('button');
-                        removeBtn.className = 'remove-media';
-                        removeBtn.innerHTML = '×';
-                        removeBtn.addEventListener('click', () => {
-                            selectedFile = null;
-                            mediaUpload.value = '';
-                            mediaPreview.style.display = 'none';
-                        });
-                        mediaPreview.appendChild(removeBtn);
-                    };
-                    reader.readAsDataURL(file);
-                } else if (file.type.startsWith('video/')) {
-                    const video = document.createElement('video');
-                    video.controls = true;
-                    video.src = URL.createObjectURL(file);
-                    mediaPreview.appendChild(video);
-                    
-                    // Add remove button
-                    const removeBtn = document.createElement('button');
-                    removeBtn.className = 'remove-media';
-                    removeBtn.innerHTML = '×';
-                    removeBtn.addEventListener('click', () => {
-                        selectedFile = null;
-                        mediaUpload.value = '';
-                        mediaPreview.style.display = 'none';
-                        URL.revokeObjectURL(video.src);
-                    });
-                    mediaPreview.appendChild(removeBtn);
-                }
-            }
-        });
-
-        // Send feedback
-        sendFeedbackBtn.addEventListener('click', sendFeedback);
-        feedbackInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendFeedback();
-            }
-        });
-
-        function sendFeedback() {
-            const message = feedbackInput.value.trim();
-            if (!message && !selectedFile) return;
-            
-            const feedbackData = {
-                message,
-                userId: auth.currentUser?.uid || 'anonymous',
-                username: auth.currentUser?.email?.split('@')[0] || 'Guest',
-                timestamp: Date.now(),
-                status: 'pending'
-            };
-            
-            // Upload file if exists
-            if (selectedFile) {
-                const storageRef = storage.ref(`feedback/${Date.now()}_${selectedFile.name}`);
-                const uploadTask = storageRef.put(selectedFile);
-                
-                uploadTask.on('state_changed',
-                    null,
-                    (error) => {
-                        console.error('Upload error:', error);
-                        // Send without media if upload fails
-                        feedbackRef.push(feedbackData);
-                    },
-                    () => {
-                        // Get download URL and add to feedback
-                        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                            feedbackData.mediaUrl = downloadURL;
-                            feedbackData.mediaType = selectedFile.type.startsWith('image/') ? 'image' : 'video';
-                            feedbackRef.push(feedbackData);
-                        });
-                    }
-                );
-            } else {
-                feedbackRef.push(feedbackData);
-            }
-            
-            feedbackInput.value = '';
-            selectedFile = null;
-            mediaUpload.value = '';
-            mediaPreview.style.display = 'none';
-            
-            // Add temporary local message
-            addFeedbackMessage({
-                message,
-                username: feedbackData.username,
-                timestamp: feedbackData.timestamp,
-                mediaUrl: feedbackData.mediaUrl,
-                mediaType: feedbackData.mediaType
-            }, true);
+// Toggle feedback modal
+feedbackBtn.addEventListener('click', () => {
+    feedbackModal.classList.toggle('active');
+    if (feedbackModal.classList.contains('active')) {
+        loadFeedbackMessages();
+    } else {
+        // Remove listener when modal is closed to save resources
+        if (feedbackListener) {
+            feedbackRef.off('value', feedbackListener);
+            feedbackListener = null;
         }
+    }
+});
 
-        function loadFeedbackMessages() {
-            feedbackRef.limitToLast(20).on('value', (snapshot) => {
-                feedbackMessages.innerHTML = '';
-                snapshot.forEach((childSnapshot) => {
-                    const feedback = childSnapshot.val();
-                    addFeedbackMessage(feedback, feedback.username === (auth.currentUser?.email?.split('@')[0] || 'Guest'));
+closeFeedback.addEventListener('click', () => {
+    feedbackModal.classList.remove('active');
+    if (feedbackListener) {
+        feedbackRef.off('value', feedbackListener);
+        feedbackListener = null;
+    }
+});
+
+// Handle media upload (keep existing code)
+mediaUpload.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        selectedFile = file;
+        
+        // Show preview
+        mediaPreview.innerHTML = '';
+        mediaPreview.style.display = 'block';
+        
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                mediaPreview.appendChild(img);
+                
+                // Add remove button
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-media';
+                removeBtn.innerHTML = '×';
+                removeBtn.addEventListener('click', () => {
+                    selectedFile = null;
+                    mediaUpload.value = '';
+                    mediaPreview.style.display = 'none';
                 });
-                scrollFeedbackToBottom();
+                mediaPreview.appendChild(removeBtn);
+            };
+            reader.readAsDataURL(file);
+        } else if (file.type.startsWith('video/')) {
+            const video = document.createElement('video');
+            video.controls = true;
+            video.src = URL.createObjectURL(file);
+            mediaPreview.appendChild(video);
+            
+            // Add remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-media';
+            removeBtn.innerHTML = '×';
+            removeBtn.addEventListener('click', () => {
+                selectedFile = null;
+                mediaUpload.value = '';
+                mediaPreview.style.display = 'none';
+                URL.revokeObjectURL(video.src);
             });
+            mediaPreview.appendChild(removeBtn);
         }
+    }
+});
 
-        function addFeedbackMessage(feedback, isCurrentUser) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `feedback-message ${isCurrentUser ? 'user' : ''}`;
-            
-            const time = new Date(feedback.timestamp).toLocaleString();
-            
-            let mediaHtml = '';
-            if (feedback.mediaUrl) {
-                if (feedback.mediaType === 'image') {
-                    mediaHtml = `<img src="${feedback.mediaUrl}" class="media-attachment" alt="Attached image">`;
-                } else {
-                    mediaHtml = `<video src="${feedback.mediaUrl}" class="media-attachment" controls></video>`;
-                }
+// Send feedback (updated)
+function sendFeedback() {
+    const message = feedbackInput.value.trim();
+    if (!message && !selectedFile) return;
+    
+    const feedbackData = {
+        message,
+        userId: auth.currentUser?.uid || 'anonymous',
+        username: auth.currentUser?.email?.split('@')[0] || 'Guest',
+        timestamp: Date.now(),
+        status: 'pending'
+    };
+    
+    // Upload file if exists
+    if (selectedFile) {
+        const storageRef = storage.ref(`feedback/${Date.now()}_${selectedFile.name}`);
+        const uploadTask = storageRef.put(selectedFile);
+        
+        uploadTask.on('state_changed',
+            null,
+            (error) => {
+                console.error('Upload error:', error);
+                // Send without media if upload fails
+                feedbackRef.push(feedbackData);
+            },
+            () => {
+                // Get download URL and add to feedback
+                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                    feedbackData.mediaUrl = downloadURL;
+                    feedbackData.mediaType = selectedFile.type.startsWith('image/') ? 'image' : 'video';
+                    feedbackRef.push(feedbackData);
+                });
             }
-            
-            messageDiv.innerHTML = `
-                <div class="message-meta">
-                    <span>${feedback.username}</span>
-                    <span>${time}</span>
-                </div>
-                ${feedback.message ? `<p>${feedback.message}</p>` : ''}
-                ${mediaHtml}
-            `;
-            
-            feedbackMessages.appendChild(messageDiv);
-            scrollFeedbackToBottom();
-        }
+        );
+    } else {
+        feedbackRef.push(feedbackData);
+    }
+    
+    feedbackInput.value = '';
+    selectedFile = null;
+    mediaUpload.value = '';
+    mediaPreview.style.display = 'none';
+}
 
-        function scrollFeedbackToBottom() {
-            feedbackMessages.scrollTop = feedbackMessages.scrollHeight;
+// Load feedback messages (updated)
+function loadFeedbackMessages() {
+    // Clear existing messages
+    feedbackMessages.innerHTML = '';
+    
+    // Set up realtime listener
+    feedbackListener = feedbackRef.limitToLast(20).on('value', (snapshot) => {
+        feedbackMessages.innerHTML = ''; // Clear before repopulating
+        
+        // Convert to array and sort by timestamp
+        const messages = [];
+        snapshot.forEach((childSnapshot) => {
+            messages.push({
+                key: childSnapshot.key,
+                ...childSnapshot.val()
+            });
+        });
+        
+        // Sort by timestamp (oldest first)
+        messages.sort((a, b) => a.timestamp - b.timestamp);
+        
+        // Display all messages
+        messages.forEach(feedback => {
+            const isCurrentUser = feedback.username === (auth.currentUser?.email?.split('@')[0] || 'Guest');
+            addFeedbackMessage(feedback, isCurrentUser);
+        });
+        
+        scrollFeedbackToBottom();
+    });
+}
+
+// Add feedback message to UI (updated)
+function addFeedbackMessage(feedback, isCurrentUser) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `feedback-message ${isCurrentUser ? 'user' : ''}`;
+    
+    const time = new Date(feedback.timestamp).toLocaleString();
+    
+    let mediaHtml = '';
+    if (feedback.mediaUrl) {
+        if (feedback.mediaType === 'image') {
+            mediaHtml = `<img src="${feedback.mediaUrl}" class="media-attachment" alt="Attached image">`;
+        } else {
+            mediaHtml = `<video src="${feedback.mediaUrl}" class="media-attachment" controls></video>`;
         }
+    }
+    
+    messageDiv.innerHTML = `
+        <div class="message-meta">
+            <span>${feedback.username}</span>
+            <span>${time}</span>
+        </div>
+        ${feedback.message ? `<p>${feedback.message}</p>` : ''}
+        ${mediaHtml}
+    `;
+    
+    feedbackMessages.appendChild(messageDiv);
+}
+
+function scrollFeedbackToBottom() {
+    feedbackMessages.scrollTop = feedbackMessages.scrollHeight;
+}
+
+// Event listeners (updated)
+sendFeedbackBtn.addEventListener('click', sendFeedback);
+feedbackInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendFeedback();
+    }
+});
     </script>
 </body>
 </html>
