@@ -11,11 +11,6 @@ module.exports = async (req, res) => {
 
   try {
     const { question } = req.body;
-    
-    if (!question) {
-      return res.status(400).json({ error: 'Question is required' });
-    }
-
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
@@ -31,14 +26,9 @@ module.exports = async (req, res) => {
       }
     );
 
-    const answer = response.data.choices[0]?.message?.content?.trim() || "No response from AI";
+    const answer = response.data.choices[0]?.message?.content?.trim();
     res.status(200).json({ response: answer });
-
   } catch (error) {
-    console.error('Error:', error.response?.data || error.message);
-    res.status(500).json({ 
-      error: 'AI request failed',
-      details: error.message 
-    });
+    res.status(500).json({ error: 'AI request failed' });
   }
 };
