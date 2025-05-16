@@ -17,75 +17,111 @@
 <script>
 // Initialize particles when page loads
 document.addEventListener('DOMContentLoaded', function() {
-particlesJS('particles-js', {
-  "particles": {
-    "number": {
-      "value": 120,
-      "density": {
+  particlesJS('particles-js', {
+    "particles": {
+      "number": {
+        "value": 80,
+        "density": {
+          "enable": true,
+          "value_area": 800
+        }
+      },
+      "color": {
+        "value": "#ffffff"
+      },
+      "shape": {
+        "type": "circle",
+        "stroke": {
+          "width": 0,
+          "color": "#000000"
+        },
+        "polygon": {
+          "nb_sides": 5
+        }
+      },
+      "opacity": {
+        "value": 0.5,
+        "random": true,
+        "anim": {
+          "enable": true,
+          "speed": 1,
+          "opacity_min": 0.1,
+          "sync": false
+        }
+      },
+      "size": {
+        "value": 3,
+        "random": true,
+        "anim": {
+          "enable": true,
+          "speed": 2,
+          "size_min": 0.1,
+          "sync": false
+        }
+      },
+      "line_linked": {
         "enable": true,
-        "value_area": 1000
-      }
-    },
-    "color": {
-      "value": "#ffffff"  /* White particles */
-    },
-    "shape": {
-      "type": "circle",
-      "stroke": {
-        "width": 0,
-        "color": "#000000"
-      }
-    },
-    "opacity": {
-      "value": 0.7,
-      "random": true,
-      "anim": {
+        "distance": 150,
+        "color": "#4d8bf0",
+        "opacity": 0.4,
+        "width": 1
+      },
+      "move": {
         "enable": true,
         "speed": 1,
-        "opacity_min": 0.1,
-        "sync": false
+        "direction": "none",
+        "random": true,
+        "straight": false,
+        "out_mode": "out",
+        "bounce": false,
+        "attract": {
+          "enable": true,
+          "rotateX": 600,
+          "rotateY": 1200
+        }
       }
     },
-    "size": {
-      "value": 2.5,
-      "random": true,
-      "anim": {
-        "enable": true,
-        "speed": 2,
-        "size_min": 0.3,
-        "sync": false
-      }
-    },
-    "line_linked": {
-      "enable": true,
-      "distance": 120,
-      "color": "#aaaaaa",  /* Light grey connection lines */
-      "opacity": 0.3,
-      "width": 1
-    },
-    "move": {
-      "enable": true,
-      "speed": 0.8,
-      "direction": "none",
-      "random": true,
-      "straight": false,
-      "out_mode": "out",
-      "bounce": false
-    }
-  },
-  "interactivity": {
-    "detect_on": "canvas",
-    "events": {
-      "onhover": {
-        "enable": true,
-        "mode": "grab"
+    "interactivity": {
+      "detect_on": "canvas",
+      "events": {
+        "onhover": {
+          "enable": true,
+          "mode": "grab"
+        },
+        "onclick": {
+          "enable": true,
+          "mode": "push"
+        },
+        "resize": true
       },
-      "onclick": {
-        "enable": true,
-        "mode": "push"
+      "modes": {
+        "grab": {
+          "distance": 140,
+          "line_linked": {
+            "opacity": 1
+          }
+        },
+        "bubble": {
+          "distance": 400,
+          "size": 40,
+          "duration": 2,
+          "opacity": 8,
+          "speed": 3
+        },
+        "repulse": {
+          "distance": 200,
+          "duration": 0.4
+        },
+        "push": {
+          "particles_nb": 4
+        },
+        "remove": {
+          "particles_nb": 2
+        }
       }
-    }
-  }
+    },
+    "retina_detect": true
+  });
 });
 </script>
     <script>
@@ -103,26 +139,21 @@ particlesJS('particles-js', {
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rubik:wght@400;700&display=swap');
         
-       :root {
-    --primary: #cccccc;        /* Light grey for accents */
-    --secondary: #888888;      /* Medium grey */
-    --dark: #000000;           /* Pure black */
-    --light: #f0f0f0;          /* Off-white */
-    --success: #44cc44;        /* Keep green for success messages */
-    --error: #cc4444;          /* Keep red for errors */
-}
-
-/* Update tab hover effects */
-.tab:hover, .tab.active {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: var(--primary);
-}
-
-/* Update message bubbles */
-.message {
-    background: rgba(50, 50, 50, 0.3);
-    border-left: 3px solid var(--primary);
-}
+        :root {
+            --primary: #00a8ff;
+            --secondary: #ff2d75;
+            --dark: #0d1b2a;
+            --light: #e0e1dd;
+            --success: #4CAF50;
+            --error: #f44336;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rubik', sans-serif;
+        }
         
         body {
             background: var(--dark);
@@ -131,24 +162,26 @@ particlesJS('particles-js', {
             display: flex;
             flex-direction: column;
         }
-   .bg-animation {
+        
+       .bg-animation {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg,
-        #000000 0%,     /* Pure black */
-        #111111 25%,    /* Dark grey */
-        #1a1a1a 50%,    /* Medium grey */
-        #222222 75%,    /* Light grey */
-        #1a1a1a 100%);
+    background: linear-gradient(135deg, 
+        #0f0c29 0%, 
+        #1a1a3a 25%, 
+        #24243e 50%, 
+        #302b63 75%, 
+        #24243e 100%);
     background-size: 400% 400%;
-    animation: spaceFlow 30s ease infinite;
-    z-index: -2;
+    animation: spaceGradient 30s ease infinite; /* Slower animation */
+    z-index: -2; /* Behind particles */
+    opacity: 0.9; /* Slightly transparent */
 }
 
-@keyframes spaceFlow {
+@keyframes spaceGradient {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
@@ -349,80 +382,31 @@ particlesJS('particles-js', {
             display: block;
         }
         
-
-        
-.title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    color: white; /* Solid white text */
-    text-shadow: 
-        0 0 5px #fff, /* Inner white glow */
-        0 0 10px #fff, /* Middle glow */
-        0 0 20px rgba(255, 255, 255, 0.5), /* Outer glow */
-        0 0 30px rgba(255, 255, 255, 0.3); /* Faint outermost glow */
-    animation: pulseGlow 2s ease-in-out infinite alternate;
-    margin-bottom: 1rem;
-}
-
-@keyframes pulseGlow {
-    from {
-        text-shadow: 
-            0 0 5px #fff,
-            0 0 10px #fff,
-            0 0 20px rgba(255, 255, 255, 0.5),
-            0 0 30px rgba(255, 255, 255, 0.3);
-    }
-    to {
-        text-shadow: 
-            0 0 10px #fff,
-            0 0 20px #fff,
-            0 0 30px rgba(255, 255, 255, 0.7),
-            0 0 40px rgba(255, 255, 255, 0.5);
-    }
-}
-
-@keyframes flickerGlow {
-    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-        text-shadow:
-            0 0 5px #fff,
-            0 0 10px #fff,
-            0 0 20px rgba(255, 255, 255, 0.5),
-            0 0 30px rgba(255, 255, 255, 0.3);
-    }
-    20%, 24%, 55% {
-        text-shadow:
-            0 0 2px #fff,
-            0 0 5px #fff,
-            0 0 10px rgba(255, 255, 255, 0.3),
-            0 0 15px rgba(255, 255, 255, 0.1);
-    }
-}
-
-/* Then change the animation property in .title to: */
-animation: flickerGlow 3s ease-in-out infinite;
+        /* Header Styles */
         .header {
-    position: relative;
-    text-align: center;
-    padding: 2rem 0;
-}
-
-.header::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%;
-    height: 100%;
-    background: radial-gradient(
-        ellipse at center,
-        rgba(255, 255, 255, 0.05) 0%,
-        rgba(255, 255, 255, 0.01) 50%,
-        transparent 70%
-    );
-    z-index: -1;
-    pointer-events: none;
-}
+            text-align: center;
+            padding: 2rem 0;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px rgba(0, 168, 255, 0.5);
+            animation: pulse 2s infinite alternate;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+        
         /* Tabs Navigation */
         .tabs {
             display: flex;
@@ -442,7 +426,13 @@ animation: flickerGlow 3s ease-in-out infinite;
             font-weight: bold;
             border: 2px solid transparent;
         }
-       
+        
+        .tab:hover, .tab.active {
+            background: rgba(0, 168, 255, 0.2);
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 168, 255, 0.2);
+        }
 
         /* AI Container Styles */
         .ai-container {
@@ -624,6 +614,13 @@ animation: flickerGlow 3s ease-in-out infinite;
             background: rgba(13, 27, 42, 0.5);
         }
 
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.8rem;
+            background: rgba(0, 168, 255, 0.1);
+            border-radius: 10px;
+            border-left: 3px solid var(--primary);
+        }
 
         .your-message {
             background: rgba(0, 168, 255, 0.2);
