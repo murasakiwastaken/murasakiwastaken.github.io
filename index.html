@@ -1294,32 +1294,6 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 
-    <!-- Feedback Button and Modal -->
-    <div class="feedback-btn" id="feedback-btn">
-        <span>Feedback</span>
-        <i class="feedback-icon">💬</i>
-    </div>
-
-    <div class="feedback-modal" id="feedback-modal">
-        <div class="feedback-modal-content">
-            <div class="feedback-header">
-                <h3>Feature Requests & Feedback</h3>
-                <button class="close-feedback">&times;</button>
-            </div>
-            <div class="feedback-messages" id="feedback-messages"></div>
-            <div class="feedback-input-area">
-                <textarea id="feedback-input" placeholder="What feature would you like to see?"></textarea>
-                <div class="feedback-actions">
-                    <label for="media-upload" class="media-upload-btn">
-                        <input type="file" id="media-upload" accept="image/*,video/*" style="display: none;">
-                        📎 Attach
-                    </label>
-                    <button id="send-feedback">Send</button>
-                </div>
-                <div id="media-preview" class="media-preview"></div>
-            </div>
-        </div>
-    </div>
 
     <script>
         // Initialize Firebase
@@ -1989,5 +1963,31 @@ auth.onAuthStateChanged((user) => {
     }
 });
     </script>
+        <!-- Move these OUTSIDE the protected-content div (before the closing </body> is best) -->
+<div class="feedback-btn" id="feedback-btn">
+    <span>Feedback</span>
+    <i class="feedback-icon">💬</i>
+</div>
+
+<div class="feedback-modal" id="feedback-modal">
+    <div class="feedback-modal-content">
+        <div class="feedback-header">
+            <h3>Community Feedback</h3>
+            <button class="close-feedback">&times;</button>
+        </div>
+        <div class="feedback-messages" id="feedback-messages"></div>
+        <div class="feedback-input-area">
+            <textarea id="feedback-input" placeholder="Share your feedback..."></textarea>
+            <div class="feedback-actions">
+                <label for="media-upload" class="media-upload-btn">
+                    <input type="file" id="media-upload" accept="image/*,video/*" style="display: none;">
+                    📎 Attach
+                </label>
+                <button id="send-feedback">Send</button>
+            </div>
+            <div id="media-preview" class="media-preview"></div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
