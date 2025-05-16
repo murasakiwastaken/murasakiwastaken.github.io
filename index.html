@@ -1054,7 +1054,7 @@
                     <p>Ask me anything about our services or get help!</p>
                 </div>
                 <div class="ai-conversation" id="ai-messages"></div>
-             <div class="ai-input-area">
+         <div class="ai-input-area">
     <input type="text" class="ai-input" id="ai-input" placeholder="Type your question...">
     <label for="ai-media-upload" class="media-upload-btn" style="margin-right: 1rem;">
         <input type="file" id="ai-media-upload" accept="image/*,video/*,audio/*,.pdf,.txt,.doc,.docx" style="display: none;">
@@ -1453,7 +1453,7 @@
         });
 
 // ======================
-// ENHANCED AI ASSISTANT SYSTEM WITH FILE UPLOADS
+// FIXED AI ASSISTANT SYSTEM WITH FILE UPLOADS
 // ======================
 const aiMessages = document.getElementById('ai-messages');
 const aiInput = document.getElementById('ai-input');
@@ -1462,75 +1462,43 @@ const aiMediaUpload = document.getElementById('ai-media-upload');
 const aiMediaPreview = document.getElementById('ai-media-preview');
 
 let aiSelectedFile = null;
+let currentMediaUrl = null; // Track the current media URL for cleanup
 
 // Handle media upload for AI
 aiMediaUpload.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
+        // Clean up previous file if exists
+        if (currentMediaUrl) {
+            URL.revokeObjectURL(currentMediaUrl);
+            currentMediaUrl = null;
+        }
+        
         aiSelectedFile = file;
+        currentMediaUrl = URL.createObjectURL(file);
         
         // Show preview
         aiMediaPreview.innerHTML = '';
         aiMediaPreview.style.display = 'block';
         
         if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                aiMediaPreview.appendChild(img);
-                
-                // Add remove button
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'remove-media';
-                removeBtn.innerHTML = '×';
-                removeBtn.addEventListener('click', () => {
-                    aiSelectedFile = null;
-                    aiMediaUpload.value = '';
-                    aiMediaPreview.style.display = 'none';
-                });
-                aiMediaPreview.appendChild(removeBtn);
-            };
-            reader.readAsDataURL(file);
+            const img = document.createElement('img');
+            img.src = currentMediaUrl;
+            aiMediaPreview.appendChild(img);
         } 
         else if (file.type.startsWith('video/')) {
             const video = document.createElement('video');
             video.controls = true;
-            video.src = URL.createObjectURL(file);
+            video.src = currentMediaUrl;
             aiMediaPreview.appendChild(video);
-            
-            // Add remove button
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-media';
-            removeBtn.innerHTML = '×';
-            removeBtn.addEventListener('click', () => {
-                aiSelectedFile = null;
-                aiMediaUpload.value = '';
-                aiMediaPreview.style.display = 'none';
-                URL.revokeObjectURL(video.src);
-            });
-            aiMediaPreview.appendChild(removeBtn);
         }
         else if (file.type.startsWith('audio/')) {
             const audio = document.createElement('audio');
             audio.controls = true;
-            audio.src = URL.createObjectURL(file);
+            audio.src = currentMediaUrl;
             aiMediaPreview.appendChild(audio);
-            
-            // Add remove button
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-media';
-            removeBtn.innerHTML = '×';
-            removeBtn.addEventListener('click', () => {
-                aiSelectedFile = null;
-                aiMediaUpload.value = '';
-                aiMediaPreview.style.display = 'none';
-                URL.revokeObjectURL(audio.src);
-            });
-            aiMediaPreview.appendChild(removeBtn);
         }
         else {
-            // For documents
             const docInfo = document.createElement('div');
             docInfo.innerHTML = `
                 <p>File: ${file.name}</p>
@@ -1538,26 +1506,36 @@ aiMediaUpload.addEventListener('change', (e) => {
                 <p>Size: ${(file.size / 1024).toFixed(2)} KB</p>
             `;
             aiMediaPreview.appendChild(docInfo);
-            
-            // Add remove button
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-media';
-            removeBtn.innerHTML = '×';
-            removeBtn.addEventListener('click', () => {
-                aiSelectedFile = null;
-                aiMediaUpload.value = '';
-                aiMediaPreview.style.display = 'none';
-            });
-            aiMediaPreview.appendChild(removeBtn);
         }
+        
+        // Add remove button
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-media';
+        removeBtn.innerHTML = '×';
+        removeBtn.addEventListener('click', () => {
+            cleanupMedia();
+        });
+        aiMediaPreview.appendChild(removeBtn);
     }
 });
+
+// Clean up media resources
+function cleanupMedia() {
+    if (currentMediaUrl) {
+        URL.revokeObjectURL(currentMediaUrl);
+        currentMediaUrl = null;
+    }
+    aiSelectedFile = null;
+    aiMediaUpload.value = '';
+    aiMediaPreview.style.display = 'none';
+    aiMediaPreview.innerHTML = '';
+}
 
 // Enhanced AI function with file support
 async function getAIResponse(question, fileData = null) {
     try {
         const formData = new FormData();
-        formData.append('question', question);
+        formData.append('question', question || "Analyze this file");
         
         if (fileData) {
             formData.append('file', fileData.file);
@@ -1570,13 +1548,15 @@ async function getAIResponse(question, fileData = null) {
             body: formData
         });
         
-        if (!response.ok) throw new Error('API request failed');
+        if (!response.ok) {
+            throw new Error(`API request failed with status ${response.status}`);
+        }
         
         const data = await response.json();
         return data.response || "I couldn't process your request.";
     } catch (error) {
         console.error('AI Error:', error);
-        return "Sorry, I'm having trouble connecting to the AI service. Please try again later.";
+        return `Sorry, I encountered an error: ${error.message}`;
     }
 }
 
@@ -1585,7 +1565,7 @@ function addAIMessage(text, isUser = false, mediaUrl = null, mediaType = null) {
     messageDiv.className = `ai-message ${isUser ? 'ai-user-message' : ''}`;
     
     let mediaHtml = '';
-    if (mediaUrl) {
+    if (mediaUrl && mediaType) {
         if (mediaType.startsWith('image/')) {
             mediaHtml = `<img src="${mediaUrl}" class="media-attachment" style="max-width: 100%; max-height: 200px; border-radius: 5px; margin-top: 10px;">`;
         } 
@@ -1603,7 +1583,7 @@ function addAIMessage(text, isUser = false, mediaUrl = null, mediaType = null) {
     }
     
     messageDiv.innerHTML = `
-        <div class="message-text">${text}</div>
+        <div class="message-text">${text || (mediaUrl ? "Sent a file" : "")}</div>
         ${mediaHtml}
     `;
     
@@ -1616,14 +1596,9 @@ async function handleAIInput() {
     if (!question && !aiSelectedFile) return;
     
     // Display user message with optional media
-    let mediaUrl = null;
-    if (aiSelectedFile) {
-        mediaUrl = URL.createObjectURL(aiSelectedFile);
-        addAIMessage(question || "Sent a file", true, mediaUrl, aiSelectedFile.type);
-    } else {
-        addAIMessage(question, true);
-    }
+    addAIMessage(question, true, currentMediaUrl, aiSelectedFile?.type);
     
+    // Clear input and show typing indicator
     aiInput.value = '';
     const typingDiv = showTypingIndicator();
     
@@ -1642,15 +1617,10 @@ async function handleAIInput() {
         addAIMessage(response);
     } catch (error) {
         removeTypingIndicator();
-        addAIMessage("Sorry, I encountered an error. Please try again.");
+        addAIMessage(`Error: ${error.message}`);
     } finally {
-        // Clean up
-        aiSelectedFile = null;
-        aiMediaUpload.value = '';
-        aiMediaPreview.style.display = 'none';
-        if (mediaUrl) {
-            URL.revokeObjectURL(mediaUrl);
-        }
+        // Clean up media resources
+        cleanupMedia();
     }
 }
 
@@ -1660,12 +1630,12 @@ aiInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleAIInput();
 });
 
-        // Initial welcome message
-        window.addEventListener('load', () => {
-            if (document.querySelector('.tab[data-category="ai-assistant"]').classList.contains('active')) {
-                addAIMessage("Hello! I'm murasaki's AI. How can I help you today?");
-            }
-        });
+// Initial welcome message
+window.addEventListener('load', () => {
+    if (document.querySelector('.tab[data-category="ai-assistant"]').classList.contains('active')) {
+        addAIMessage("Hello! I'm murasaki's AI. You can send me text or files and I'll do my best to help!");
+    }
+});
 
         // ======================
         // TAB SYSTEM
