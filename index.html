@@ -78,7 +78,35 @@
             margin: 0 auto;
             padding: 20px;
         }
+/* Add to your existing styles */
+.ai-input-area {
+    position: relative;
+}
 
+.ai-media-preview {
+    margin-top: 10px;
+    padding: 0 1rem 1rem;
+    display: none;
+}
+
+.ai-media-preview img, 
+.ai-media-preview video {
+    max-width: 100%;
+    max-height: 150px;
+    border-radius: 5px;
+}
+
+.ai-media-preview .remove-media {
+    background: var(--error);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-left: 5px;
+}
         /* Message delete button styles */
         .message {
             position: relative;
@@ -1026,11 +1054,15 @@
                     <p>Ask me anything about our services or get help!</p>
                 </div>
                 <div class="ai-conversation" id="ai-messages"></div>
-                <div class="ai-input-area">
-                    <input type="text" class="ai-input" id="ai-input" placeholder="Type your question...">
-                    <button class="ai-send-btn" id="ai-send-btn">Send</button>
-                </div>
-            </div>
+             <div class="ai-input-area">
+    <input type="text" class="ai-input" id="ai-input" placeholder="Type your question...">
+    <label for="ai-media-upload" class="media-upload-btn" style="margin-right: 1rem;">
+        <input type="file" id="ai-media-upload" accept="image/*,video/*,audio/*,.pdf,.txt,.doc,.docx" style="display: none;">
+        📎 Attach
+    </label>
+    <button class="ai-send-btn" id="ai-send-btn">Send</button>
+</div>
+<div id="ai-media-preview" class="media-preview"></div>
             
             <!-- Username Modal -->
             <div class="username-modal" id="username-modal">
@@ -1420,79 +1452,213 @@
             }
         });
 
-        // ======================
-        // AI ASSISTANT SYSTEM
-        // ======================
-        const aiMessages = document.getElementById('ai-messages');
-        const aiInput = document.getElementById('ai-input');
-        const aiSendBtn = document.getElementById('ai-send-btn');
+// ======================
+// ENHANCED AI ASSISTANT SYSTEM WITH FILE UPLOADS
+// ======================
+const aiMessages = document.getElementById('ai-messages');
+const aiInput = document.getElementById('ai-input');
+const aiSendBtn = document.getElementById('ai-send-btn');
+const aiMediaUpload = document.getElementById('ai-media-upload');
+const aiMediaPreview = document.getElementById('ai-media-preview');
 
-        // AI function with Vercel API proxy
-        async function getAIResponse(question) {
-            try {
-                const response = await fetch('https://murasakiwastaken.vercel.app/api/ai-proxy', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question })
+let aiSelectedFile = null;
+
+// Handle media upload for AI
+aiMediaUpload.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        aiSelectedFile = file;
+        
+        // Show preview
+        aiMediaPreview.innerHTML = '';
+        aiMediaPreview.style.display = 'block';
+        
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                aiMediaPreview.appendChild(img);
+                
+                // Add remove button
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-media';
+                removeBtn.innerHTML = '×';
+                removeBtn.addEventListener('click', () => {
+                    aiSelectedFile = null;
+                    aiMediaUpload.value = '';
+                    aiMediaPreview.style.display = 'none';
                 });
-                
-                if (!response.ok) throw new Error('API request failed');
-                
-                const data = await response.json();
-                return data.response || "I couldn't process your request.";
-            } catch (error) {
-                console.error('AI Error:', error);
-                return "Sorry, I'm having trouble connecting to the AI service. Please try again later.";
-            }
-        }
-
-        function addAIMessage(text, isUser = false) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `ai-message ${isUser ? 'ai-user-message' : ''}`;
-            messageDiv.textContent = text;
-            aiMessages.appendChild(messageDiv);
-            aiMessages.scrollTop = aiMessages.scrollHeight;
-        }
-
-        function showTypingIndicator() {
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'ai-message ai-typing';
-            typingDiv.textContent = 'AI is thinking...';
-            typingDiv.id = 'typing-indicator';
-            aiMessages.appendChild(typingDiv);
-            aiMessages.scrollTop = aiMessages.scrollHeight;
-            return typingDiv;
-        }
-
-        function removeTypingIndicator() {
-            const typingDiv = document.getElementById('typing-indicator');
-            if (typingDiv) typingDiv.remove();
-        }
-
-        async function handleAIInput() {
-            const question = aiInput.value.trim();
-            if (!question) return;
+                aiMediaPreview.appendChild(removeBtn);
+            };
+            reader.readAsDataURL(file);
+        } 
+        else if (file.type.startsWith('video/')) {
+            const video = document.createElement('video');
+            video.controls = true;
+            video.src = URL.createObjectURL(file);
+            aiMediaPreview.appendChild(video);
             
-            addAIMessage(question, true);
-            aiInput.value = '';
+            // Add remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-media';
+            removeBtn.innerHTML = '×';
+            removeBtn.addEventListener('click', () => {
+                aiSelectedFile = null;
+                aiMediaUpload.value = '';
+                aiMediaPreview.style.display = 'none';
+                URL.revokeObjectURL(video.src);
+            });
+            aiMediaPreview.appendChild(removeBtn);
+        }
+        else if (file.type.startsWith('audio/')) {
+            const audio = document.createElement('audio');
+            audio.controls = true;
+            audio.src = URL.createObjectURL(file);
+            aiMediaPreview.appendChild(audio);
             
-            const typingDiv = showTypingIndicator();
+            // Add remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-media';
+            removeBtn.innerHTML = '×';
+            removeBtn.addEventListener('click', () => {
+                aiSelectedFile = null;
+                aiMediaUpload.value = '';
+                aiMediaPreview.style.display = 'none';
+                URL.revokeObjectURL(audio.src);
+            });
+            aiMediaPreview.appendChild(removeBtn);
+        }
+        else {
+            // For documents
+            const docInfo = document.createElement('div');
+            docInfo.innerHTML = `
+                <p>File: ${file.name}</p>
+                <p>Type: ${file.type || 'document'}</p>
+                <p>Size: ${(file.size / 1024).toFixed(2)} KB</p>
+            `;
+            aiMediaPreview.appendChild(docInfo);
             
-            try {
-                const response = await getAIResponse(question);
-                removeTypingIndicator();
-                addAIMessage(response);
-            } catch (error) {
-                removeTypingIndicator();
-                addAIMessage("Sorry, I encountered an error. Please try again.");
-            }
+            // Add remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-media';
+            removeBtn.innerHTML = '×';
+            removeBtn.addEventListener('click', () => {
+                aiSelectedFile = null;
+                aiMediaUpload.value = '';
+                aiMediaPreview.style.display = 'none';
+            });
+            aiMediaPreview.appendChild(removeBtn);
+        }
+    }
+});
+
+// Enhanced AI function with file support
+async function getAIResponse(question, fileData = null) {
+    try {
+        const formData = new FormData();
+        formData.append('question', question);
+        
+        if (fileData) {
+            formData.append('file', fileData.file);
+            formData.append('fileType', fileData.type);
+            formData.append('fileName', fileData.name);
         }
 
-        // Event listeners
-        aiSendBtn.addEventListener('click', handleAIInput);
-        aiInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleAIInput();
+        const response = await fetch('https://murasakiwastaken.vercel.app/api/ai-proxy', {
+            method: 'POST',
+            body: formData
         });
+        
+        if (!response.ok) throw new Error('API request failed');
+        
+        const data = await response.json();
+        return data.response || "I couldn't process your request.";
+    } catch (error) {
+        console.error('AI Error:', error);
+        return "Sorry, I'm having trouble connecting to the AI service. Please try again later.";
+    }
+}
+
+function addAIMessage(text, isUser = false, mediaUrl = null, mediaType = null) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `ai-message ${isUser ? 'ai-user-message' : ''}`;
+    
+    let mediaHtml = '';
+    if (mediaUrl) {
+        if (mediaType.startsWith('image/')) {
+            mediaHtml = `<img src="${mediaUrl}" class="media-attachment" style="max-width: 100%; max-height: 200px; border-radius: 5px; margin-top: 10px;">`;
+        } 
+        else if (mediaType.startsWith('video/')) {
+            mediaHtml = `<video src="${mediaUrl}" class="media-attachment" controls style="max-width: 100%; max-height: 200px; border-radius: 5px; margin-top: 10px;"></video>`;
+        }
+        else if (mediaType.startsWith('audio/')) {
+            mediaHtml = `<audio src="${mediaUrl}" class="media-attachment" controls style="max-width: 100%; margin-top: 10px;"></audio>`;
+        }
+        else {
+            mediaHtml = `<div class="media-attachment" style="margin-top: 10px;">
+                <a href="${mediaUrl}" target="_blank" style="color: var(--primary);">Download attached file</a>
+            </div>`;
+        }
+    }
+    
+    messageDiv.innerHTML = `
+        <div class="message-text">${text}</div>
+        ${mediaHtml}
+    `;
+    
+    aiMessages.appendChild(messageDiv);
+    aiMessages.scrollTop = aiMessages.scrollHeight;
+}
+
+async function handleAIInput() {
+    const question = aiInput.value.trim();
+    if (!question && !aiSelectedFile) return;
+    
+    // Display user message with optional media
+    let mediaUrl = null;
+    if (aiSelectedFile) {
+        mediaUrl = URL.createObjectURL(aiSelectedFile);
+        addAIMessage(question || "Sent a file", true, mediaUrl, aiSelectedFile.type);
+    } else {
+        addAIMessage(question, true);
+    }
+    
+    aiInput.value = '';
+    const typingDiv = showTypingIndicator();
+    
+    try {
+        let fileData = null;
+        if (aiSelectedFile) {
+            fileData = {
+                file: aiSelectedFile,
+                type: aiSelectedFile.type,
+                name: aiSelectedFile.name
+            };
+        }
+        
+        const response = await getAIResponse(question, fileData);
+        removeTypingIndicator();
+        addAIMessage(response);
+    } catch (error) {
+        removeTypingIndicator();
+        addAIMessage("Sorry, I encountered an error. Please try again.");
+    } finally {
+        // Clean up
+        aiSelectedFile = null;
+        aiMediaUpload.value = '';
+        aiMediaPreview.style.display = 'none';
+        if (mediaUrl) {
+            URL.revokeObjectURL(mediaUrl);
+        }
+    }
+}
+
+// Event listeners
+aiSendBtn.addEventListener('click', handleAIInput);
+aiInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleAIInput();
+});
 
         // Initial welcome message
         window.addEventListener('load', () => {
