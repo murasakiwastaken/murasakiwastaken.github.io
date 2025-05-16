@@ -1430,7 +1430,7 @@
         // AI function with Vercel API proxy
         async function getAIResponse(question) {
             try {
-                const response = await fetch('https://murasakiwastaken-github-io.vercel.app/api/ai-proxy', {
+                const response = await fetch('https://murasakiwastaken.vercel.app/api/ai-proxy', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ question })
