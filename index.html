@@ -11,6 +11,119 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Particles.js library -->
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
+<script>
+// Initialize particles when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  particlesJS('particles-js', {
+    "particles": {
+      "number": {
+        "value": 80,
+        "density": {
+          "enable": true,
+          "value_area": 800
+        }
+      },
+      "color": {
+        "value": "#ffffff"
+      },
+      "shape": {
+        "type": "circle",
+        "stroke": {
+          "width": 0,
+          "color": "#000000"
+        },
+        "polygon": {
+          "nb_sides": 5
+        }
+      },
+      "opacity": {
+        "value": 0.5,
+        "random": true,
+        "anim": {
+          "enable": true,
+          "speed": 1,
+          "opacity_min": 0.1,
+          "sync": false
+        }
+      },
+      "size": {
+        "value": 3,
+        "random": true,
+        "anim": {
+          "enable": true,
+          "speed": 2,
+          "size_min": 0.1,
+          "sync": false
+        }
+      },
+      "line_linked": {
+        "enable": true,
+        "distance": 150,
+        "color": "#4d8bf0",
+        "opacity": 0.4,
+        "width": 1
+      },
+      "move": {
+        "enable": true,
+        "speed": 1,
+        "direction": "none",
+        "random": true,
+        "straight": false,
+        "out_mode": "out",
+        "bounce": false,
+        "attract": {
+          "enable": true,
+          "rotateX": 600,
+          "rotateY": 1200
+        }
+      }
+    },
+    "interactivity": {
+      "detect_on": "canvas",
+      "events": {
+        "onhover": {
+          "enable": true,
+          "mode": "grab"
+        },
+        "onclick": {
+          "enable": true,
+          "mode": "push"
+        },
+        "resize": true
+      },
+      "modes": {
+        "grab": {
+          "distance": 140,
+          "line_linked": {
+            "opacity": 1
+          }
+        },
+        "bubble": {
+          "distance": 400,
+          "size": 40,
+          "duration": 2,
+          "opacity": 8,
+          "speed": 3
+        },
+        "repulse": {
+          "distance": 200,
+          "duration": 0.4
+        },
+        "push": {
+          "particles_nb": 4
+        },
+        "remove": {
+          "particles_nb": 2
+        }
+      }
+    },
+    "retina_detect": true
+  });
+});
+</script>
     <script>
       const firebaseConfig = {
         apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
@@ -50,23 +163,29 @@
             flex-direction: column;
         }
         
-        .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(-45deg, #0d1b2a, #1b263b, #415a77, #778da9);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            z-index: -1;
-        }
-        
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+       .bg-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, 
+        #0f0c29 0%, 
+        #1a1a3a 25%, 
+        #24243e 50%, 
+        #302b63 75%, 
+        #24243e 100%);
+    background-size: 400% 400%;
+    animation: spaceGradient 30s ease infinite; /* Slower animation */
+    z-index: -2; /* Behind particles */
+    opacity: 0.9; /* Slightly transparent */
+}
+
+@keyframes spaceGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
         
         /* Main Layout Structure */
         .main-container {
@@ -217,7 +336,22 @@
         .hidden {
             display: none;
         }
+/* Style for the attach button */
+#ai-attach-btn {
+    padding: 0.8rem 1rem;
+    background: rgba(0, 168, 255, 0.1);
+    border-radius: 50px;
+    cursor: pointer;
+    color: var(--primary);
+    border: 1px dashed var(--primary);
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
 
+#ai-attach-btn:hover {
+    background: rgba(0, 168, 255, 0.2);
+    transform: scale(1.05);
+}
         /* AI Typing Indicator */
         .ai-typing {
             color: rgba(224, 225, 221, 0.7);
@@ -842,7 +976,23 @@
             cursor: pointer;
             margin-left: 5px;
         }
+/* Particles container */
+.particles-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1; /* Behind content but above bg-animation */
+  pointer-events: none; /* Allow clicks to pass through */
+}
 
+/* Particle styles */
+.particles-js-canvas-el {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
         /* Responsive Adjustments */
         @media (max-width: 768px) {
             .title {
@@ -893,7 +1043,7 @@
 </head>
 <body>
     <div class="bg-animation"></div>
-    
+    <div class="particles-container" id="particles-js"></div>
     <div class="main-container">
         <!-- Auth Container (always visible) -->
         <div class="auth-container">
@@ -1054,16 +1204,14 @@
                     <p>Ask me anything about our services or get help!</p>
                 </div>
                 <div class="ai-conversation" id="ai-messages"></div>
-         <div class="ai-input-area">
+  <div class="ai-input-area">
     <input type="text" class="ai-input" id="ai-input" placeholder="Type your question...">
-    <label for="ai-media-upload" class="media-upload-btn" style="margin-right: 1rem;">
-        <input type="file" id="ai-media-upload" accept="image/*,video/*,audio/*,.pdf,.txt,.doc,.docx" style="display: none;">
-        📎 Attach
-    </label>
+    <button id="ai-attach-btn" class="media-upload-btn" style="margin-right: 1rem;">
+        📎 Attach (redirects to different website)
+    </button>
     <button class="ai-send-btn" id="ai-send-btn">Send</button>
 </div>
 <div id="ai-media-preview" class="media-preview"></div>
-            
             <!-- Username Modal -->
             <div class="username-modal" id="username-modal">
                 <div class="username-modal-content">
@@ -1453,98 +1601,34 @@
         });
 
 // ======================
-// DEBUGGED AI ASSISTANT SYSTEM
+// ======================
+// AI ASSISTANT WITH IMAGE ANALYSIS REDIRECT
 // ======================
 const aiMessages = document.getElementById('ai-messages');
 const aiInput = document.getElementById('ai-input');
 const aiSendBtn = document.getElementById('ai-send-btn');
-const aiMediaUpload = document.getElementById('ai-media-upload');
+const aiAttachBtn = document.getElementById('ai-attach-btn');
 const aiMediaPreview = document.getElementById('ai-media-preview');
 
-let aiSelectedFile = null;
-let currentMediaUrl = null;
-
-// Handle media upload
-aiMediaUpload.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        // Clean up previous file if exists
-        cleanupMedia();
-        
-        aiSelectedFile = file;
-        currentMediaUrl = URL.createObjectURL(file);
-        
-        // Show preview
-        aiMediaPreview.innerHTML = '';
-        aiMediaPreview.style.display = 'block';
-        
-        if (file.type.startsWith('image/')) {
-            const img = document.createElement('img');
-            img.src = currentMediaUrl;
-            aiMediaPreview.appendChild(img);
-        } 
-        else if (file.type.startsWith('video/')) {
-            const video = document.createElement('video');
-            video.controls = true;
-            video.src = currentMediaUrl;
-            aiMediaPreview.appendChild(video);
-        }
-        else {
-            const docInfo = document.createElement('div');
-            docInfo.innerHTML = `
-                <p>File: ${file.name}</p>
-                <p>Type: ${file.type || 'document'}</p>
-                <p>Size: ${(file.size / 1024).toFixed(2)} KB</p>
-            `;
-            aiMediaPreview.appendChild(docInfo);
-        }
-        
-        // Add remove button
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'remove-media';
-        removeBtn.innerHTML = '×';
-        removeBtn.addEventListener('click', cleanupMedia);
-        aiMediaPreview.appendChild(removeBtn);
+// Redirect to image analysis service
+aiAttachBtn.addEventListener('click', () => {
+    // Open in new tab
+ /*   window.open("https://aiassistantbot.pages.dev", "_blank"); 
+*/
+    
+    // Or you can use this alternative that shows a message first:
+    
+    if (confirm("Image analysis requires visiting an external site. Proceed?")) {
+        window.location.href = "https://aiassistantbot.pages.dev";
     }
+   
 });
 
-// Clean up media resources
-function cleanupMedia() {
-    if (currentMediaUrl) {
-        URL.revokeObjectURL(currentMediaUrl);
-        currentMediaUrl = null;
-    }
-    aiSelectedFile = null;
-    aiMediaUpload.value = '';
-    aiMediaPreview.style.display = 'none';
-    aiMediaPreview.innerHTML = '';
-}
-
 // Display message in chat
-function addAIMessage(text, isUser = false, mediaUrl = null, mediaType = null) {
+function addAIMessage(text, isUser = false) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `ai-message ${isUser ? 'ai-user-message' : ''}`;
-    
-    let mediaHtml = '';
-    if (mediaUrl && mediaType) {
-        if (mediaType.startsWith('image/')) {
-            mediaHtml = `<img src="${mediaUrl}" class="media-attachment">`;
-        } 
-        else if (mediaType.startsWith('video/')) {
-            mediaHtml = `<video src="${mediaUrl}" class="media-attachment" controls></video>`;
-        }
-        else {
-            mediaHtml = `<div class="media-attachment">
-                <a href="${mediaUrl}" target="_blank">Download attached file</a>
-            </div>`;
-        }
-    }
-    
-    messageDiv.innerHTML = `
-        <div class="message-text">${text || (mediaUrl ? "Sent a file" : "")}</div>
-        ${mediaHtml}
-    `;
-    
+    messageDiv.innerHTML = `<div class="message-text">${text}</div>`;
     aiMessages.appendChild(messageDiv);
     aiMessages.scrollTop = aiMessages.scrollHeight;
 }
@@ -1592,26 +1676,22 @@ async function getAIResponse(question) {
 // Handle sending message
 async function handleAIInput() {
     const question = aiInput.value.trim();
-    if (!question && !aiSelectedFile) return;
+    if (!question) return;
     
     // Display user message
-    addAIMessage(question, true, currentMediaUrl, aiSelectedFile?.type);
+    addAIMessage(question, true);
     
     // Clear input and show typing indicator
     aiInput.value = '';
     const typingDiv = showTypingIndicator();
     
     try {
-        // Get AI response (even for files - backend will handle it)
-        const response = await getAIResponse(question || "I sent you a file");
+        const response = await getAIResponse(question);
         removeTypingIndicator();
         addAIMessage(response);
     } catch (error) {
         removeTypingIndicator();
         addAIMessage("Sorry, I couldn't process your request. Please try again.");
-    } finally {
-        // Clean up media resources
-        cleanupMedia();
     }
 }
 
@@ -1625,6 +1705,7 @@ aiInput.addEventListener('keypress', (e) => {
 window.addEventListener('load', () => {
     if (document.querySelector('.tab[data-category="ai-assistant"]').classList.contains('active')) {
         addAIMessage("Hello! I'm murasaki's AI assistant. How can I help you today?");
+        addAIMessage("For image analysis, this AI is currently unsupported, please use the attach button below to redirect yourself to another website. Thank you for your understanding.", false);
     }
 });
         // ======================
