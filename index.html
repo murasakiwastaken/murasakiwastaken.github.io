@@ -231,6 +231,63 @@ document.addEventListener('DOMContentLoaded', function() {
     cursor: pointer;
     margin-left: 5px;
 }
+
+/* Make feedback messages look like chat messages */
+.feedback-message {
+    margin-bottom: 1rem;
+    padding: 0.8rem;
+    background: rgba(0, 168, 255, 0.1);
+    border-radius: 10px;
+    border-left: 3px solid var(--primary);
+    position: relative;
+}
+
+.feedback-message.user {
+    background: rgba(0, 168, 255, 0.2);
+    border-left: 3px solid var(--secondary);
+}
+
+.feedback-message .message-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.feedback-message .message-username {
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.feedback-message.user .message-username {
+    color: var(--secondary);
+}
+
+.feedback-message .message-time {
+    font-size: 0.7rem;
+    color: rgba(224, 225, 221, 0.5);
+}
+
+.feedback-message .delete-message {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    background: var(--error);
+    color: white;
+    border: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feedback-message:hover .delete-message {
+    opacity: 1;
+}
         /* Message delete button styles */
         .message {
             position: relative;
@@ -1783,188 +1840,154 @@ window.addEventListener('load', () => {
             }
         });
 
-        // ======================
-        // FEEDBACK SYSTEM
-        // ======================
-        const feedbackBtn = document.getElementById('feedback-btn');
-        const feedbackModal = document.getElementById('feedback-modal');
-        const closeFeedback = document.querySelector('.close-feedback');
-        const feedbackMessages = document.getElementById('feedback-messages');
-        const feedbackInput = document.getElementById('feedback-input');
-        const sendFeedbackBtn = document.getElementById('send-feedback');
-        const mediaUpload = document.getElementById('media-upload');
-        const mediaPreview = document.getElementById('media-preview');
+     // ======================
+// FEEDBACK SYSTEM (Now works like chatroom)
+// ======================
 
-        // Firebase reference for feedback
-        const feedbackRef = database.ref('feedback');
+// Firebase reference - use same structure as chat
+const feedbackRef = database.ref('feedback');
+let feedbackUsername = localStorage.getItem('feedbackUsername') || '';
 
-        let selectedFile = null;
+// Check username on load (like chatroom)
+function checkFeedbackUsername() {
+    if (auth.currentUser && !feedbackUsername) {
+        // Use the auth username if logged in
+        feedbackUsername = auth.currentUser.email.split('@')[0];
+        localStorage.setItem('feedbackUsername', feedbackUsername);
+    }
+    loadFeedbackMessages();
+}
 
-        // Toggle feedback modal
-        feedbackBtn.addEventListener('click', () => {
-            feedbackModal.classList.toggle('active');
-            if (feedbackModal.classList.contains('active')) {
-                loadFeedbackMessages();
-            }
-        });
-
-        closeFeedback.addEventListener('click', () => {
-            feedbackModal.classList.remove('active');
-        });
-
-        // Handle media upload
-        mediaUpload.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                selectedFile = file;
-                
-                // Show preview
-                mediaPreview.innerHTML = '';
-                mediaPreview.style.display = 'block';
-                
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        mediaPreview.appendChild(img);
-                        
-                        // Add remove button
-                        const removeBtn = document.createElement('button');
-                        removeBtn.className = 'remove-media';
-                        removeBtn.innerHTML = '×';
-                        removeBtn.addEventListener('click', () => {
-                            selectedFile = null;
-                            mediaUpload.value = '';
-                            mediaPreview.style.display = 'none';
-                        });
-                        mediaPreview.appendChild(removeBtn);
-                    };
-                    reader.readAsDataURL(file);
-                } else if (file.type.startsWith('video/')) {
-                    const video = document.createElement('video');
-                    video.controls = true;
-                    video.src = URL.createObjectURL(file);
-                    mediaPreview.appendChild(video);
-                    
-                    // Add remove button
-                    const removeBtn = document.createElement('button');
-                    removeBtn.className = 'remove-media';
-                    removeBtn.innerHTML = '×';
-                    removeBtn.addEventListener('click', () => {
-                        selectedFile = null;
-                        mediaUpload.value = '';
-                        mediaPreview.style.display = 'none';
-                        URL.revokeObjectURL(video.src);
-                    });
-                    mediaPreview.appendChild(removeBtn);
-                }
-            }
-        });
-
-        // Send feedback
-        sendFeedbackBtn.addEventListener('click', sendFeedback);
-        feedbackInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendFeedback();
-            }
-        });
-
-        function sendFeedback() {
-            const message = feedbackInput.value.trim();
-            if (!message && !selectedFile) return;
-            
-            const feedbackData = {
-                message,
-                userId: auth.currentUser?.uid || 'anonymous',
-                username: auth.currentUser?.email?.split('@')[0] || 'Guest',
-                timestamp: Date.now(),
-                status: 'pending'
-            };
-            
-            // Upload file if exists
-            if (selectedFile) {
-                const storageRef = storage.ref(`feedback/${Date.now()}_${selectedFile.name}`);
-                const uploadTask = storageRef.put(selectedFile);
-                
-                uploadTask.on('state_changed',
-                    null,
-                    (error) => {
-                        console.error('Upload error:', error);
-                        // Send without media if upload fails
-                        feedbackRef.push(feedbackData);
-                    },
-                    () => {
-                        // Get download URL and add to feedback
-                        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                            feedbackData.mediaUrl = downloadURL;
-                            feedbackData.mediaType = selectedFile.type.startsWith('image/') ? 'image' : 'video';
-                            feedbackRef.push(feedbackData);
-                        });
-                    }
-                );
-            } else {
-                feedbackRef.push(feedbackData);
-            }
-            
-            feedbackInput.value = '';
-            selectedFile = null;
-            mediaUpload.value = '';
-            mediaPreview.style.display = 'none';
-            
-            // Add temporary local message
-            addFeedbackMessage({
-                message,
-                username: feedbackData.username,
-                timestamp: feedbackData.timestamp,
-                mediaUrl: feedbackData.mediaUrl,
-                mediaType: feedbackData.mediaType
-            }, true);
-        }
-
-        function loadFeedbackMessages() {
-            feedbackRef.limitToLast(20).on('value', (snapshot) => {
-                feedbackMessages.innerHTML = '';
-                snapshot.forEach((childSnapshot) => {
-                    const feedback = childSnapshot.val();
-                    addFeedbackMessage(feedback, feedback.username === (auth.currentUser?.email?.split('@')[0] || 'Guest'));
-                });
-                scrollFeedbackToBottom();
+// Load all feedback messages
+function loadFeedbackMessages() {
+    feedbackRef.limitToLast(100).on('value', (snapshot) => {
+        feedbackMessages.innerHTML = '';
+        snapshot.forEach((childSnapshot) => {
+            const msg = childSnapshot.val();
+            displayFeedbackMessage({
+                ...msg,
+                key: childSnapshot.key
             });
-        }
+        });
+        scrollFeedbackToBottom();
+    });
+}
 
-        function addFeedbackMessage(feedback, isCurrentUser) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `feedback-message ${isCurrentUser ? 'user' : ''}`;
-            
-            const time = new Date(feedback.timestamp).toLocaleString();
-            
-            let mediaHtml = '';
-            if (feedback.mediaUrl) {
-                if (feedback.mediaType === 'image') {
-                    mediaHtml = `<img src="${feedback.mediaUrl}" class="media-attachment" alt="Attached image">`;
-                } else {
-                    mediaHtml = `<video src="${feedback.mediaUrl}" class="media-attachment" controls></video>`;
-                }
+// Display a feedback message (similar to chat messages)
+function displayFeedbackMessage({ username, message, timestamp, key, mediaUrl, mediaType }) {
+    const isCurrentUser = username === feedbackUsername;
+    
+    const messageEl = document.createElement('div');
+    messageEl.className = `feedback-message ${isCurrentUser ? 'user' : ''}`;
+    
+    const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    let mediaHtml = '';
+    if (mediaUrl) {
+        if (mediaType === 'image') {
+            mediaHtml = `<img src="${mediaUrl}" class="media-attachment" alt="Attached image">`;
+        } else {
+            mediaHtml = `<video src="${mediaUrl}" class="media-attachment" controls></video>`;
+        }
+    }
+    
+    let deleteBtn = '';
+    if (isCurrentUser) {
+        deleteBtn = `<button class="delete-message" data-key="${key}">×</button>`;
+    }
+    
+    messageEl.innerHTML = `
+        ${deleteBtn}
+        <div class="message-meta">
+            <span class="message-username">${username}:</span>
+            <span class="message-time">${time}</span>
+        </div>
+        ${message ? `<p class="message-text">${message}</p>` : ''}
+        ${mediaHtml}
+    `;
+    
+    feedbackMessages.appendChild(messageEl);
+    
+    // Add delete handler if current user
+    if (isCurrentUser) {
+        messageEl.querySelector('.delete-message')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const messageKey = e.target.getAttribute('data-key');
+            deleteFeedbackMessage(messageKey);
+        });
+    }
+}
+
+// Delete feedback message
+function deleteFeedbackMessage(messageKey) {
+    if (confirm('Delete this feedback?')) {
+        feedbackRef.child(messageKey).remove();
+    }
+}
+
+// Send feedback
+function sendFeedback() {
+    const message = feedbackInput.value.trim();
+    if (!message && !selectedFile) return;
+    
+    // Require login to post feedback
+    if (!auth.currentUser) {
+        alert('Please sign in to submit feedback');
+        return;
+    }
+    
+    const feedbackData = {
+        username: feedbackUsername,
+        message,
+        timestamp: Date.now()
+    };
+    
+    // Handle file upload if exists
+    if (selectedFile) {
+        const storageRef = storage.ref(`feedback/${Date.now()}_${selectedFile.name}`);
+        const uploadTask = storageRef.put(selectedFile);
+        
+        uploadTask.on('state_changed',
+            null,
+            (error) => {
+                console.error('Upload error:', error);
+                // Send without media if upload fails
+                feedbackRef.push(feedbackData);
+            },
+            () => {
+                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                    feedbackData.mediaUrl = downloadURL;
+                    feedbackData.mediaType = selectedFile.type.startsWith('image/') ? 'image' : 'video';
+                    feedbackRef.push(feedbackData);
+                });
             }
-            
-            messageDiv.innerHTML = `
-                <div class="message-meta">
-                    <span>${feedback.username}</span>
-                    <span>${time}</span>
-                </div>
-                ${feedback.message ? `<p>${feedback.message}</p>` : ''}
-                ${mediaHtml}
-            `;
-            
-            feedbackMessages.appendChild(messageDiv);
-            scrollFeedbackToBottom();
-        }
+        );
+    } else {
+        feedbackRef.push(feedbackData);
+    }
+    
+    // Clear inputs
+    feedbackInput.value = '';
+    selectedFile = null;
+    mediaUpload.value = '';
+    mediaPreview.style.display = 'none';
+}
 
-        function scrollFeedbackToBottom() {
-            feedbackMessages.scrollTop = feedbackMessages.scrollHeight;
-        }
+// Initialize on page load
+window.addEventListener('DOMContentLoaded', () => {
+    checkFeedbackUsername();
+    
+    // Show feedback button to everyone
+    document.getElementById('feedback-btn').style.display = 'flex';
+});
+
+// Update auth state to handle username
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        feedbackUsername = user.email.split('@')[0];
+        localStorage.setItem('feedbackUsername', feedbackUsername);
+    }
+});
     </script>
 </body>
 </html>
