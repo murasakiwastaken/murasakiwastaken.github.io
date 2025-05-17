@@ -1387,30 +1387,37 @@
     
     <!-- Main JavaScript -->
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
-        authDomain: "chatroommurasaki.firebaseapp.com",
-        projectId: "chatroommurasaki",
-        storageBucket: "chatroommurasaki.appspot.com",
-        messagingSenderId: "649572971936",
-        appId: "1:649572971936:web:5d0aaf1be9f09cb428a0c5",
-        measurementId: "G-1113622WQQ"
-    };
+ // Initialize Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
+    authDomain: "chatroommurasaki.firebaseapp.com",
+    projectId: "chatroommurasaki",
+    storageBucket: "chatroommurasaki.appspot.com",
+    messagingSenderId: "649572971936",
+    appId: "1:649572971936:web:5d0aaf1be9f09cb428a0c5",
+    measurementId: "G-1113622WQQ"
+};
 
-    // Initialize Firebase only if it hasn't been initialized already
-    if (!firebase.apps.length) {
+// Wait for Firebase to load
+function initializeFirebase() {
+    if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
         firebase.initializeApp(firebaseConfig);
+        initApplication();
     } else {
-        firebase.app(); // if already initialized, use that one
+        setTimeout(initializeFirebase, 100);
     }
-    
-    // Declare these ONCE at the top level
+}
+
+// Start the initialization process
+document.addEventListener('DOMContentLoaded', function() {
+    initializeFirebase();
+});
+
+function initApplication() {
     const auth = firebase.auth();
     const database = firebase.database();
     const storage = firebase.storage();
-
+    
     // DOM Elements
     const authPage = document.getElementById('auth-page');
     const mainContainer = document.getElementById('main-container');
@@ -1426,7 +1433,7 @@
     const newPasswordInput = document.getElementById('new-password');
     const authStatus = document.getElementById('auth-status');
     const signupStatus = document.getElementById('signup-status');
-
+    
     // Toggle between login and signup forms
     showSignup.addEventListener('click', (e) => {
         e.preventDefault();
@@ -1434,14 +1441,14 @@
         signupForm.classList.remove('hidden');
         clearStatus();
     });
-
+    
     showLogin.addEventListener('click', (e) => {
         e.preventDefault();
         signupForm.classList.add('hidden');
         loginForm.classList.remove('hidden');
         clearStatus();
     });
-
+    
     // Login function
     loginBtn.addEventListener('click', () => {
         const username = usernameInput.value.trim();
@@ -1468,7 +1475,6 @@
                 initParticles();
                 initTabSystem();
                 initFeedbackSystem();
-                initSettingsPanel();
             })
             .catch((error) => {
                 showError(authStatus, getErrorMessage(error));
@@ -1510,7 +1516,6 @@
                 initParticles();
                 initTabSystem();
                 initFeedbackSystem();
-                initSettingsPanel();
             })
             .catch((error) => {
                 showError(signupStatus, getErrorMessage(error));
@@ -1564,6 +1569,7 @@
                 return 'Login failed. Please try again.';
         }
     }
+}
 
     // Load non-critical CSS
     function loadDeferredStyles() {
