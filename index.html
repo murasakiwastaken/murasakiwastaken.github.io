@@ -55,7 +55,26 @@
         .hidden {
             display: none;
         }
-        
+        /* Add to your CSS */
+.cloak-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    padding: 8px 12px;
+    background: linear-gradient(90deg, #00a8ff, #ff2d75);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    opacity: 0.3;
+    transition: opacity 0.3s;
+}
+
+.cloak-toggle-btn:hover {
+    opacity: 1;
+}
         /* Animation keyframes */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -527,12 +546,7 @@
                 <div class="settings-section">
                     <h3>Cloaking</h3>
                     
-                    <div class="settings-option">
-                        <label>
-                            <input type="checkbox" id="about-blank-cloak">
-                            Enable About:Blank Cloak
-                        </label>
-                    </div>
+                 
                     
                     <div class="settings-option">
                         <h4>Cloak as Website</h4>
@@ -1598,6 +1612,23 @@ window.addEventListener('resize', () => {
                         // Hide auth page and show main content
                         authPage.style.display = 'none';
                         mainContainer.style.display = 'flex';
+// When showing main content (after login/signup):
+function showMainContent() {
+    document.getElementById('auth-page').style.display = 'none';
+    document.getElementById('main-container').style.display = 'flex';
+    
+    // Remove cloak if returning to site
+    const iframe = document.getElementById('cloak-iframe');
+    if (iframe) iframe.remove();
+    
+    const toggleBtn = document.getElementById('cloak-toggle-btn');
+    if (toggleBtn) toggleBtn.remove();
+    
+    // Restore original title/favicon
+    document.title = "murasaki's center v2 | more features!";
+    updateFavicon('/favicon.ico'); // Set to your original favicon
+}
+                        showMainContent()
                         initParticles();
                         initTabSystem();
                         initFeedbackSystem();
@@ -2215,36 +2246,188 @@ function displayMessage({ username, message, timestamp, key, isSystem }) {
             // ======================
             // SETTINGS SYSTEM (NEW)
             // ======================
-        function initSettingsSystem() {
+ function initSettingsSystem() {
+    // DOM Elements
     const settingsBtn = document.getElementById('settings-btn');
     const settingsModal = document.getElementById('settings-modal');
     const closeSettings = document.querySelector('.settings-close');
     const darkModeToggle = document.getElementById('dark-mode-toggle');
     const bgColorPicker = document.getElementById('bg-color-picker');
     const applyBgColorBtn = document.getElementById('apply-bg-color');
-    const aboutBlankCloak = document.getElementById('about-blank-cloak');
     const cloakPreset = document.getElementById('cloak-preset');
     const customCloakUrl = document.getElementById('custom-cloak-url');
     const applyCloakBtn = document.getElementById('apply-cloak');
 
- function loadSettings() {
-    // Dark mode
-    const darkMode = localStorage.getItem('darkMode') === 'true';
-    darkModeToggle.checked = darkMode;
-    toggleDarkMode(darkMode);
+    // Event Listeners
+    settingsBtn.addEventListener('click', () => settingsModal.classList.toggle('active'));
+    closeSettings.addEventListener('click', () => settingsModal.classList.remove('active'));
+    cloakPreset.addEventListener('change', handleCloakPresetChange);
+    applyCloakBtn.addEventListener('click', applyCloak);
+    darkModeToggle.addEventListener('change', toggleDarkMode);
+    applyBgColorBtn.addEventListener('click', applyBackgroundColor);
 
-    // Background color
-    const bgColor = localStorage.getItem('bgColor') || '#0d1b2a';
-    bgColorPicker.value = bgColor;
-    applyBackgroundColor(bgColor);
+    // Initialize UI
+    loadSettings();
 
-    // About:Blank cloak - check this first
-    const cloakEnabled = localStorage.getItem('aboutBlankCloak') === 'true';
-    aboutBlankCloak.checked = cloakEnabled;
+    // ======================
+    // CLOAKING SYSTEM
+    // ======================
+    function handleCloakPresetChange() {
+        customCloakUrl.style.display = this.value === 'custom' ? 'block' : 'none';
+    }
 
-    // Only apply website cloak if about:blank is not enabled
-    if (!cloakEnabled) {
-        // Cloak preset
+    function applyCloak() {
+        const { targetUrl, title, faviconUrl } = getCloakSettings();
+        if (!targetUrl) return;
+        
+        activateIframeCloak(targetUrl, title, faviconUrl);
+        saveCloakSettings(targetUrl, title, faviconUrl);
+    }
+
+    function getCloakSettings() {
+        let targetUrl, title, faviconUrl;
+
+        switch (cloakPreset.value) {
+            case 'https://docs.google.com':
+                return {
+                    targetUrl: 'https://docs.google.com',
+                    title: 'Google Docs',
+                    faviconUrl: 'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png'
+                };
+            case 'https://classroom.google.com':
+                return {
+                    targetUrl: 'https://classroom.google.com',
+                    title: 'Google Classroom',
+                    faviconUrl: 'https://ssl.gstatic.com/classroom/favicon.png'
+                };
+            case 'https://kamiapp.com':
+                return {
+                    targetUrl: 'https://kamiapp.com',
+                    title: 'Kami',
+                    faviconUrl: 'https://kamiapp.com/favicon.ico'
+                };
+            case 'https://clever.com':
+                return {
+                    targetUrl: 'https://clever.com',
+                    title: 'Clever',
+                    faviconUrl: 'https://clever.com/favicon.ico'
+                };
+            case 'custom':
+                targetUrl = customCloakUrl.value.trim();
+                if (!targetUrl) {
+                    alert('Please enter a valid URL');
+                    return {};
+                }
+                return {
+                    targetUrl,
+                    title: prompt('Enter tab title:') || 'My Tab',
+                    faviconUrl: prompt('Enter favicon URL (optional):') || ''
+                };
+            default:
+                alert('Please select a preset or enter a custom URL!');
+                return {};
+        }
+    }
+
+    function activateIframeCloak(url, title, faviconUrl) {
+        // Hide main content (except settings)
+        document.querySelectorAll('.main-container > *:not(.settings-modal)').forEach(el => {
+            el.style.display = 'none';
+        });
+
+        // Create or update iframe
+        let iframe = document.getElementById('cloak-iframe');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'cloak-iframe';
+            iframe.style.position = 'fixed';
+            iframe.style.top = '0';
+            iframe.style.left = '0';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.style.zIndex = '9990';
+            document.body.appendChild(iframe);
+        }
+        iframe.src = url;
+
+        // Add/recreate toggle button
+        const toggleBtn = document.getElementById('cloak-toggle-btn') || createToggleButton();
+        setupToggleBehavior(iframe, toggleBtn);
+
+        // Update appearance
+        updateTabAppearance(title, faviconUrl);
+    }
+
+    function createToggleButton() {
+        const btn = document.createElement('button');
+        btn.id = 'cloak-toggle-btn';
+        btn.className = 'cloak-toggle-btn';
+        btn.textContent = '👁️';
+        document.body.appendChild(btn);
+        return btn;
+    }
+
+    function setupToggleBehavior(iframe, btn) {
+        let cloakActive = true;
+        btn.addEventListener('click', () => {
+            cloakActive = !cloakActive;
+            iframe.style.display = cloakActive ? 'block' : 'none';
+            btn.textContent = cloakActive ? '👁️' : '👁️‍🗨️';
+        });
+    }
+
+    function updateTabAppearance(title, faviconUrl) {
+        document.title = title;
+        updateFavicon(faviconUrl);
+    }
+
+    function updateFavicon(url) {
+        let favicon = document.querySelector('link[rel="icon"]') || 
+                     document.createElement('link');
+        favicon.rel = 'icon';
+        if (url) favicon.href = url;
+        document.head.appendChild(favicon);
+    }
+
+    function saveCloakSettings(url, title, faviconUrl) {
+        localStorage.setItem('cloakActive', 'true');
+        localStorage.setItem('cloakUrl', url);
+        localStorage.setItem('cloakTitle', title);
+        localStorage.setItem('cloakFavicon', faviconUrl);
+        localStorage.setItem('cloakPreset', cloakPreset.value);
+    }
+
+    // ======================
+    // APPEARANCE SETTINGS
+    // ======================
+    function toggleDarkMode(e) {
+        const enabled = e.target.checked;
+        document.body.classList.toggle('dark-mode', enabled);
+        localStorage.setItem('darkMode', enabled);
+    }
+
+    function applyBackgroundColor() {
+        const color = bgColorPicker.value;
+        document.body.style.backgroundColor = color;
+        localStorage.setItem('bgColor', color);
+    }
+
+    // ======================
+    // INITIALIZATION
+    // ======================
+    function loadSettings() {
+        // Dark Mode
+        const darkMode = localStorage.getItem('darkMode') === 'true';
+        darkModeToggle.checked = darkMode;
+        toggleDarkMode({ target: { checked: darkMode } });
+
+        // Background Color
+        const bgColor = localStorage.getItem('bgColor') || '#0d1b2a';
+        bgColorPicker.value = bgColor;
+        document.body.style.backgroundColor = bgColor;
+
+        // Cloaking
         const cloakPresetValue = localStorage.getItem('cloakPreset') || '';
         cloakPreset.value = cloakPresetValue;
         if (cloakPresetValue === 'custom') {
@@ -2252,180 +2435,29 @@ function displayMessage({ username, message, timestamp, key, isSystem }) {
             customCloakUrl.value = localStorage.getItem('customCloakUrl') || '';
         }
 
-        // Reapply website cloak on page load if settings exist
-        const savedTitle = localStorage.getItem('cloakTitle');
-        const savedFavicon = localStorage.getItem('cloakFavicon');
-        if (savedTitle) {
-            document.title = savedTitle;
-            if (savedFavicon) {
-                let favicon = document.querySelector('link[rel="icon"]') || 
-                             document.createElement('link');
-                favicon.rel = 'icon';
-                favicon.href = savedFavicon;
-                document.head.appendChild(favicon);
-            }
+        if (localStorage.getItem('cloakActive') === 'true') {
+            const url = localStorage.getItem('cloakUrl');
+            const title = localStorage.getItem('cloakTitle');
+            const favicon = localStorage.getItem('cloakFavicon');
+            if (url && title) activateIframeCloak(url, title, favicon);
         }
     }
+
+    // Cleanup when showing auth page
+    function resetCloak() {
+        const iframe = document.getElementById('cloak-iframe');
+        const toggleBtn = document.getElementById('cloak-toggle-btn');
+        if (iframe) iframe.remove();
+        if (toggleBtn) toggleBtn.remove();
+        localStorage.removeItem('cloakActive');
+    }
+
+    // Expose cleanup for use elsewhere
+    return { resetCloak };
 }
 
-    // Toggle settings modal
-    settingsBtn.addEventListener('click', () => {
-        settingsModal.classList.toggle('active');
-    });
+      
 
-    closeSettings.addEventListener('click', () => {
-        settingsModal.classList.remove('active');
-    });
-
-    // Dark mode toggle
-    darkModeToggle.addEventListener('change', (e) => {
-        const enabled = e.target.checked;
-        toggleDarkMode(enabled);
-        localStorage.setItem('darkMode', enabled);
-    });
-
-    function toggleDarkMode(enabled) {
-        if (enabled) {
-            document.body.classList.add('dark-mode');
-            document.querySelectorAll('.auth-input, .chat-input, .ai-input').forEach(el => {
-                el.classList.add('dark-mode');
-            });
-            document.querySelectorAll('.game-card').forEach(el => {
-                el.classList.add('dark-mode');
-            });
-        } else {
-            document.body.classList.remove('dark-mode');
-            document.querySelectorAll('.auth-input, .chat-input, .ai-input').forEach(el => {
-                el.classList.remove('dark-mode');
-            });
-            document.querySelectorAll('.game-card').forEach(el => {
-                el.classList.remove('dark-mode');
-            });
-        }
-    }
-
-    // Background color
-    applyBgColorBtn.addEventListener('click', () => {
-        const color = bgColorPicker.value;
-        applyBackgroundColor(color);
-        localStorage.setItem('bgColor', color);
-    });
-
-    function applyBackgroundColor(color) {
-        document.body.style.backgroundColor = color;
-    }
-
-    // Cloak preset
-    cloakPreset.addEventListener('change', (e) => {
-        if (e.target.value === 'custom') {
-            customCloakUrl.style.display = 'block';
-        } else {
-            customCloakUrl.style.display = 'none';
-        }
-    });
-
-    // Apply cloak
-    applyCloakBtn.addEventListener('click', () => {
-    // If about:blank cloak is enabled, skip the website cloaking
-    if (aboutBlankCloak.checked) {
-        applyAboutBlankCloak();
-        return;
-    }
-        let title, faviconUrl, targetUrl;
-
-        // Preset selection
-        switch (cloakPreset.value) {
-            case 'https://docs.google.com':
-                title = 'Google Docs';
-                faviconUrl = 'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png';
-                targetUrl = 'https://docs.google.com';
-                break;
-            case 'https://classroom.google.com':
-                title = 'Google Classroom';
-                faviconUrl = 'https://ssl.gstatic.com/classroom/favicon.png';
-                targetUrl = 'https://classroom.google.com';
-                break;
-            case 'https://kamiapp.com':
-                title = 'Kami';
-                faviconUrl = 'https://kamiapp.com/favicon.ico';
-                targetUrl = 'https://kamiapp.com';
-                break;
-            case 'https://clever.com':
-                title = 'Clever';
-                faviconUrl = 'https://clever.com/favicon.ico';
-                targetUrl = 'https://clever.com';
-                break;
-            case 'custom':
-                const customUrl = customCloakUrl.value.trim();
-                if (!customUrl) {
-                    alert('Please enter a custom URL');
-                    return;
-                }
-                title = prompt('Enter title for this page:') || 'My Tab';
-                faviconUrl = prompt('Enter favicon URL (optional):') || '';
-                targetUrl = customUrl;
-                break;
-            default:
-                alert('Please select a preset or enter a custom URL!');
-                return;
-        }
-
-        // Save settings
-        localStorage.setItem('cloakTitle', title);
-        localStorage.setItem('cloakFavicon', faviconUrl);
-        localStorage.setItem('cloakUrl', targetUrl);
-        localStorage.setItem('cloakPreset', cloakPreset.value);
-
-        // Apply changes
-        document.title = title;
-        
-        // Update favicon
-        let favicon = document.querySelector('link[rel="icon"]');
-        if (!favicon) {
-            favicon = document.createElement('link');
-            favicon.rel = 'icon';
-            document.head.appendChild(favicon);
-        }
-        if (faviconUrl) {
-            favicon.href = faviconUrl;
-        }
-
-        // Handle about:blank cloak if enabled
-        if (aboutBlankCloak.checked) {
-            localStorage.setItem('aboutBlankCloak', 'true');
-            const aboutBlankUrl = `${targetUrl}?${Date.now()}`; // Add timestamp to prevent caching
-            window.location.replace(`about:blank?${encodeURIComponent(aboutBlankUrl)}`);
-        } else {
-            alert(`Tab now appears as: ${title}`);
-        }
-    });
-function applyAboutBlankCloak() {
-    // Get the target URL from either preset or custom
-    let targetUrl;
-    if (cloakPreset.value === 'custom') {
-        targetUrl = customCloakUrl.value.trim();
-        if (!targetUrl) {
-            alert('Please enter a custom URL for about:blank cloaking');
-            return;
-        }
-    } else if (cloakPreset.value) {
-        targetUrl = cloakPreset.value;
-    } else {
-        alert('Please select a preset or enter a custom URL!');
-        return;
-    }
-
-    // Save settings
-    localStorage.setItem('aboutBlankCloak', 'true');
-    localStorage.setItem('cloakPreset', cloakPreset.value);
-    if (cloakPreset.value === 'custom') {
-        localStorage.setItem('customCloakUrl', targetUrl);
-    }
-
-    // Apply about:blank cloak
-    const aboutBlankUrl = `${targetUrl}?${Date.now()}`; // Add timestamp to prevent caching
-    window.location.replace(`about:blank?${encodeURIComponent(aboutBlankUrl)}`);
-}
     // Initialize settings
     loadSettings();
 }
