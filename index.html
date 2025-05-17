@@ -118,7 +118,39 @@
             font-size: 1.5rem;
             cursor: pointer;
         }
+.settings-content::-webkit-scrollbar {
+    width: 8px;
+}
 
+.settings-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.settings-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 168, 255, 0.5);
+    border-radius: 10px;
+}
+
+.settings-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 168, 255, 0.7);
+}
+
+.settings-option select {
+    background: rgba(224, 225, 221, 0.1);
+    color: #e0e1dd;
+    border: 1px solid rgba(0, 168, 255, 0.3);
+    padding: 8px;
+    border-radius: 5px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.settings-option select:focus {
+    outline: none;
+    border-color: #00a8ff;
+    box-shadow: 0 0 5px rgba(0, 168, 255, 0.5);
+}
         .settings-section {
             margin-bottom: 20px;
             padding-bottom: 20px;
@@ -1360,14 +1392,32 @@ body.dark-mode .game-card {
         };
         
         // Wait for Firebase to load
-        function initializeFirebase() {
-            if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
-                firebase.initializeApp(firebaseConfig);
-                initApplication();
-            } else {
-                setTimeout(initializeFirebase, 100);
-            }
+// Replace the initializeFirebase function with:
+function initializeFirebase() {
+    if (typeof firebase === 'undefined') {
+        setTimeout(initializeFirebase, 100);
+        return;
+    }
+
+    try {
+        // Initialize Firebase if not already initialized
+        if (firebase.apps.length === 0) {
+            firebase.initializeApp(firebaseConfig);
+            
+            // Initialize services
+            firebase.auth();
+            firebase.database();
+            firebase.storage();
+            
+            initApplication();
+        } else {
+            initApplication();
         }
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        setTimeout(initializeFirebase, 1000);
+    }
+}
         
         // Initialize particles.js
         function initParticles() {
@@ -1459,7 +1509,27 @@ body.dark-mode .game-card {
                 setTimeout(initParticles, 100);
             }
         }
-        
+let isScrolling = false;
+
+// Throttle scroll events
+window.addEventListener('scroll', () => {
+    if (!isScrolling) {
+        isScrolling = true;
+        setTimeout(() => {
+            // Handle scroll-related operations here
+            isScrolling = false;
+        }, 100);
+    }
+});
+
+// Debounce resize events
+let resizeTimeout;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        // Handle resize operations here
+    }, 200);
+});
         // Load non-critical CSS
         function loadDeferredStyles() {
             const addStylesNode = document.getElementById("deferred-styles");
@@ -1725,35 +1795,53 @@ body.dark-mode .game-card {
                     switchTab(initialTab);
                 }
                 
-                // Game Modal
-                const modal = document.querySelector('.modal');
-                const playBtns = document.querySelectorAll('.play-btn');
-                const closeBtn = document.querySelector('.close-btn');
-                const gameFrame = document.querySelector('.game-frame');
-                
-                playBtns.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const gameUrl = btn.dataset.game;
-                        gameFrame.src = gameUrl;
-                        modal.classList.add('active');
-                        document.body.style.overflow = 'hidden';
-                    });
-                });
-                
-                closeBtn.addEventListener('click', () => {
-                    modal.classList.remove('active');
-                    gameFrame.src = '';
-                    document.body.style.overflow = 'auto';
-                });
-                
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        modal.classList.remove('active');
-                        gameFrame.src = '';
-                        document.body.style.overflow = 'auto';
-                    }
-                });
+                // Replace the game modal code in initTabSystem() with:
+const modal = document.querySelector('.modal');
+const playBtns = document.querySelectorAll('.play-btn');
+const closeBtn = document.querySelector('.close-btn');
+const gameFrame = document.querySelector('.game-frame');
+
+playBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const gameUrl = btn.dataset.game;
+        if (!gameUrl) {
+            console.error('No game URL specified');
+            return;
+        }
+        
+        // Show loading state
+        gameFrame.src = '';
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Set iframe source after a small delay to allow animation
+        setTimeout(() => {
+            gameFrame.src = gameUrl;
+        }, 300);
+    });
+});
+
+// Close modal with escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+        closeGameModal();
+    }
+});
+
+function closeGameModal() {
+    modal.classList.remove('active');
+    gameFrame.src = '';
+    document.body.style.overflow = 'auto';
+}
+
+closeBtn.addEventListener('click', closeGameModal);
+
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        closeGameModal();
+    }
+});
             }
             
             // ======================
@@ -1798,23 +1886,30 @@ body.dark-mode .game-card {
                 }
             }
             
-            function loadChatHistory() {
-                chatRef.limitToLast(100).on('value', (snapshot) => {
-                    chatMessages.innerHTML = '';
-                    
-                    snapshot.forEach((childSnapshot) => {
-                        const msg = childSnapshot.val();
-                        displayMessage({
-                            ...msg,
-                            key: childSnapshot.key
-                        });
-                    });
-                    
-                    scrollToBottom();
+           // In the chat system initialization
+function loadChatHistory() {
+    chatRef.limitToLast(100).on('value', (snapshot) => {
+        // Only clear if we have new messages to avoid flickering
+        if (snapshot.numChildren() > chatMessages.children.length) {
+            chatMessages.innerHTML = '';
+        }
+        
+        snapshot.forEach((childSnapshot) => {
+            const msg = childSnapshot.val();
+            // Check if message already exists
+            if (!document.querySelector(`[data-key="${childSnapshot.key}"]`)) {
+                displayMessage({
+                    ...msg,
+                    key: childSnapshot.key
                 });
             }
+        });
+        
+        scrollToBottom();
+    });
+}
             
-            function displayMessage({ username, message, timestamp, key, isSystem }) {
+function displayMessage({ username, message, timestamp, key, isSystem }) {
                 const isCurrentUser = username === chatUsername;
                 const isSystemMsg = username === 'System' || username === 'AI Assistant' || isSystem;
                 
@@ -1827,7 +1922,8 @@ body.dark-mode .game-card {
                 if (isCurrentUser && !isSystemMsg) {
                     deleteBtn = `<button class="delete-message" data-key="${key}">×</button>`;
                 }
-                
+                 messageEl.setAttribute('data-key', key);
+
                 messageEl.innerHTML = `
                     ${deleteBtn}
                     <span class="message-username" style="color: ${isSystemMsg ? '#ff2d75' : '#00a8ff'}">${username}:</span>
@@ -2119,177 +2215,209 @@ body.dark-mode .game-card {
             // ======================
             // SETTINGS SYSTEM (NEW)
             // ======================
-            function initSettingsSystem() {
-                const settingsBtn = document.getElementById('settings-btn');
-                const settingsModal = document.getElementById('settings-modal');
-                const closeSettings = document.querySelector('.settings-close');
-                const darkModeToggle = document.getElementById('dark-mode-toggle');
-                const bgColorPicker = document.getElementById('bg-color-picker');
-                const applyBgColorBtn = document.getElementById('apply-bg-color');
-                const aboutBlankCloak = document.getElementById('about-blank-cloak');
-                const cloakPreset = document.getElementById('cloak-preset');
-                const customCloakUrl = document.getElementById('custom-cloak-url');
-                const applyCloakBtn = document.getElementById('apply-cloak');
+        function initSettingsSystem() {
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const closeSettings = document.querySelector('.settings-close');
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const bgColorPicker = document.getElementById('bg-color-picker');
+    const applyBgColorBtn = document.getElementById('apply-bg-color');
+    const aboutBlankCloak = document.getElementById('about-blank-cloak');
+    const cloakPreset = document.getElementById('cloak-preset');
+    const customCloakUrl = document.getElementById('custom-cloak-url');
+    const applyCloakBtn = document.getElementById('apply-cloak');
 
-                // Load saved settings
-                function loadSettings() {
-                    // Dark mode
-                    const darkMode = localStorage.getItem('darkMode') === 'true';
-                    darkModeToggle.checked = darkMode;
-                    toggleDarkMode(darkMode);
-// Re-apply cloak on page load if settings exist
-const savedTitle = localStorage.getItem('cloakTitle');
-const savedFavicon = localStorage.getItem('cloakFavicon');
-if (savedTitle) {
-  document.title = savedTitle;
-  if (savedFavicon) {
-    let favicon = document.querySelector('link[rel="icon"]') || 
-                 document.createElement('link');
-    favicon.rel = 'icon';
-    favicon.href = savedFavicon;
-    document.head.appendChild(favicon);
-  }
-}
-                    // Background color
-                    const bgColor = localStorage.getItem('bgColor') || '#0d1b2a';
-                    bgColorPicker.value = bgColor;
-                    applyBackgroundColor(bgColor);
+    // Load saved settings
+    function loadSettings() {
+        // Dark mode
+        const darkMode = localStorage.getItem('darkMode') === 'true';
+        darkModeToggle.checked = darkMode;
+        toggleDarkMode(darkMode);
 
-                    // About:Blank cloak
-                    const cloakEnabled = localStorage.getItem('aboutBlankCloak') === 'true';
-                    aboutBlankCloak.checked = cloakEnabled;
+        // Background color
+        const bgColor = localStorage.getItem('bgColor') || '#0d1b2a';
+        bgColorPicker.value = bgColor;
+        applyBackgroundColor(bgColor);
 
-                    // Cloak preset
-                    const cloakPresetValue = localStorage.getItem('cloakPreset') || '';
-                    cloakPreset.value = cloakPresetValue;
-                    if (cloakPresetValue === 'custom') {
-                        customCloakUrl.style.display = 'block';
-                        customCloakUrl.value = localStorage.getItem('customCloakUrl') || '';
-                    }
-                }
+        // About:Blank cloak
+        const cloakEnabled = localStorage.getItem('aboutBlankCloak') === 'true';
+        aboutBlankCloak.checked = cloakEnabled;
 
-                // Toggle settings modal
-                settingsBtn.addEventListener('click', () => {
-                    settingsModal.classList.toggle('active');
-                });
+        // Cloak preset
+        const cloakPresetValue = localStorage.getItem('cloakPreset') || '';
+        cloakPreset.value = cloakPresetValue;
+        if (cloakPresetValue === 'custom') {
+            customCloakUrl.style.display = 'block';
+            customCloakUrl.value = localStorage.getItem('customCloakUrl') || '';
+        }
 
-                closeSettings.addEventListener('click', () => {
-                    settingsModal.classList.remove('active');
-                });
-
-                // Dark mode toggle
-                darkModeToggle.addEventListener('change', (e) => {
-                    const enabled = e.target.checked;
-                    toggleDarkMode(enabled);
-                    localStorage.setItem('darkMode', enabled);
-                });
-
-                function toggleDarkMode(enabled) {
-                    if (enabled) {
-                        document.body.classList.add('dark-mode');
-                    } else {
-                        document.body.classList.remove('dark-mode');
-                    }
-                }
-
-                // Background color
-                applyBgColorBtn.addEventListener('click', () => {
-                    const color = bgColorPicker.value;
-                    applyBackgroundColor(color);
-                    localStorage.setItem('bgColor', color);
-                });
-
-                function applyBackgroundColor(color) {
-                    document.body.style.backgroundColor = color;
-                }
-// About:Blank Cloak Toggle
-const aboutBlankToggle = document.getElementById('about-blank-toggle');
-
-// Load saved setting
-const isAboutBlankEnabled = localStorage.getItem('aboutBlank') === 'enabled';
-aboutBlankToggle.checked = isAboutBlankEnabled;
-
-// Toggle event
-aboutBlankToggle.addEventListener('change', (e) => {
-    if (e.target.checked) {
-        localStorage.setItem('aboutBlank', 'enabled');
-    } else {
-        localStorage.removeItem('aboutBlank');
-    }
-    window.location.reload(); // Refresh to apply changes
-});
-
-                // Cloak preset
-                cloakPreset.addEventListener('change', (e) => {
-                    if (e.target.value === 'custom') {
-                        customCloakUrl.style.display = 'block';
-                    } else {
-                        customCloakUrl.style.display = 'none';
-                        localStorage.setItem('cloakPreset', e.target.value);
-                    }
-                });
-
-              // In initSettingsSystem() -> Cloaking section
-applyCloakBtn.addEventListener('click', () => {
-  let title, faviconUrl;
-
-  // Preset selection
-  switch (cloakPreset.value) {
-    case 'https://docs.google.com':
-      title = 'Google Docs';
-      faviconUrl = 'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png';
-      break;
-    case 'https://classroom.google.com':
-      title = 'Google Classroom';
-      faviconUrl = 'https://ssl.gstatic.com/classroom/favicon.png';
-      break;
-    case 'https://kamiapp.com':
-      title = 'Kami';
-      faviconUrl = 'https://kamiapp.com/favicon.ico';
-      break;
-    case 'https://clever.com':
-      title = 'Clever';
-      faviconUrl = 'https://clever.com/favicon.ico';
-      break;
-    case 'custom':
-      title = customCloakUrl.value.trim() || 'My Tab';
-      faviconUrl = prompt('Enter favicon URL (optional):') || '';
-      break;
-    default:
-      alert('Select a preset or enter a custom title!');
-      return;
-  }
-
-  // Apply changes
-  document.title = title;
-  if (faviconUrl) {
-    let favicon = document.querySelector('link[rel="icon"]');
-    if (!favicon) {
-      favicon = document.createElement('link');
-      favicon.rel = 'icon';
-      document.head.appendChild(favicon);
-    }
-    favicon.href = faviconUrl;
-  }
-
-  // Save to localStorage
-  localStorage.setItem('cloakTitle', title);
-  localStorage.setItem('cloakFavicon', faviconUrl);
-  alert(`Tab now appears as: ${title}`);
-});
-
-                // Initialize settings
-                loadSettings();
-
-        
+        // Reapply cloak on page load
+        const savedTitle = localStorage.getItem('cloakTitle');
+        const savedFavicon = localStorage.getItem('cloakFavicon');
+        if (savedTitle) {
+            document.title = savedTitle;
+            if (savedFavicon) {
+                let favicon = document.querySelector('link[rel="icon"]') || 
+                             document.createElement('link');
+                favicon.rel = 'icon';
+                favicon.href = savedFavicon;
+                document.head.appendChild(favicon);
             }
         }
+    }
+
+    // Toggle settings modal
+    settingsBtn.addEventListener('click', () => {
+        settingsModal.classList.toggle('active');
+    });
+
+    closeSettings.addEventListener('click', () => {
+        settingsModal.classList.remove('active');
+    });
+
+    // Dark mode toggle
+    darkModeToggle.addEventListener('change', (e) => {
+        const enabled = e.target.checked;
+        toggleDarkMode(enabled);
+        localStorage.setItem('darkMode', enabled);
+    });
+
+    function toggleDarkMode(enabled) {
+        if (enabled) {
+            document.body.classList.add('dark-mode');
+            document.querySelectorAll('.auth-input, .chat-input, .ai-input').forEach(el => {
+                el.classList.add('dark-mode');
+            });
+            document.querySelectorAll('.game-card').forEach(el => {
+                el.classList.add('dark-mode');
+            });
+        } else {
+            document.body.classList.remove('dark-mode');
+            document.querySelectorAll('.auth-input, .chat-input, .ai-input').forEach(el => {
+                el.classList.remove('dark-mode');
+            });
+            document.querySelectorAll('.game-card').forEach(el => {
+                el.classList.remove('dark-mode');
+            });
+        }
+    }
+
+    // Background color
+    applyBgColorBtn.addEventListener('click', () => {
+        const color = bgColorPicker.value;
+        applyBackgroundColor(color);
+        localStorage.setItem('bgColor', color);
+    });
+
+    function applyBackgroundColor(color) {
+        document.body.style.backgroundColor = color;
+    }
+
+    // Cloak preset
+    cloakPreset.addEventListener('change', (e) => {
+        if (e.target.value === 'custom') {
+            customCloakUrl.style.display = 'block';
+        } else {
+            customCloakUrl.style.display = 'none';
+        }
+    });
+
+    // Apply cloak
+    applyCloakBtn.addEventListener('click', () => {
+        let title, faviconUrl, targetUrl;
+
+        // Preset selection
+        switch (cloakPreset.value) {
+            case 'https://docs.google.com':
+                title = 'Google Docs';
+                faviconUrl = 'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png';
+                targetUrl = 'https://docs.google.com';
+                break;
+            case 'https://classroom.google.com':
+                title = 'Google Classroom';
+                faviconUrl = 'https://ssl.gstatic.com/classroom/favicon.png';
+                targetUrl = 'https://classroom.google.com';
+                break;
+            case 'https://kamiapp.com':
+                title = 'Kami';
+                faviconUrl = 'https://kamiapp.com/favicon.ico';
+                targetUrl = 'https://kamiapp.com';
+                break;
+            case 'https://clever.com':
+                title = 'Clever';
+                faviconUrl = 'https://clever.com/favicon.ico';
+                targetUrl = 'https://clever.com';
+                break;
+            case 'custom':
+                const customUrl = customCloakUrl.value.trim();
+                if (!customUrl) {
+                    alert('Please enter a custom URL');
+                    return;
+                }
+                title = prompt('Enter title for this page:') || 'My Tab';
+                faviconUrl = prompt('Enter favicon URL (optional):') || '';
+                targetUrl = customUrl;
+                break;
+            default:
+                alert('Please select a preset or enter a custom URL!');
+                return;
+        }
+
+        // Save settings
+        localStorage.setItem('cloakTitle', title);
+        localStorage.setItem('cloakFavicon', faviconUrl);
+        localStorage.setItem('cloakUrl', targetUrl);
+        localStorage.setItem('cloakPreset', cloakPreset.value);
+
+        // Apply changes
+        document.title = title;
         
-        // Initialize everything when ready
-        document.addEventListener('DOMContentLoaded', () => {
-            loadDeferredStyles();
-            initializeFirebase();
-        });
+        // Update favicon
+        let favicon = document.querySelector('link[rel="icon"]');
+        if (!favicon) {
+            favicon = document.createElement('link');
+            favicon.rel = 'icon';
+            document.head.appendChild(favicon);
+        }
+        if (faviconUrl) {
+            favicon.href = faviconUrl;
+        }
+
+        // Handle about:blank cloak if enabled
+        if (aboutBlankCloak.checked) {
+            localStorage.setItem('aboutBlankCloak', 'true');
+            const aboutBlankUrl = `${targetUrl}?${Date.now()}`; // Add timestamp to prevent caching
+            window.location.replace(`about:blank?${encodeURIComponent(aboutBlankUrl)}`);
+        } else {
+            alert(`Tab now appears as: ${title}`);
+        }
+    });
+
+    // Initialize settings
+    loadSettings();
+}
+        
+     // Wrap the main initialization in error handling
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        loadDeferredStyles();
+        initializeFirebase();
+    } catch (error) {
+        console.error('Initialization error:', error);
+        // Show user-friendly error message
+        const errorDiv = document.createElement('div');
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.top = '0';
+        errorDiv.style.left = '0';
+        errorDiv.style.width = '100%';
+        errorDiv.style.padding = '20px';
+        errorDiv.style.backgroundColor = '#f44336';
+        errorDiv.style.color = 'white';
+        errorDiv.style.zIndex = '9999';
+        errorDiv.textContent = 'Error initializing application. Please refresh the page.';
+        document.body.appendChild(errorDiv);
+    }
+});
     </script>
 </body>
 </html>
