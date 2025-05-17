@@ -2313,35 +2313,45 @@ function displayMessage({ username, message, timestamp, key, isSystem }) {
     }
 
     function activateIframeCloak(url, title, faviconUrl) {
-        // Hide main content (except settings)
-        document.querySelectorAll('.main-container > *:not(.settings-modal)').forEach(el => {
+    // Hide main content (except settings and cloak toggle button)
+    document.querySelectorAll('.main-container > *').forEach(el => {
+        if (!el.classList.contains('settings-modal') && 
+            el.id !== 'cloak-toggle-btn') {
             el.style.display = 'none';
-        });
-
-        // Create or update iframe
-        let iframe = document.getElementById('cloak-iframe');
-        if (!iframe) {
-            iframe = document.createElement('iframe');
-            iframe.id = 'cloak-iframe';
-            iframe.style.position = 'fixed';
-            iframe.style.top = '0';
-            iframe.style.left = '0';
-            iframe.style.width = '100%';
-            iframe.style.height = '100%';
-            iframe.style.border = 'none';
-            iframe.style.zIndex = '9990';
-            document.body.appendChild(iframe);
         }
-        iframe.src = url;
+    });
+    
+    // Also hide the feedback button
+    const feedbackBtn = document.getElementById('feedback-btn');
+    if (feedbackBtn) feedbackBtn.style.display = 'none';
+    
+    // Hide the settings button too
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) settingsBtn.style.display = 'none';
 
-        // Add/recreate toggle button
-        const toggleBtn = document.getElementById('cloak-toggle-btn') || createToggleButton();
-        setupToggleBehavior(iframe, toggleBtn);
-
-        // Update appearance
-        updateTabAppearance(title, faviconUrl);
+    // Create or update iframe
+    let iframe = document.getElementById('cloak-iframe');
+    if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'cloak-iframe';
+        iframe.style.position = 'fixed';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.zIndex = '9990';
+        document.body.appendChild(iframe);
     }
+    iframe.src = url;
 
+    // Add/recreate toggle button
+    const toggleBtn = document.getElementById('cloak-toggle-btn') || createToggleButton();
+    setupToggleBehavior(iframe, toggleBtn);
+
+    // Update appearance
+    updateTabAppearance(title, faviconUrl);
+}
     function createToggleButton() {
         const btn = document.createElement('button');
         btn.id = 'cloak-toggle-btn';
@@ -2351,14 +2361,42 @@ function displayMessage({ username, message, timestamp, key, isSystem }) {
         return btn;
     }
 
-    function setupToggleBehavior(iframe, btn) {
-        let cloakActive = true;
-        btn.addEventListener('click', () => {
-            cloakActive = !cloakActive;
-            iframe.style.display = cloakActive ? 'block' : 'none';
-            btn.textContent = cloakActive ? '👁️' : '👁️‍🗨️';
-        });
-    }
+   function setupToggleBehavior(iframe, btn) {
+    let cloakActive = true;
+    btn.addEventListener('click', () => {
+        cloakActive = !cloakActive;
+        iframe.style.display = cloakActive ? 'block' : 'none';
+        btn.textContent = cloakActive ? '👁️' : '👁️‍🗨️';
+        
+        // When uncloaking, restore the UI
+        if (!cloakActive) {
+            // Show main content
+            document.querySelectorAll('.main-container > *').forEach(el => {
+                el.style.display = '';
+            });
+            
+            // Show feedback button
+            const feedbackBtn = document.getElementById('feedback-btn');
+            if (feedbackBtn) feedbackBtn.style.display = '';
+            
+            // Show settings button
+            const settingsBtn = document.getElementById('settings-btn');
+            if (settingsBtn) settingsBtn.style.display = '';
+        } else {
+            // When recloaking, hide everything again
+            document.querySelectorAll('.main-container > *').forEach(el => {
+                if (!el.classList.contains('settings-modal') && 
+                    el.id !== 'cloak-toggle-btn') {
+                    el.style.display = 'none';
+                }
+            });
+            const feedbackBtn = document.getElementById('feedback-btn');
+            if (feedbackBtn) feedbackBtn.style.display = 'none';
+            const settingsBtn = document.getElementById('settings-btn');
+            if (settingsBtn) settingsBtn.style.display = 'none';
+        }
+    });
+}
 
     function updateTabAppearance(title, faviconUrl) {
         document.title = title;
@@ -2426,14 +2464,27 @@ function displayMessage({ username, message, timestamp, key, isSystem }) {
         }
     }
 
-    // Cleanup when showing auth page
-    function resetCloak() {
-        const iframe = document.getElementById('cloak-iframe');
-        const toggleBtn = document.getElementById('cloak-toggle-btn');
-        if (iframe) iframe.remove();
-        if (toggleBtn) toggleBtn.remove();
-        localStorage.removeItem('cloakActive');
-    }
+function resetCloak() {
+    const iframe = document.getElementById('cloak-iframe');
+    const toggleBtn = document.getElementById('cloak-toggle-btn');
+    if (iframe) iframe.remove();
+    if (toggleBtn) toggleBtn.remove();
+    
+    // Restore all UI elements
+    document.querySelectorAll('.main-container > *').forEach(el => {
+        el.style.display = '';
+    });
+    
+    // Restore feedback button
+    const feedbackBtn = document.getElementById('feedback-btn');
+    if (feedbackBtn) feedbackBtn.style.display = '';
+    
+    // Restore settings button
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) settingsBtn.style.display = '';
+    
+    localStorage.removeItem('cloakActive');
+}
 
     // Expose cleanup for use elsewhere
     return { resetCloak };
