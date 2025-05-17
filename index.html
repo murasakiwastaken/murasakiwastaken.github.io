@@ -350,8 +350,44 @@
             });
         }
         
-        // Start loading deferred resources after DOM is parsed
-        document.addEventListener('DOMContentLoaded', loadDeferredResources);
+       // Initialize Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
+    authDomain: "chatroommurasaki.firebaseapp.com",
+    projectId: "chatroommurasaki",
+    storageBucket: "chatroommurasaki.appspot.com",
+    messagingSenderId: "649572971936",
+    appId: "1:649572971936:web:5d0aaf1be9f09cb428a0c5",
+    measurementId: "G-1113622WQQ"
+};
+
+// Wait for Firebase to load properly
+function initializeFirebase() {
+    if (typeof firebase !== 'undefined' && firebase.apps.length === 0) {
+        firebase.initializeApp(firebaseConfig);
+        initApplication(); // Start app only after Firebase is ready
+    } else {
+        setTimeout(initializeFirebase, 100); // Keep checking
+    }
+}
+
+// Main application initialization
+function initApplication() {
+    // Now it's safe to use Firebase
+    const auth = firebase.auth();
+    const database = firebase.database();
+    
+    // DOM Elements
+    const authPage = document.getElementById('auth-page');
+    const mainContainer = document.getElementById('main-container');
+    // ... rest of your app initialization
+}
+
+// Start checking for Firebase
+initializeFirebase();
+
+// Load deferred resources after DOM is ready
+document.addEventListener('DOMContentLoaded', loadDeferredResources);
     </script>
 </head>
 <body>
