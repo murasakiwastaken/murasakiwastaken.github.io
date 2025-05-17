@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="murasaki's center v2 with enhanced features and performance">
-    <title>murasaki's center v2 | more features unc!</title>
+    <meta name="description" content="murasaki's center  with enhanced features and performance">
+    <title>murasaki's center v2.5 | enhanced experience</title>
     
     <!-- Preload critical resources -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rubik:wght@400;700&display=swap" as="style">
@@ -330,7 +330,7 @@
     <div class="particles-container" id="particles-js"></div>
     <div class="main-container" id="main-container">
         <header class="header">
-            <h1 class="title">murasaki's center v2 | more features!</h1>
+            <h1 class="title">murasaki's center v2.5 | enhanced experience</h1>
         </header>
         
         <div class="tabs">
@@ -2227,22 +2227,23 @@ function displayMessage({ username, message, timestamp, key, isSystem }) {
     const customCloakUrl = document.getElementById('custom-cloak-url');
     const applyCloakBtn = document.getElementById('apply-cloak');
 
-    // Load saved settings
-    function loadSettings() {
-        // Dark mode
-        const darkMode = localStorage.getItem('darkMode') === 'true';
-        darkModeToggle.checked = darkMode;
-        toggleDarkMode(darkMode);
+ function loadSettings() {
+    // Dark mode
+    const darkMode = localStorage.getItem('darkMode') === 'true';
+    darkModeToggle.checked = darkMode;
+    toggleDarkMode(darkMode);
 
-        // Background color
-        const bgColor = localStorage.getItem('bgColor') || '#0d1b2a';
-        bgColorPicker.value = bgColor;
-        applyBackgroundColor(bgColor);
+    // Background color
+    const bgColor = localStorage.getItem('bgColor') || '#0d1b2a';
+    bgColorPicker.value = bgColor;
+    applyBackgroundColor(bgColor);
 
-        // About:Blank cloak
-        const cloakEnabled = localStorage.getItem('aboutBlankCloak') === 'true';
-        aboutBlankCloak.checked = cloakEnabled;
+    // About:Blank cloak - check this first
+    const cloakEnabled = localStorage.getItem('aboutBlankCloak') === 'true';
+    aboutBlankCloak.checked = cloakEnabled;
 
+    // Only apply website cloak if about:blank is not enabled
+    if (!cloakEnabled) {
         // Cloak preset
         const cloakPresetValue = localStorage.getItem('cloakPreset') || '';
         cloakPreset.value = cloakPresetValue;
@@ -2251,7 +2252,7 @@ function displayMessage({ username, message, timestamp, key, isSystem }) {
             customCloakUrl.value = localStorage.getItem('customCloakUrl') || '';
         }
 
-        // Reapply cloak on page load
+        // Reapply website cloak on page load if settings exist
         const savedTitle = localStorage.getItem('cloakTitle');
         const savedFavicon = localStorage.getItem('cloakFavicon');
         if (savedTitle) {
@@ -2265,6 +2266,7 @@ function displayMessage({ username, message, timestamp, key, isSystem }) {
             }
         }
     }
+}
 
     // Toggle settings modal
     settingsBtn.addEventListener('click', () => {
@@ -2324,6 +2326,11 @@ function displayMessage({ username, message, timestamp, key, isSystem }) {
 
     // Apply cloak
     applyCloakBtn.addEventListener('click', () => {
+    // If about:blank cloak is enabled, skip the website cloaking
+    if (aboutBlankCloak.checked) {
+        applyAboutBlankCloak();
+        return;
+    }
         let title, faviconUrl, targetUrl;
 
         // Preset selection
@@ -2392,7 +2399,33 @@ function displayMessage({ username, message, timestamp, key, isSystem }) {
             alert(`Tab now appears as: ${title}`);
         }
     });
+function applyAboutBlankCloak() {
+    // Get the target URL from either preset or custom
+    let targetUrl;
+    if (cloakPreset.value === 'custom') {
+        targetUrl = customCloakUrl.value.trim();
+        if (!targetUrl) {
+            alert('Please enter a custom URL for about:blank cloaking');
+            return;
+        }
+    } else if (cloakPreset.value) {
+        targetUrl = cloakPreset.value;
+    } else {
+        alert('Please select a preset or enter a custom URL!');
+        return;
+    }
 
+    // Save settings
+    localStorage.setItem('aboutBlankCloak', 'true');
+    localStorage.setItem('cloakPreset', cloakPreset.value);
+    if (cloakPreset.value === 'custom') {
+        localStorage.setItem('customCloakUrl', targetUrl);
+    }
+
+    // Apply about:blank cloak
+    const aboutBlankUrl = `${targetUrl}?${Date.now()}`; // Add timestamp to prevent caching
+    window.location.replace(`about:blank?${encodeURIComponent(aboutBlankUrl)}`);
+}
     // Initialize settings
     loadSettings();
 }
