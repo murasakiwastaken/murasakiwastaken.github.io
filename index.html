@@ -11,6 +11,7 @@
     <link rel="preload" href="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" as="script">
     <link rel="preload" href="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js" as="script">
     
+
     <!-- Inline critical CSS -->
     <style>
         /* Critical CSS - minimal styles needed for initial render */
@@ -29,7 +30,10 @@
             overflow-x: hidden;
             font-family: 'Rubik', sans-serif;
         }
-        
+        body.dark-mode {
+    background: #0d1b2a;
+    color: #e0e1dd;
+}
         .auth-page {
             display: flex;
             justify-content: center;
@@ -615,7 +619,13 @@
                 font-size: 1rem;
                 transition: all 0.3s ease;
             }
-            
+            body.dark-mode .auth-input,
+body.dark-mode .chat-input,
+body.dark-mode .ai-input {
+    background: rgba(224, 225, 221, 0.1);
+    color: #e0e1dd;
+    border: 1px solid rgba(0, 168, 255, 0.3);
+}
             .auth-input:focus {
                 outline: none;
                 box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
@@ -739,6 +749,11 @@
                 animation: fadeIn 0.6s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
                 will-change: transform, box-shadow;
             }
+body.dark-mode .game-card {
+    background: rgba(13, 27, 42, 0.7);
+    border: 2px solid rgba(0, 168, 255, 0.3);
+    color: #e0e1dd;
+}
             
             /* Staggered animation for game cards */
             .game-card:nth-child(1) { animation-delay: 0.1s; }
@@ -2122,7 +2137,19 @@
                     const darkMode = localStorage.getItem('darkMode') === 'true';
                     darkModeToggle.checked = darkMode;
                     toggleDarkMode(darkMode);
-
+// Re-apply cloak on page load if settings exist
+const savedTitle = localStorage.getItem('cloakTitle');
+const savedFavicon = localStorage.getItem('cloakFavicon');
+if (savedTitle) {
+  document.title = savedTitle;
+  if (savedFavicon) {
+    let favicon = document.querySelector('link[rel="icon"]') || 
+                 document.createElement('link');
+    favicon.rel = 'icon';
+    favicon.href = savedFavicon;
+    document.head.appendChild(favicon);
+  }
+}
                     // Background color
                     const bgColor = localStorage.getItem('bgColor') || '#0d1b2a';
                     bgColorPicker.value = bgColor;
@@ -2175,14 +2202,22 @@
                 function applyBackgroundColor(color) {
                     document.body.style.backgroundColor = color;
                 }
+// About:Blank Cloak Toggle
+const aboutBlankToggle = document.getElementById('about-blank-toggle');
 
-                // About:Blank cloak
-                aboutBlankCloak.addEventListener('change', (e) => {
-                    localStorage.setItem('aboutBlankCloak', e.target.checked);
-                    if (e.target.checked) {
-                        alert('About:Blank cloak enabled. This feature will activate when you navigate away from the page.');
-                    }
-                });
+// Load saved setting
+const isAboutBlankEnabled = localStorage.getItem('aboutBlank') === 'enabled';
+aboutBlankToggle.checked = isAboutBlankEnabled;
+
+// Toggle event
+aboutBlankToggle.addEventListener('change', (e) => {
+    if (e.target.checked) {
+        localStorage.setItem('aboutBlank', 'enabled');
+    } else {
+        localStorage.removeItem('aboutBlank');
+    }
+    window.location.reload(); // Refresh to apply changes
+});
 
                 // Cloak preset
                 cloakPreset.addEventListener('change', (e) => {
@@ -2194,47 +2229,59 @@
                     }
                 });
 
-                // Apply cloak
-                applyCloakBtn.addEventListener('click', () => {
-                    let url;
-                    if (cloakPreset.value === 'custom') {
-                        url = customCloakUrl.value.trim();
-                        if (!url) {
-                            alert('Please enter a valid URL');
-                            return;
-                        }
-                        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                            url = 'https://' + url;
-                        }
-                        localStorage.setItem('cloakPreset', 'custom');
-                        localStorage.setItem('customCloakUrl', url);
-                    } else if (cloakPreset.value) {
-                        url = cloakPreset.value;
-                        localStorage.setItem('cloakPreset', cloakPreset.value);
-                    } else {
-                        alert('Please select a website to cloak as');
-                        return;
-                    }
+              // In initSettingsSystem() -> Cloaking section
+applyCloakBtn.addEventListener('click', () => {
+  let title, faviconUrl;
 
-                    // Store the URL for cloaking
-                    localStorage.setItem('cloakUrl', url);
-                    alert(`Cloak set to: ${url}. This will take effect when you navigate away from the page.`);
-                });
+  // Preset selection
+  switch (cloakPreset.value) {
+    case 'https://docs.google.com':
+      title = 'Google Docs';
+      faviconUrl = 'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png';
+      break;
+    case 'https://classroom.google.com':
+      title = 'Google Classroom';
+      faviconUrl = 'https://ssl.gstatic.com/classroom/favicon.png';
+      break;
+    case 'https://kamiapp.com':
+      title = 'Kami';
+      faviconUrl = 'https://kamiapp.com/favicon.ico';
+      break;
+    case 'https://clever.com':
+      title = 'Clever';
+      faviconUrl = 'https://clever.com/favicon.ico';
+      break;
+    case 'custom':
+      title = customCloakUrl.value.trim() || 'My Tab';
+      faviconUrl = prompt('Enter favicon URL (optional):') || '';
+      break;
+    default:
+      alert('Select a preset or enter a custom title!');
+      return;
+  }
+
+  // Apply changes
+  document.title = title;
+  if (faviconUrl) {
+    let favicon = document.querySelector('link[rel="icon"]');
+    if (!favicon) {
+      favicon = document.createElement('link');
+      favicon.rel = 'icon';
+      document.head.appendChild(favicon);
+    }
+    favicon.href = faviconUrl;
+  }
+
+  // Save to localStorage
+  localStorage.setItem('cloakTitle', title);
+  localStorage.setItem('cloakFavicon', faviconUrl);
+  alert(`Tab now appears as: ${title}`);
+});
 
                 // Initialize settings
                 loadSettings();
 
-                // Handle window blur for cloaking
-                window.addEventListener('blur', () => {
-                    if (aboutBlankCloak.checked) {
-                        const cloakUrl = localStorage.getItem('cloakUrl') || 'about:blank';
-                        const newWindow = window.open('about:blank', '_blank');
-                        if (newWindow) {
-                            newWindow.location.href = cloakUrl;
-                            window.focus();
-                        }
-                    }
-                });
+        
             }
         }
         
