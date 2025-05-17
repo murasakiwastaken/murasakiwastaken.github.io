@@ -1387,8 +1387,7 @@
     
     <!-- Main JavaScript -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-        document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
     // Initialize Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
@@ -1407,8 +1406,10 @@
         firebase.app(); // if already initialized, use that one
     }
     
+    // Declare these ONCE at the top level
     const auth = firebase.auth();
     const database = firebase.database();
+    const storage = firebase.storage();
 
     // DOM Elements
     const authPage = document.getElementById('auth-page');
@@ -1564,1102 +1565,1831 @@
         }
     }
 
-            const auth = firebase.auth();
-            const database = firebase.database();
-            const storage = firebase.storage();
+    // Load non-critical CSS
+    function loadDeferredStyles() {
+        const addStylesNode = document.getElementById("deferred-styles");
+        const replacement = document.createElement("div");
+        replacement.innerHTML = addStylesNode.textContent;
+        document.body.appendChild(replacement);
+        addStylesNode.parentElement.removeChild(addStylesNode);
+    }
 
-            // Load non-critical CSS
-            function loadDeferredStyles() {
-                const addStylesNode = document.getElementById("deferred-styles");
-                const replacement = document.createElement("div");
-                replacement.innerHTML = addStylesNode.textContent;
-                document.body.appendChild(replacement);
-                addStylesNode.parentElement.removeChild(addStylesNode);
+    // Initialize FPS counter
+    function initFPSCounter() {
+        const fpsCounter = document.getElementById('fps-counter-display');
+        let lastTime = performance.now();
+        let frameCount = 0;
+        let fps = 0;
+
+        function updateFPSCounter() {
+            frameCount++;
+            const now = performance.now();
+            const delta = now - lastTime;
+            
+            if (delta >= 1000) {
+                fps = Math.round((frameCount * 1000) / delta);
+                fpsCounter.textContent = `FPS: ${fps}`;
+                frameCount = 0;
+                lastTime = now;
             }
+            requestAnimationFrame(updateFPSCounter);
+        }
 
-            // Initialize FPS counter
-            function initFPSCounter() {
-                const fpsCounter = document.getElementById('fps-counter-display');
-                let lastTime = performance.now();
-                let frameCount = 0;
-                let fps = 0;
+        updateFPSCounter();
+    }
 
-                function updateFPSCounter() {
-                    frameCount++;
-                    const now = performance.now();
-                    const delta = now - lastTime;
-                    
-                    if (delta >= 1000) {
-                        fps = Math.round((frameCount * 1000) / delta);
-                        fpsCounter.textContent = `FPS: ${fps}`;
-                        frameCount = 0;
-                        lastTime = now;
+    // Initialize particles.js
+    function initParticles() {
+        if (typeof particlesJS !== 'undefined') {
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": {
+                        "value": 60,  // Reduced for performance
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": "#ffffff"
+                    },
+                    "shape": {
+                        "type": "circle",
+                        "stroke": {
+                            "width": 0,
+                            "color": "#000000"
+                        }
+                    },
+                    "opacity": {
+                        "value": 0.5,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 1,
+                            "opacity_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 2,
+                            "size_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#4d8bf0",
+                        "opacity": 0.4,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 1,  // Reduced for performance
+                        "direction": "none",
+                        "random": true,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false
                     }
-                    requestAnimationFrame(updateFPSCounter);
-                }
-
-                updateFPSCounter();
-            }
-
-            // Initialize particles.js
-            function initParticles() {
-                if (typeof particlesJS !== 'undefined') {
-                    particlesJS('particles-js', {
-                        "particles": {
-                            "number": {
-                                "value": 60,  // Reduced for performance
-                                "density": {
-                                    "enable": true,
-                                    "value_area": 800
-                                }
-                            },
-                            "color": {
-                                "value": "#ffffff"
-                            },
-                            "shape": {
-                                "type": "circle",
-                                "stroke": {
-                                    "width": 0,
-                                    "color": "#000000"
-                                }
-                            },
-                            "opacity": {
-                                "value": 0.5,
-                                "random": true,
-                                "anim": {
-                                    "enable": true,
-                                    "speed": 1,
-                                    "opacity_min": 0.1,
-                                    "sync": false
-                                }
-                            },
-                            "size": {
-                                "value": 3,
-                                "random": true,
-                                "anim": {
-                                    "enable": true,
-                                    "speed": 2,
-                                    "size_min": 0.1,
-                                    "sync": false
-                                }
-                            },
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {
+                            "enable": true,
+                            "mode": "grab"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        },
+                        "resize": true
+                    },
+                    "modes": {
+                        "grab": {
+                            "distance": 140,
                             "line_linked": {
-                                "enable": true,
-                                "distance": 150,
-                                "color": "#4d8bf0",
-                                "opacity": 0.4,
-                                "width": 1
-                            },
-                            "move": {
-                                "enable": true,
-                                "speed": 1,  // Reduced for performance
-                                "direction": "none",
-                                "random": true,
-                                "straight": false,
-                                "out_mode": "out",
-                                "bounce": false
+                                "opacity": 1
                             }
                         },
-                        "interactivity": {
-                            "detect_on": "canvas",
-                            "events": {
-                                "onhover": {
-                                    "enable": true,
-                                    "mode": "grab"
-                                },
-                                "onclick": {
-                                    "enable": true,
-                                    "mode": "push"
-                                },
-                                "resize": true
-                            },
-                            "modes": {
-                                "grab": {
-                                    "distance": 140,
-                                    "line_linked": {
-                                        "opacity": 1
-                                    }
-                                },
-                                "push": {
-                                    "particles_nb": 4
-                                }
-                            }
-                        },
-                        "retina_detect": true
-                    });
+                        "push": {
+                            "particles_nb": 4
+                        }
+                    }
+                },
+                "retina_detect": true
+            });
+        } else {
+            setTimeout(initParticles, 100);
+        }
+    }
+
+    // Settings panel functionality
+    function initSettingsPanel() {
+        const settingsPanel = document.getElementById('settings-panel');
+        const settingsBtn = document.getElementById('settings-btn');
+        const closeSettings = document.getElementById('close-settings');
+        const darkModeToggle = document.getElementById('dark-mode');
+        const particlesToggle = document.getElementById('particles-toggle');
+        const fpsCounterToggle = document.getElementById('fps-counter');
+        const colorSchemeOptions = document.querySelectorAll('.color-scheme-option');
+        const cloakToggle = document.getElementById('cloak-toggle');
+        const aboutBlankToggle = document.getElementById('about-blank-toggle');
+        const cloakSiteSelect = document.getElementById('cloak-site');
+        const applyCloakBtn = document.getElementById('apply-cloak');
+        const fpsCounterDisplay = document.getElementById('fps-counter-display');
+
+        // Load saved settings from localStorage
+        function loadSettings() {
+            // Dark mode
+            if (localStorage.getItem('darkMode') === 'false') {
+                darkModeToggle.checked = false;
+                document.body.classList.add('light-mode');
+            }
+
+            // Particles
+            if (localStorage.getItem('particlesEnabled') === 'false') {
+                particlesToggle.checked = false;
+                document.getElementById('particles-js').style.display = 'none';
+            }
+
+            // FPS counter
+            if (localStorage.getItem('fpsCounterEnabled') === 'true') {
+                fpsCounterToggle.checked = true;
+                fpsCounterDisplay.style.display = 'block';
+                initFPSCounter();
+            }
+
+            // Color scheme
+            const savedScheme = localStorage.getItem('colorScheme');
+            if (savedScheme) {
+                document.querySelector(`.color-scheme-option[data-scheme="${savedScheme}"]`).classList.add('selected');
+                applyColorScheme(savedScheme);
+            }
+
+            // Cloaking settings
+            if (localStorage.getItem('cloakEnabled') === 'true') {
+                cloakToggle.checked = true;
+            }
+            if (localStorage.getItem('aboutBlankEnabled') === 'true') {
+                aboutBlankToggle.checked = true;
+            }
+            if (localStorage.getItem('cloakSite')) {
+                cloakSiteSelect.value = localStorage.getItem('cloakSite');
+            }
+        }
+
+        // Apply color scheme
+        function applyColorScheme(scheme) {
+            const bgAnimation = document.querySelector('.bg-animation');
+            
+            switch(scheme) {
+                case 'default':
+                    bgAnimation.style.background = 'linear-gradient(135deg, #0f0c29 0%, #1a1a3a 25%, #24243e 50%, #302b63 75%, #24243e 100%)';
+                    break;
+                case 'red':
+                    bgAnimation.style.background = 'linear-gradient(135deg, #1a2a6c 0%, #b21f1f 100%)';
+                    break;
+                case 'green':
+                    bgAnimation.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+                    break;
+                case 'blue':
+                    bgAnimation.style.background = 'linear-gradient(135deg, #5433FF 0%, #20BDFF 100%)';
+                    break;
+                case 'purple':
+                    bgAnimation.style.background = 'linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%)';
+                    break;
+                case 'orange':
+                    bgAnimation.style.background = 'linear-gradient(135deg, #f12711 0%, #f5af19 100%)';
+                    break;
+            }
+        }
+
+        // Toggle settings panel
+        settingsBtn.addEventListener('click', () => {
+            settingsPanel.classList.toggle('open');
+        });
+
+        closeSettings.addEventListener('click', () => {
+            settingsPanel.classList.remove('open');
+        });
+
+        // Dark mode toggle
+        darkModeToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                document.body.classList.remove('light-mode');
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                document.body.classList.add('light-mode');
+                localStorage.setItem('darkMode', 'false');
+            }
+        });
+
+        // Particles toggle
+        particlesToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                document.getElementById('particles-js').style.display = 'block';
+                initParticles();
+                localStorage.setItem('particlesEnabled', 'true');
+            } else {
+                document.getElementById('particles-js').style.display = 'none';
+                localStorage.setItem('particlesEnabled', 'false');
+            }
+        });
+
+        // FPS counter toggle
+        fpsCounterToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                fpsCounterDisplay.style.display = 'block';
+                initFPSCounter();
+                localStorage.setItem('fpsCounterEnabled', 'true');
+            } else {
+                fpsCounterDisplay.style.display = 'none';
+                localStorage.setItem('fpsCounterEnabled', 'false');
+            }
+        });
+
+        // Color scheme selection
+        colorSchemeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                colorSchemeOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                const scheme = option.dataset.scheme;
+                applyColorScheme(scheme);
+                localStorage.setItem('colorScheme', scheme);
+            });
+        });
+
+        // Cloaking functionality
+        function applyCloaking() {
+            const cloakEnabled = cloakToggle.checked;
+            const aboutBlankEnabled = aboutBlankToggle.checked;
+            const cloakSite = cloakSiteSelect.value;
+            
+            if (!cloakEnabled) {
+                localStorage.removeItem('cloakEnabled');
+                localStorage.removeItem('aboutBlankEnabled');
+                localStorage.removeItem('cloakSite');
+                document.title = "murasaki's center v2 | more features!";
+                return;
+            }
+            
+            localStorage.setItem('cloakEnabled', 'true');
+            localStorage.setItem('aboutBlankEnabled', aboutBlankEnabled ? 'true' : 'false');
+            localStorage.setItem('cloakSite', cloakSite);
+            
+            let title = '';
+            let icon = '';
+            
+            switch(cloakSite) {
+                case 'google-classroom':
+                    title = 'Google Classroom';
+                    icon = 'https://ssl.gstatic.com/classroom/favicon.png';
+                    break;
+                case 'google-docs':
+                    title = 'Google Docs';
+                    icon = 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico';
+                    break;
+                case 'kami':
+                    title = 'Kami';
+                    icon = 'https://kami.app/favicon.ico';
+                    break;
+                case 'clever':
+                    title = 'Clever | Portal';
+                    icon = 'https://clever.com/favicon.ico';
+                    break;
+                case 'google':
+                    title = 'Google';
+                    icon = 'https://www.google.com/favicon.ico';
+                    break;
+            }
+            
+            document.title = title;
+            
+            // Change favicon
+            const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+            link.type = 'image/x-icon';
+            link.rel = 'shortcut icon';
+            link.href = icon;
+            document.getElementsByTagName('head')[0].appendChild(link);
+            
+            // About:blank cloaking if enabled
+            if (aboutBlankEnabled) {
+                const aboutBlank = window.open('about:blank', '_blank');
+                if (aboutBlank) {
+                    aboutBlank.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>${title}</title>
+                            <link rel="icon" href="${icon}">
+                            <style>
+                                body { margin: 0; padding: 0; }
+                                iframe { border: none; width: 100%; height: 100vh; }
+                            </style>
+                        </head>
+                        <body>
+                            <iframe src="${window.location.href}"></iframe>
+                        </body>
+                        </html>
+                    `);
+                    aboutBlank.document.close();
+                    window.location.href = 'about:blank';
+                }
+            }
+        }
+        
+        // Apply cloaking button
+        applyCloakBtn.addEventListener('click', applyCloaking);
+        
+        // Load settings when page loads
+        loadSettings();
+        
+        // Apply cloaking if enabled
+        if (localStorage.getItem('cloakEnabled') === 'true') {
+            applyCloaking();
+        }
+    }
+
+                
+               // ======================
+    // TAB SYSTEM
+    // ======================
+    function initTabSystem() {
+        const tabs = document.querySelectorAll('.tab');
+        const gameCards = document.querySelectorAll('.game-card');
+        const chatContainer = document.getElementById('chatroom');
+        const aiContainer = document.getElementById('ai-assistant');
+        
+        // Function to switch tabs with animation
+        function switchTab(tab) {
+            const category = tab.dataset.category;
+            
+            // Animate out current active content
+            const currentActiveTab = document.querySelector('.tab.active');
+            if (currentActiveTab) {
+                currentActiveTab.classList.remove('active');
+            }
+            
+            // Add active class to new tab with animation
+            tab.classList.add('active');
+            
+            // Hide all containers first with fade out animation
+            if (chatContainer.classList.contains('active')) {
+                chatContainer.style.animation = 'fadeOut 0.3s ease-out forwards';
+                setTimeout(() => {
+                    chatContainer.classList.remove('active');
+                    chatContainer.style.display = 'none';
+                    chatContainer.style.animation = '';
+                }, 300);
+            }
+            
+            if (aiContainer.classList.contains('active')) {
+                aiContainer.style.animation = 'fadeOut 0.3s ease-out forwards';
+                setTimeout(() => {
+                    aiContainer.classList.remove('active');
+                    aiContainer.style.display = 'none';
+                    aiContainer.style.animation = '';
+                }, 300);
+            }
+            
+            gameCards.forEach(card => {
+                if (card.style.display === 'block') {
+                    card.style.animation = 'fadeOut 0.3s ease-out forwards';
+                    setTimeout(() => {
+                        card.style.display = 'none';
+                        card.style.animation = '';
+                    }, 300);
+                }
+            });
+            
+            // Show the selected container with fade in animation
+            setTimeout(() => {
+                if (category === 'chatroom') {
+                    chatContainer.style.display = 'block';
+                    setTimeout(() => {
+                        chatContainer.classList.add('active');
+                        chatContainer.style.animation = 'fadeIn 0.3s ease-out forwards';
+                        checkUsername();
+                    }, 10);
+                } else if (category === 'ai-assistant') {
+                    aiContainer.style.display = 'block';
+                    setTimeout(() => {
+                        aiContainer.classList.add('active');
+                        aiContainer.style.animation = 'fadeIn 0.3s ease-out forwards';
+                        // Initialize AI if first time
+                        if (document.getElementById('ai-messages').children.length === 0) {
+                            addAIMessage("Hello! I'm murasaki's AI assistant. How can I help you today?");
+                            addAIMessage("For image analysis, this AI is currently unsupported, please use the attach button below to redirect yourself to another website. Thank you for your understanding.", false);
+                        }
+                    }, 10);
                 } else {
-                    setTimeout(initParticles, 100);
+                    gameCards.forEach(card => {
+                        if (category === 'all' || card.dataset.category === category) {
+                            card.style.display = 'none';
+                            setTimeout(() => {
+                                card.style.display = 'block';
+                                card.style.animation = 'fadeIn 0.3s ease-out forwards';
+                            }, 10);
+                        }
+                    });
                 }
+            }, 300);
+        }
+        
+        // Add click event to all tabs
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                switchTab(tab);
+            });
+        });
+        
+        // Initialize first tab
+        const initialTab = document.querySelector('.tab.active');
+        if (initialTab) {
+            switchTab(initialTab);
+        }
+        
+        // Game Modal
+        const modal = document.querySelector('.modal');
+        const playBtns = document.querySelectorAll('.play-btn');
+        const closeBtn = document.querySelector('.close-btn');
+        const gameFrame = document.querySelector('.game-frame');
+        
+        playBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const gameUrl = btn.dataset.game;
+                gameFrame.src = gameUrl;
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+        
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+            gameFrame.src = '';
+            document.body.style.overflow = 'auto';
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                gameFrame.src = '';
+                document.body.style.overflow = 'auto';
+            }
+        });
+    }
+                
+               // ======================
+    // CHAT SYSTEM
+    // ======================
+    const usernameModal = document.getElementById('username-modal');
+    const chatUsernameInput = document.getElementById('username-input');
+    const setUsernameBtn = document.getElementById('set-username-btn');
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatRef = database.ref('chat');
+    
+    let chatUsername = localStorage.getItem('chatUsername') || '';
+    
+    // Username handling
+    function checkUsername() {
+        if (!chatUsername) {
+            usernameModal.classList.add('active');
+            chatUsernameInput.focus();
+        } else {
+            usernameModal.classList.remove('active');
+            loadChatHistory();
+        }
+    }
+    
+    function setUsername() {
+        const newUsername = chatUsernameInput.value.trim();
+        if (newUsername) {
+            chatUsername = newUsername;
+            localStorage.setItem('chatUsername', chatUsername);
+            usernameModal.classList.remove('active');
+            
+            // System welcome message
+            chatRef.push({
+                username: 'System',
+                message: `${chatUsername} joined the chat!`,
+                timestamp: Date.now()
+            });
+            
+            loadChatHistory();
+        }
+    }
+    
+    function loadChatHistory() {
+        chatRef.limitToLast(100).on('value', (snapshot) => {
+            chatMessages.innerHTML = '';
+            
+            snapshot.forEach((childSnapshot) => {
+                const msg = childSnapshot.val();
+                displayMessage({
+                    ...msg,
+                    key: childSnapshot.key
+                });
+            });
+            
+            scrollToBottom();
+        });
+    }
+    
+    function displayMessage({ username, message, timestamp, key, isSystem }) {
+        const isCurrentUser = username === chatUsername;
+        const isSystemMsg = username === 'System' || username === 'AI Assistant' || isSystem;
+        
+        const messageEl = document.createElement('div');
+        messageEl.className = `message ${isCurrentUser ? 'your-message' : ''} ${isSystemMsg ? 'system-message' : ''}`;
+        
+        const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        let deleteBtn = '';
+        if (isCurrentUser && !isSystemMsg) {
+            deleteBtn = `<button class="delete-message" data-key="${key}">×</button>`;
+        }
+        
+        messageEl.innerHTML = `
+            ${deleteBtn}
+            <span class="message-username" style="color: ${isSystemMsg ? '#ff2d75' : '#00a8ff'}">${username}:</span>
+            <span class="message-text">${message}</span>
+            <div class="message-time">${time}</div>
+        `;
+        
+        chatMessages.appendChild(messageEl);
+        scrollToBottom();
+        
+        // Add delete event listener if this is the user's message
+        if (isCurrentUser && !isSystemMsg) {
+            messageEl.querySelector('.delete-message').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const messageKey = e.target.getAttribute('data-key');
+                deleteMessage(messageKey);
+            });
+        }
+    }
+    
+    function deleteMessage(messageKey) {
+        if (confirm('Are you sure you want to delete this message?')) {
+            database.ref('chat/' + messageKey).remove()
+                .then(() => {
+                    console.log('Message deleted successfully');
+                })
+                .catch((error) => {
+                    console.error('Error deleting message:', error);
+                });
+        }
+    }
+    
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // Send message function
+    function sendMessage() {
+        const message = messageInput.value.trim();
+        if (message && chatUsername) {
+            chatRef.push({
+                username: chatUsername,
+                message,
+                timestamp: Date.now()
+            });
+            messageInput.value = '';
+        }
+    }
+    
+    // Event listeners for chat
+    setUsernameBtn.addEventListener('click', setUsername);
+    chatUsernameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') setUsername();
+    });
+    sendBtn.addEventListener('click', sendMessage);
+    
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            const message = messageInput.value.trim();
+            if (message && chatUsername) {
+                chatRef.push({
+                    username: chatUsername,
+                    message,
+                    timestamp: Date.now()
+                });
+                messageInput.value = '';
+            }
+        }
+    });
+                
+               // ======================
+    // AI ASSISTANT
+    // ======================
+    function addAIMessage(text, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `ai-message ${isUser ? 'ai-user-message' : ''}`;
+        messageDiv.style.animation = 'fadeIn 0.3s ease-out';
+        messageDiv.innerHTML = `<div class="message-text">${text}</div>`;
+        document.getElementById('ai-messages').appendChild(messageDiv);
+        document.getElementById('ai-messages').scrollTop = document.getElementById('ai-messages').scrollHeight;
+    }
+    
+    // Show typing indicator
+    function showTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'ai-message ai-typing';
+        typingDiv.textContent = 'AI is thinking...';
+        typingDiv.id = 'typing-indicator';
+        typingDiv.style.animation = 'fadeIn 0.3s ease-out';
+        document.getElementById('ai-messages').appendChild(typingDiv);
+        document.getElementById('ai-messages').scrollTop = document.getElementById('ai-messages').scrollHeight;
+        return typingDiv;
+    }
+    
+    // Remove typing indicator
+    function removeTypingIndicator() {
+        const typingDiv = document.getElementById('typing-indicator');
+        if (typingDiv) {
+            typingDiv.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => typingDiv.remove(), 300);
+        }
+    }
+    
+    // Get AI response
+    async function getAIResponse(question) {
+        try {
+            const response = await fetch('https://murasakiwastaken.vercel.app/api/ai-proxy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ question })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data.response || "I didn't get a response.";
+        } catch (error) {
+            console.error('AI Error:', error);
+            return `Error: ${error.message}`;
+        }
+    }
+    
+    // Handle sending message
+    async function handleAIInput() {
+        const question = document.getElementById('ai-input').value.trim();
+        if (!question) return;
+        
+        // Display user message
+        addAIMessage(question, true);
+        
+        // Clear input and show typing indicator
+        document.getElementById('ai-input').value = '';
+        const typingDiv = showTypingIndicator();
+        
+        try {
+            const response = await getAIResponse(question);
+            removeTypingIndicator();
+            addAIMessage(response);
+        } catch (error) {
+            removeTypingIndicator();
+            addAIMessage("Sorry, I couldn't process your request. Please try again.");
+        }
+    }
+    
+    // Event listeners
+    document.getElementById('ai-send-btn').addEventListener('click', handleAIInput);
+    document.getElementById('ai-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleAIInput();
+    });
+    
+    // Redirect to image analysis service
+    document.getElementById('ai-attach-btn').addEventListener('click', () => {
+        if (confirm("Image analysis requires visiting an external site. Proceed?")) {
+            window.location.href = "https://aiassistantbot.pages.dev";
+        }
+    });
+                
+              <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
+        authDomain: "chatroommurasaki.firebaseapp.com",
+        projectId: "chatroommurasaki",
+        storageBucket: "chatroommurasaki.appspot.com",
+        messagingSenderId: "649572971936",
+        appId: "1:649572971936:web:5d0aaf1be9f09cb428a0c5",
+        measurementId: "G-1113622WQQ"
+    };
+
+    // Initialize Firebase only if it hasn't been initialized already
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    } else {
+        firebase.app(); // if already initialized, use that one
+    }
+    
+    // Declare these ONCE at the top level
+    const auth = firebase.auth();
+    const database = firebase.database();
+    const storage = firebase.storage();
+
+    // DOM Elements
+    const authPage = document.getElementById('auth-page');
+    const mainContainer = document.getElementById('main-container');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const showSignup = document.getElementById('show-signup');
+    const showLogin = document.getElementById('show-login');
+    const loginBtn = document.getElementById('login-btn');
+    const signupBtn = document.getElementById('signup-btn');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const newUsernameInput = document.getElementById('new-username');
+    const newPasswordInput = document.getElementById('new-password');
+    const authStatus = document.getElementById('auth-status');
+    const signupStatus = document.getElementById('signup-status');
+
+    // Toggle between login and signup forms
+    showSignup.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginForm.classList.add('hidden');
+        signupForm.classList.remove('hidden');
+        clearStatus();
+    });
+
+    showLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        signupForm.classList.add('hidden');
+        loginForm.classList.remove('hidden');
+        clearStatus();
+    });
+
+    // Login function
+    loginBtn.addEventListener('click', () => {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+        
+        if (!username || !password) {
+            showError(authStatus, 'Please enter both username and password');
+            return;
+        }
+        
+        // Using username@example.com as the email
+        const email = `${username}@example.com`;
+        
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Logging in...';
+        
+        auth.signInWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                showSuccess(authStatus, 'Login successful!');
+                // Hide auth page and show main content
+                authPage.style.display = 'none';
+                mainContainer.style.display = 'flex';
+                loadDeferredStyles();
+                initParticles();
+                initTabSystem();
+                initFeedbackSystem();
+                initSettingsPanel();
+            })
+            .catch((error) => {
+                showError(authStatus, getErrorMessage(error));
+            })
+            .finally(() => {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Log In';
+            });
+    });
+    
+    // Signup function
+    signupBtn.addEventListener('click', () => {
+        const username = newUsernameInput.value.trim();
+        const password = newPasswordInput.value.trim();
+        
+        if (!username || !password) {
+            showError(signupStatus, 'Please enter both username and password');
+            return;
+        }
+        
+        if (password.length < 6) {
+            showError(signupStatus, 'Password must be at least 6 characters');
+            return;
+        }
+        
+        // Using username@example.com as the email
+        const email = `${username}@example.com`;
+        
+        signupBtn.disabled = true;
+        signupBtn.textContent = 'Creating account...';
+        
+        auth.createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                showSuccess(signupStatus, 'Account created successfully!');
+                // Hide auth page and show main content
+                authPage.style.display = 'none';
+                mainContainer.style.display = 'flex';
+                loadDeferredStyles();
+                initParticles();
+                initTabSystem();
+                initFeedbackSystem();
+                initSettingsPanel();
+            })
+            .catch((error) => {
+                showError(signupStatus, getErrorMessage(error));
+            })
+            .finally(() => {
+                signupBtn.disabled = false;
+                signupBtn.textContent = 'Sign Up';
+            });
+    });
+    
+    // Helper functions
+    function clearInputs() {
+        usernameInput.value = '';
+        passwordInput.value = '';
+        newUsernameInput.value = '';
+        newPasswordInput.value = '';
+    }
+    
+    function clearStatus() {
+        authStatus.classList.remove('success', 'error');
+        authStatus.style.display = 'none';
+        signupStatus.classList.remove('success', 'error');
+        signupStatus.style.display = 'none';
+    }
+    
+    function showError(element, message) {
+        element.textContent = message;
+        element.classList.remove('success');
+        element.classList.add('error');
+        element.style.display = 'block';
+    }
+    
+    function showSuccess(element, message) {
+        element.textContent = message;
+        element.classList.remove('error');
+        element.classList.add('success');
+        element.style.display = 'block';
+    }
+    
+    function getErrorMessage(error) {
+        switch (error.code) {
+            case 'auth/wrong-password':
+                return 'Incorrect password';
+            case 'auth/user-not-found':
+                return 'Username not found';
+            case 'auth/email-already-in-use':
+                return 'Username already taken';
+            case 'auth/weak-password':
+                return 'Password must be at least 6 characters';
+            default:
+                return 'Login failed. Please try again.';
+        }
+    }
+
+    // Load non-critical CSS
+    function loadDeferredStyles() {
+        const addStylesNode = document.getElementById("deferred-styles");
+        const replacement = document.createElement("div");
+        replacement.innerHTML = addStylesNode.textContent;
+        document.body.appendChild(replacement);
+        addStylesNode.parentElement.removeChild(addStylesNode);
+    }
+
+    // Initialize FPS counter
+    function initFPSCounter() {
+        const fpsCounter = document.getElementById('fps-counter-display');
+        let lastTime = performance.now();
+        let frameCount = 0;
+        let fps = 0;
+
+        function updateFPSCounter() {
+            frameCount++;
+            const now = performance.now();
+            const delta = now - lastTime;
+            
+            if (delta >= 1000) {
+                fps = Math.round((frameCount * 1000) / delta);
+                fpsCounter.textContent = `FPS: ${fps}`;
+                frameCount = 0;
+                lastTime = now;
+            }
+            requestAnimationFrame(updateFPSCounter);
+        }
+
+        updateFPSCounter();
+    }
+
+    // Initialize particles.js
+    function initParticles() {
+        if (typeof particlesJS !== 'undefined') {
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": {
+                        "value": 60,  // Reduced for performance
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": "#ffffff"
+                    },
+                    "shape": {
+                        "type": "circle",
+                        "stroke": {
+                            "width": 0,
+                            "color": "#000000"
+                        }
+                    },
+                    "opacity": {
+                        "value": 0.5,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 1,
+                            "opacity_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 2,
+                            "size_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#4d8bf0",
+                        "opacity": 0.4,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 1,  // Reduced for performance
+                        "direction": "none",
+                        "random": true,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false
+                    }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {
+                            "enable": true,
+                            "mode": "grab"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        },
+                        "resize": true
+                    },
+                    "modes": {
+                        "grab": {
+                            "distance": 140,
+                            "line_linked": {
+                                "opacity": 1
+                            }
+                        },
+                        "push": {
+                            "particles_nb": 4
+                        }
+                    }
+                },
+                "retina_detect": true
+            });
+        } else {
+            setTimeout(initParticles, 100);
+        }
+    }
+
+    // Settings panel functionality
+    function initSettingsPanel() {
+        const settingsPanel = document.getElementById('settings-panel');
+        const settingsBtn = document.getElementById('settings-btn');
+        const closeSettings = document.getElementById('close-settings');
+        const darkModeToggle = document.getElementById('dark-mode');
+        const particlesToggle = document.getElementById('particles-toggle');
+        const fpsCounterToggle = document.getElementById('fps-counter');
+        const colorSchemeOptions = document.querySelectorAll('.color-scheme-option');
+        const cloakToggle = document.getElementById('cloak-toggle');
+        const aboutBlankToggle = document.getElementById('about-blank-toggle');
+        const cloakSiteSelect = document.getElementById('cloak-site');
+        const applyCloakBtn = document.getElementById('apply-cloak');
+        const fpsCounterDisplay = document.getElementById('fps-counter-display');
+
+        // Load saved settings from localStorage
+        function loadSettings() {
+            // Dark mode
+            if (localStorage.getItem('darkMode') === 'false') {
+                darkModeToggle.checked = false;
+                document.body.classList.add('light-mode');
             }
 
-            // Settings panel functionality
-            function initSettingsPanel() {
-                const settingsPanel = document.getElementById('settings-panel');
-                const settingsBtn = document.getElementById('settings-btn');
-                const closeSettings = document.getElementById('close-settings');
-                const darkModeToggle = document.getElementById('dark-mode');
-                const particlesToggle = document.getElementById('particles-toggle');
-                const fpsCounterToggle = document.getElementById('fps-counter');
-                const colorSchemeOptions = document.querySelectorAll('.color-scheme-option');
-                const cloakToggle = document.getElementById('cloak-toggle');
-                const aboutBlankToggle = document.getElementById('about-blank-toggle');
-                const cloakSiteSelect = document.getElementById('cloak-site');
-                const applyCloakBtn = document.getElementById('apply-cloak');
-                const fpsCounterDisplay = document.getElementById('fps-counter-display');
-
-                // Load saved settings from localStorage
-                function loadSettings() {
-                    // Dark mode
-                    if (localStorage.getItem('darkMode') === 'false') {
-                        darkModeToggle.checked = false;
-                        document.body.classList.add('light-mode');
-                    }
-
-                    // Particles
-                    if (localStorage.getItem('particlesEnabled') === 'false') {
-                        particlesToggle.checked = false;
-                        document.getElementById('particles-js').style.display = 'none';
-                    }
-
-                    // FPS counter
-                    if (localStorage.getItem('fpsCounterEnabled') === 'true') {
-                        fpsCounterToggle.checked = true;
-                        fpsCounterDisplay.style.display = 'block';
-                        initFPSCounter();
-                    }
-
-                    // Color scheme
-                    const savedScheme = localStorage.getItem('colorScheme');
-                    if (savedScheme) {
-                        document.querySelector(`.color-scheme-option[data-scheme="${savedScheme}"]`).classList.add('selected');
-                        applyColorScheme(savedScheme);
-                    }
-
-                    // Cloaking settings
-                    if (localStorage.getItem('cloakEnabled') === 'true') {
-                        cloakToggle.checked = true;
-                    }
-                    if (localStorage.getItem('aboutBlankEnabled') === 'true') {
-                        aboutBlankToggle.checked = true;
-                    }
-                    if (localStorage.getItem('cloakSite')) {
-                        cloakSiteSelect.value = localStorage.getItem('cloakSite');
-                    }
-                }
-
-                // Apply color scheme
-                function applyColorScheme(scheme) {
-                    const bgAnimation = document.querySelector('.bg-animation');
-                    
-                    switch(scheme) {
-                        case 'default':
-                            bgAnimation.style.background = 'linear-gradient(135deg, #0f0c29 0%, #1a1a3a 25%, #24243e 50%, #302b63 75%, #24243e 100%)';
-                            break;
-                        case 'red':
-                            bgAnimation.style.background = 'linear-gradient(135deg, #1a2a6c 0%, #b21f1f 100%)';
-                            break;
-                        case 'green':
-                            bgAnimation.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
-                            break;
-                        case 'blue':
-                            bgAnimation.style.background = 'linear-gradient(135deg, #5433FF 0%, #20BDFF 100%)';
-                            break;
-                        case 'purple':
-                            bgAnimation.style.background = 'linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%)';
-                            break;
-                        case 'orange':
-                            bgAnimation.style.background = 'linear-gradient(135deg, #f12711 0%, #f5af19 100%)';
-                            break;
-                    }
-                }
-
-                // Toggle settings panel
-                settingsBtn.addEventListener('click', () => {
-                    settingsPanel.classList.toggle('open');
-                });
-
-                closeSettings.addEventListener('click', () => {
-                    settingsPanel.classList.remove('open');
-                });
-
-                // Dark mode toggle
-                darkModeToggle.addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        document.body.classList.remove('light-mode');
-                        localStorage.setItem('darkMode', 'true');
-                    } else {
-                        document.body.classList.add('light-mode');
-                        localStorage.setItem('darkMode', 'false');
-                    }
-                });
-
-                // Particles toggle
-                particlesToggle.addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        document.getElementById('particles-js').style.display = 'block';
-                        initParticles();
-                        localStorage.setItem('particlesEnabled', 'true');
-                    } else {
-                        document.getElementById('particles-js').style.display = 'none';
-                        localStorage.setItem('particlesEnabled', 'false');
-                    }
-                });
-
-                // FPS counter toggle
-                fpsCounterToggle.addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        fpsCounterDisplay.style.display = 'block';
-                        initFPSCounter();
-                        localStorage.setItem('fpsCounterEnabled', 'true');
-                    } else {
-                        fpsCounterDisplay.style.display = 'none';
-                        localStorage.setItem('fpsCounterEnabled', 'false');
-                    }
-                });
-
-                // Color scheme selection
-                colorSchemeOptions.forEach(option => {
-                    option.addEventListener('click', () => {
-                        colorSchemeOptions.forEach(opt => opt.classList.remove('selected'));
-                        option.classList.add('selected');
-                        const scheme = option.dataset.scheme;
-                        applyColorScheme(scheme);
-                        localStorage.setItem('colorScheme', scheme);
-                    });
-                });
-
-                // Cloaking functionality
-                function applyCloaking() {
-                    const cloakEnabled = cloakToggle.checked;
-                    const aboutBlankEnabled = aboutBlankToggle.checked;
-                    const cloakSite = cloakSiteSelect.value;
-                    
-                    if (!cloakEnabled) {
-                        localStorage.removeItem('cloakEnabled');
-                        localStorage.removeItem('aboutBlankEnabled');
-                        localStorage.removeItem('cloakSite');
-                        document.title = "murasaki's center v2 | more features!";
-                        return;
-                    }
-                    
-                    localStorage.setItem('cloakEnabled', 'true');
-                    localStorage.setItem('aboutBlankEnabled', aboutBlankEnabled ? 'true' : 'false');
-                    localStorage.setItem('cloakSite', cloakSite);
-                    
-                    let title = '';
-                    let icon = '';
-                    
-                    switch(cloakSite) {
-                        case 'google-classroom':
-                            title = 'Google Classroom';
-                            icon = 'https://ssl.gstatic.com/classroom/favicon.png';
-                            break;
-                        case 'google-docs':
-                            title = 'Google Docs';
-                            icon = 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico';
-                            break;
-                        case 'kami':
-                            title = 'Kami';
-                            icon = 'https://kami.app/favicon.ico';
-                            break;
-                        case 'clever':
-                            title = 'Clever | Portal';
-                            icon = 'https://clever.com/favicon.ico';
-                            break;
-                        case 'google':
-                            title = 'Google';
-                            icon = 'https://www.google.com/favicon.ico';
-                            break;
-                    }
-                    
-                    document.title = title;
-                    
-                    // Change favicon
-                    const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-                    link.type = 'image/x-icon';
-                    link.rel = 'shortcut icon';
-                    link.href = icon;
-                    document.getElementsByTagName('head')[0].appendChild(link);
-                    
-                    // About:blank cloaking if enabled
-                    if (aboutBlankEnabled) {
-                        const aboutBlank = window.open('about:blank', '_blank');
-                        if (aboutBlank) {
-                            aboutBlank.document.write(`
-                                <!DOCTYPE html>
-                                <html>
-                                <head>
-                                    <title>${title}</title>
-                                    <link rel="icon" href="${icon}">
-                                    <style>
-                                        body { margin: 0; padding: 0; }
-                                        iframe { border: none; width: 100%; height: 100vh; }
-                                    </style>
-                                </head>
-                                <body>
-                                    <iframe src="${window.location.href}"></iframe>
-                                </body>
-                                </html>
-                            `);
-                            aboutBlank.document.close();
-                            window.location.href = 'about:blank';
-                        }
-                    }
-                }
-                
-                // Apply cloaking button
-                applyCloakBtn.addEventListener('click', applyCloaking);
-                
-                // Load settings when page loads
-                loadSettings();
-                
-                // Apply cloaking if enabled
-                if (localStorage.getItem('cloakEnabled') === 'true') {
-                    applyCloaking();
-                }
+            // Particles
+            if (localStorage.getItem('particlesEnabled') === 'false') {
+                particlesToggle.checked = false;
+                document.getElementById('particles-js').style.display = 'none';
             }
 
-            // Main application initialization
-            function initApplication() {
-                // DOM Elements
-                const authPage = document.getElementById('auth-page');
-                const mainContainer = document.getElementById('main-container');
-                const loginForm = document.getElementById('login-form');
-                const signupForm = document.getElementById('signup-form');
-                const showSignup = document.getElementById('show-signup');
-                const showLogin = document.getElementById('show-login');
-                const loginBtn = document.getElementById('login-btn');
-                const signupBtn = document.getElementById('signup-btn');
-                const usernameInput = document.getElementById('username');
-                const passwordInput = document.getElementById('password');
-                const newUsernameInput = document.getElementById('new-username');
-                const newPasswordInput = document.getElementById('new-password');
-                const authStatus = document.getElementById('auth-status');
-                const signupStatus = document.getElementById('signup-status');
-                
-                // Toggle between login and signup forms
-                showSignup.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    loginForm.classList.add('hidden');
-                    signupForm.classList.remove('hidden');
-                    clearStatus();
-                });
-                
-                showLogin.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    signupForm.classList.add('hidden');
-                    loginForm.classList.remove('hidden');
-                    clearStatus();
-                });
-                
-                // Login function
-                loginBtn.addEventListener('click', () => {
-                    const username = usernameInput.value.trim();
-                    const password = passwordInput.value.trim();
-                    
-                    if (!username || !password) {
-                        showError(authStatus, 'Please enter both username and password');
-                        return;
-                    }
-                    
-                    // For demo, we'll use username@example.com as the email
-                    const email = `${username}@example.com`;
-                    
-                    loginBtn.disabled = true;
-                    loginBtn.textContent = 'Logging in...';
-                    
-                    auth.signInWithEmailAndPassword(email, password)
-                        .then((userCredential) => {
-                            showSuccess(authStatus, 'Login successful!');
-                            // Hide auth page and show main content
-                            authPage.style.display = 'none';
-                            mainContainer.style.display = 'flex';
-                            loadDeferredStyles();
-                            initParticles();
-                            initTabSystem();
-                            initFeedbackSystem();
-                            initSettingsPanel();
-                        })
-                        .catch((error) => {
-                            showError(authStatus, getErrorMessage(error));
-                        })
-                        .finally(() => {
-                            loginBtn.disabled = false;
-                            loginBtn.textContent = 'Log In';
-                        });
-                });
-                
-                // Signup function
-                signupBtn.addEventListener('click', () => {
-                    const username = newUsernameInput.value.trim();
-                    const password = newPasswordInput.value.trim();
-                    
-                    if (!username || !password) {
-                        showError(signupStatus, 'Please enter both username and password');
-                        return;
-                    }
-                    
-                    if (password.length < 6) {
-                        showError(signupStatus, 'Password must be at least 6 characters');
-                        return;
-                    }
-                    
-                    // For demo, we'll use username@example.com as the email
-                    const email = `${username}@example.com`;
-                    
-                    signupBtn.disabled = true;
-                    signupBtn.textContent = 'Creating account...';
-                    
-                    auth.createUserWithEmailAndPassword(email, password)
-                        .then((userCredential) => {
-                            showSuccess(signupStatus, 'Account created successfully!');
-                            // Hide auth page and show main content
-                            authPage.style.display = 'none';
-                            mainContainer.style.display = 'flex';
-                            loadDeferredStyles();
-                            initParticles();
-                            initTabSystem();
-                            initFeedbackSystem();
-                            initSettingsPanel();
-                        })
-                        .catch((error) => {
-                            showError(signupStatus, getErrorMessage(error));
-                        })
-                        .finally(() => {
-                            signupBtn.disabled = false;
-                            signupBtn.textContent = 'Sign Up';
-                        });
-                });
-                
-                // Helper functions
-                function clearInputs() {
-                    usernameInput.value = '';
-                    passwordInput.value = '';
-                    newUsernameInput.value = '';
-                    newPasswordInput.value = '';
+            // FPS counter
+            if (localStorage.getItem('fpsCounterEnabled') === 'true') {
+                fpsCounterToggle.checked = true;
+                fpsCounterDisplay.style.display = 'block';
+                initFPSCounter();
+            }
+
+            // Color scheme
+            const savedScheme = localStorage.getItem('colorScheme');
+            if (savedScheme) {
+                document.querySelector(`.color-scheme-option[data-scheme="${savedScheme}"]`).classList.add('selected');
+                applyColorScheme(savedScheme);
+            }
+
+            // Cloaking settings
+            if (localStorage.getItem('cloakEnabled') === 'true') {
+                cloakToggle.checked = true;
+            }
+            if (localStorage.getItem('aboutBlankEnabled') === 'true') {
+                aboutBlankToggle.checked = true;
+            }
+            if (localStorage.getItem('cloakSite')) {
+                cloakSiteSelect.value = localStorage.getItem('cloakSite');
+            }
+        }
+
+        // Apply color scheme
+        function applyColorScheme(scheme) {
+            const bgAnimation = document.querySelector('.bg-animation');
+            
+            switch(scheme) {
+                case 'default':
+                    bgAnimation.style.background = 'linear-gradient(135deg, #0f0c29 0%, #1a1a3a 25%, #24243e 50%, #302b63 75%, #24243e 100%)';
+                    break;
+                case 'red':
+                    bgAnimation.style.background = 'linear-gradient(135deg, #1a2a6c 0%, #b21f1f 100%)';
+                    break;
+                case 'green':
+                    bgAnimation.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+                    break;
+                case 'blue':
+                    bgAnimation.style.background = 'linear-gradient(135deg, #5433FF 0%, #20BDFF 100%)';
+                    break;
+                case 'purple':
+                    bgAnimation.style.background = 'linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%)';
+                    break;
+                case 'orange':
+                    bgAnimation.style.background = 'linear-gradient(135deg, #f12711 0%, #f5af19 100%)';
+                    break;
+            }
+        }
+
+        // Toggle settings panel
+        settingsBtn.addEventListener('click', () => {
+            settingsPanel.classList.toggle('open');
+        });
+
+        closeSettings.addEventListener('click', () => {
+            settingsPanel.classList.remove('open');
+        });
+
+        // Dark mode toggle
+        darkModeToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                document.body.classList.remove('light-mode');
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                document.body.classList.add('light-mode');
+                localStorage.setItem('darkMode', 'false');
+            }
+        });
+
+        // Particles toggle
+        particlesToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                document.getElementById('particles-js').style.display = 'block';
+                initParticles();
+                localStorage.setItem('particlesEnabled', 'true');
+            } else {
+                document.getElementById('particles-js').style.display = 'none';
+                localStorage.setItem('particlesEnabled', 'false');
+            }
+        });
+
+        // FPS counter toggle
+        fpsCounterToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                fpsCounterDisplay.style.display = 'block';
+                initFPSCounter();
+                localStorage.setItem('fpsCounterEnabled', 'true');
+            } else {
+                fpsCounterDisplay.style.display = 'none';
+                localStorage.setItem('fpsCounterEnabled', 'false');
+            }
+        });
+
+        // Color scheme selection
+        colorSchemeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                colorSchemeOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                const scheme = option.dataset.scheme;
+                applyColorScheme(scheme);
+                localStorage.setItem('colorScheme', scheme);
+            });
+        });
+
+        // Cloaking functionality
+        function applyCloaking() {
+            const cloakEnabled = cloakToggle.checked;
+            const aboutBlankEnabled = aboutBlankToggle.checked;
+            const cloakSite = cloakSiteSelect.value;
+            
+            if (!cloakEnabled) {
+                localStorage.removeItem('cloakEnabled');
+                localStorage.removeItem('aboutBlankEnabled');
+                localStorage.removeItem('cloakSite');
+                document.title = "murasaki's center v2 | more features!";
+                return;
+            }
+            
+            localStorage.setItem('cloakEnabled', 'true');
+            localStorage.setItem('aboutBlankEnabled', aboutBlankEnabled ? 'true' : 'false');
+            localStorage.setItem('cloakSite', cloakSite);
+            
+            let title = '';
+            let icon = '';
+            
+            switch(cloakSite) {
+                case 'google-classroom':
+                    title = 'Google Classroom';
+                    icon = 'https://ssl.gstatic.com/classroom/favicon.png';
+                    break;
+                case 'google-docs':
+                    title = 'Google Docs';
+                    icon = 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico';
+                    break;
+                case 'kami':
+                    title = 'Kami';
+                    icon = 'https://kami.app/favicon.ico';
+                    break;
+                case 'clever':
+                    title = 'Clever | Portal';
+                    icon = 'https://clever.com/favicon.ico';
+                    break;
+                case 'google':
+                    title = 'Google';
+                    icon = 'https://www.google.com/favicon.ico';
+                    break;
+            }
+            
+            document.title = title;
+            
+            // Change favicon
+            const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+            link.type = 'image/x-icon';
+            link.rel = 'shortcut icon';
+            link.href = icon;
+            document.getElementsByTagName('head')[0].appendChild(link);
+            
+            // About:blank cloaking if enabled
+            if (aboutBlankEnabled) {
+                const aboutBlank = window.open('about:blank', '_blank');
+                if (aboutBlank) {
+                    aboutBlank.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>${title}</title>
+                            <link rel="icon" href="${icon}">
+                            <style>
+                                body { margin: 0; padding: 0; }
+                                iframe { border: none; width: 100%; height: 100vh; }
+                            </style>
+                        </head>
+                        <body>
+                            <iframe src="${window.location.href}"></iframe>
+                        </body>
+                        </html>
+                    `);
+                    aboutBlank.document.close();
+                    window.location.href = 'about:blank';
                 }
-                
-                function clearStatus() {
-                    authStatus.classList.remove('success', 'error');
-                    authStatus.style.display = 'none';
-                    signupStatus.classList.remove('success', 'error');
-                    signupStatus.style.display = 'none';
+            }
+        }
+        
+        // Apply cloaking button
+        applyCloakBtn.addEventListener('click', applyCloaking);
+        
+        // Load settings when page loads
+        loadSettings();
+        
+        // Apply cloaking if enabled
+        if (localStorage.getItem('cloakEnabled') === 'true') {
+            applyCloaking();
+        }
+    }
+
+    // ======================
+    // TAB SYSTEM
+    // ======================
+    function initTabSystem() {
+        const tabs = document.querySelectorAll('.tab');
+        const gameCards = document.querySelectorAll('.game-card');
+        const chatContainer = document.getElementById('chatroom');
+        const aiContainer = document.getElementById('ai-assistant');
+        
+        // Function to switch tabs with animation
+        function switchTab(tab) {
+            const category = tab.dataset.category;
+            
+            // Animate out current active content
+            const currentActiveTab = document.querySelector('.tab.active');
+            if (currentActiveTab) {
+                currentActiveTab.classList.remove('active');
+            }
+            
+            // Add active class to new tab with animation
+            tab.classList.add('active');
+            
+            // Hide all containers first with fade out animation
+            if (chatContainer.classList.contains('active')) {
+                chatContainer.style.animation = 'fadeOut 0.3s ease-out forwards';
+                setTimeout(() => {
+                    chatContainer.classList.remove('active');
+                    chatContainer.style.display = 'none';
+                    chatContainer.style.animation = '';
+                }, 300);
+            }
+            
+            if (aiContainer.classList.contains('active')) {
+                aiContainer.style.animation = 'fadeOut 0.3s ease-out forwards';
+                setTimeout(() => {
+                    aiContainer.classList.remove('active');
+                    aiContainer.style.display = 'none';
+                    aiContainer.style.animation = '';
+                }, 300);
+            }
+            
+            gameCards.forEach(card => {
+                if (card.style.display === 'block') {
+                    card.style.animation = 'fadeOut 0.3s ease-out forwards';
+                    setTimeout(() => {
+                        card.style.display = 'none';
+                        card.style.animation = '';
+                    }, 300);
                 }
-                
-                function showError(element, message) {
-                    element.textContent = message;
-                    element.classList.remove('success');
-                    element.classList.add('error');
-                    element.style.display = 'block';
-                }
-                
-                function showSuccess(element, message) {
-                    element.textContent = message;
-                    element.classList.remove('error');
-                    element.classList.add('success');
-                    element.style.display = 'block';
-                }
-                
-                function getErrorMessage(error) {
-                    switch (error.code) {
-                        case 'auth/wrong-password':
-                            return 'Incorrect password';
-                        case 'auth/user-not-found':
-                            return 'Username not found';
-                        case 'auth/email-already-in-use':
-                            return 'Username already taken';
-                        case 'auth/weak-password':
-                            return 'Password must be at least 6 characters';
-                        default:
-                            return 'Login failed. Please try again.';
-                    }
-                }
-                
-                // ======================
-                // TAB SYSTEM
-                // ======================
-                function initTabSystem() {
-                    const tabs = document.querySelectorAll('.tab');
-                    const gameCards = document.querySelectorAll('.game-card');
-                    const chatContainer = document.getElementById('chatroom');
-                    const aiContainer = document.getElementById('ai-assistant');
-                    
-                    // Function to switch tabs with animation
-                    function switchTab(tab) {
-                        const category = tab.dataset.category;
-                        
-                        // Animate out current active content
-                        const currentActiveTab = document.querySelector('.tab.active');
-                        if (currentActiveTab) {
-                            currentActiveTab.classList.remove('active');
+            });
+            
+            // Show the selected container with fade in animation
+            setTimeout(() => {
+                if (category === 'chatroom') {
+                    chatContainer.style.display = 'block';
+                    setTimeout(() => {
+                        chatContainer.classList.add('active');
+                        chatContainer.style.animation = 'fadeIn 0.3s ease-out forwards';
+                        checkUsername();
+                    }, 10);
+                } else if (category === 'ai-assistant') {
+                    aiContainer.style.display = 'block';
+                    setTimeout(() => {
+                        aiContainer.classList.add('active');
+                        aiContainer.style.animation = 'fadeIn 0.3s ease-out forwards';
+                        // Initialize AI if first time
+                        if (document.getElementById('ai-messages').children.length === 0) {
+                            addAIMessage("Hello! I'm murasaki's AI assistant. How can I help you today?");
+                            addAIMessage("For image analysis, this AI is currently unsupported, please use the attach button below to redirect yourself to another website. Thank you for your understanding.", false);
                         }
-                        
-                        // Add active class to new tab with animation
-                        tab.classList.add('active');
-                        
-                        // Hide all containers first with fade out animation
-                        if (chatContainer.classList.contains('active')) {
-                            chatContainer.style.animation = 'fadeOut 0.3s ease-out forwards';
+                    }, 10);
+                } else {
+                    gameCards.forEach(card => {
+                        if (category === 'all' || card.dataset.category === category) {
+                            card.style.display = 'none';
                             setTimeout(() => {
-                                chatContainer.classList.remove('active');
-                                chatContainer.style.display = 'none';
-                                chatContainer.style.animation = '';
-                            }, 300);
-                        }
-                        
-                        if (aiContainer.classList.contains('active')) {
-                            aiContainer.style.animation = 'fadeOut 0.3s ease-out forwards';
-                            setTimeout(() => {
-                                aiContainer.classList.remove('active');
-                                aiContainer.style.display = 'none';
-                                aiContainer.style.animation = '';
-                            }, 300);
-                        }
-                        
-                        gameCards.forEach(card => {
-                            if (card.style.display === 'block') {
-                                card.style.animation = 'fadeOut 0.3s ease-out forwards';
-                                setTimeout(() => {
-                                    card.style.display = 'none';
-                                    card.style.animation = '';
-                                }, 300);
-                            }
-                        });
-                        
-                        // Show the selected container with fade in animation
-                        setTimeout(() => {
-                            if (category === 'chatroom') {
-                                chatContainer.style.display = 'block';
-                                setTimeout(() => {
-                                    chatContainer.classList.add('active');
-                                    chatContainer.style.animation = 'fadeIn 0.3s ease-out forwards';
-                                    checkUsername();
-                                }, 10);
-                            } else if (category === 'ai-assistant') {
-                                aiContainer.style.display = 'block';
-                                setTimeout(() => {
-                                    aiContainer.classList.add('active');
-                                    aiContainer.style.animation = 'fadeIn 0.3s ease-out forwards';
-                                    // Initialize AI if first time
-                                    if (document.getElementById('ai-messages').children.length === 0) {
-                                        addAIMessage("Hello! I'm murasaki's AI assistant. How can I help you today?");
-                                        addAIMessage("For image analysis, this AI is currently unsupported, please use the attach button below to redirect yourself to another website. Thank you for your understanding.", false);
-                                    }
-                                }, 10);
-                            } else {
-                                gameCards.forEach(card => {
-                                    if (category === 'all' || card.dataset.category === category) {
-                                        card.style.display = 'none';
-                                        setTimeout(() => {
-                                            card.style.display = 'block';
-                                            card.style.animation = 'fadeIn 0.3s ease-out forwards';
-                                        }, 10);
-                                    }
-                                });
-                            }
-                        }, 300);
-                    }
-                    
-                    // Add click event to all tabs
-                    tabs.forEach(tab => {
-                        tab.addEventListener('click', () => {
-                            switchTab(tab);
-                        });
-                    });
-                    
-                    // Initialize first tab
-                    const initialTab = document.querySelector('.tab.active');
-                    if (initialTab) {
-                        switchTab(initialTab);
-                    }
-                    
-                    // Game Modal
-                    const modal = document.querySelector('.modal');
-                    const playBtns = document.querySelectorAll('.play-btn');
-                    const closeBtn = document.querySelector('.close-btn');
-                    const gameFrame = document.querySelector('.game-frame');
-                    
-                    playBtns.forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            const gameUrl = btn.dataset.game;
-                            gameFrame.src = gameUrl;
-                            modal.classList.add('active');
-                            document.body.style.overflow = 'hidden';
-                        });
-                    });
-                    
-                    closeBtn.addEventListener('click', () => {
-                        modal.classList.remove('active');
-                        gameFrame.src = '';
-                        document.body.style.overflow = 'auto';
-                    });
-                    
-                    modal.addEventListener('click', (e) => {
-                        if (e.target === modal) {
-                            modal.classList.remove('active');
-                            gameFrame.src = '';
-                            document.body.style.overflow = 'auto';
+                                card.style.display = 'block';
+                                card.style.animation = 'fadeIn 0.3s ease-out forwards';
+                            }, 10);
                         }
                     });
                 }
+            }, 300);
+        }
+        
+        // Add click event to all tabs
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                switchTab(tab);
+            });
+        });
+        
+        // Initialize first tab
+        const initialTab = document.querySelector('.tab.active');
+        if (initialTab) {
+            switchTab(initialTab);
+        }
+        
+        // Game Modal
+        const modal = document.querySelector('.modal');
+        const playBtns = document.querySelectorAll('.play-btn');
+        const closeBtn = document.querySelector('.close-btn');
+        const gameFrame = document.querySelector('.game-frame');
+        
+        playBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const gameUrl = btn.dataset.game;
+                gameFrame.src = gameUrl;
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+        
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+            gameFrame.src = '';
+            document.body.style.overflow = 'auto';
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                gameFrame.src = '';
+                document.body.style.overflow = 'auto';
+            }
+        });
+    }
+
+    // ======================
+    // CHAT SYSTEM
+    // ======================
+    const usernameModal = document.getElementById('username-modal');
+    const chatUsernameInput = document.getElementById('username-input');
+    const setUsernameBtn = document.getElementById('set-username-btn');
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatRef = database.ref('chat');
+    
+    let chatUsername = localStorage.getItem('chatUsername') || '';
+    
+    // Username handling
+    function checkUsername() {
+        if (!chatUsername) {
+            usernameModal.classList.add('active');
+            chatUsernameInput.focus();
+        } else {
+            usernameModal.classList.remove('active');
+            loadChatHistory();
+        }
+    }
+    
+    function setUsername() {
+        const newUsername = chatUsernameInput.value.trim();
+        if (newUsername) {
+            chatUsername = newUsername;
+            localStorage.setItem('chatUsername', chatUsername);
+            usernameModal.classList.remove('active');
+            
+            // System welcome message
+            chatRef.push({
+                username: 'System',
+                message: `${chatUsername} joined the chat!`,
+                timestamp: Date.now()
+            });
+            
+            loadChatHistory();
+        }
+    }
+    
+    function loadChatHistory() {
+        chatRef.limitToLast(100).on('value', (snapshot) => {
+            chatMessages.innerHTML = '';
+            
+            snapshot.forEach((childSnapshot) => {
+                const msg = childSnapshot.val();
+                displayMessage({
+                    ...msg,
+                    key: childSnapshot.key
+                });
+            });
+            
+            scrollToBottom();
+        });
+    }
+    
+    function displayMessage({ username, message, timestamp, key, isSystem }) {
+        const isCurrentUser = username === chatUsername;
+        const isSystemMsg = username === 'System' || username === 'AI Assistant' || isSystem;
+        
+        const messageEl = document.createElement('div');
+        messageEl.className = `message ${isCurrentUser ? 'your-message' : ''} ${isSystemMsg ? 'system-message' : ''}`;
+        
+        const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        let deleteBtn = '';
+        if (isCurrentUser && !isSystemMsg) {
+            deleteBtn = `<button class="delete-message" data-key="${key}">×</button>`;
+        }
+        
+        messageEl.innerHTML = `
+            ${deleteBtn}
+            <span class="message-username" style="color: ${isSystemMsg ? '#ff2d75' : '#00a8ff'}">${username}:</span>
+            <span class="message-text">${message}</span>
+            <div class="message-time">${time}</div>
+        `;
+        
+        chatMessages.appendChild(messageEl);
+        scrollToBottom();
+        
+        // Add delete event listener if this is the user's message
+        if (isCurrentUser && !isSystemMsg) {
+            messageEl.querySelector('.delete-message').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const messageKey = e.target.getAttribute('data-key');
+                deleteMessage(messageKey);
+            });
+        }
+    }
+    
+    function deleteMessage(messageKey) {
+        if (confirm('Are you sure you want to delete this message?')) {
+            database.ref('chat/' + messageKey).remove()
+                .then(() => {
+                    console.log('Message deleted successfully');
+                })
+                .catch((error) => {
+                    console.error('Error deleting message:', error);
+                });
+        }
+    }
+    
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // Send message function
+    function sendMessage() {
+        const message = messageInput.value.trim();
+        if (message && chatUsername) {
+            chatRef.push({
+                username: chatUsername,
+                message,
+                timestamp: Date.now()
+            });
+            messageInput.value = '';
+        }
+    }
+    
+    // Event listeners for chat
+    setUsernameBtn.addEventListener('click', setUsername);
+    chatUsernameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') setUsername();
+    });
+    sendBtn.addEventListener('click', sendMessage);
+    
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            const message = messageInput.value.trim();
+            if (message && chatUsername) {
+                chatRef.push({
+                    username: chatUsername,
+                    message,
+                    timestamp: Date.now()
+                });
+                messageInput.value = '';
+            }
+        }
+    });
+    
+    // ======================
+    // AI ASSISTANT
+    // ======================
+    function addAIMessage(text, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `ai-message ${isUser ? 'ai-user-message' : ''}`;
+        messageDiv.style.animation = 'fadeIn 0.3s ease-out';
+        messageDiv.innerHTML = `<div class="message-text">${text}</div>`;
+        document.getElementById('ai-messages').appendChild(messageDiv);
+        document.getElementById('ai-messages').scrollTop = document.getElementById('ai-messages').scrollHeight;
+    }
+    
+    // Show typing indicator
+    function showTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'ai-message ai-typing';
+        typingDiv.textContent = 'AI is thinking...';
+        typingDiv.id = 'typing-indicator';
+        typingDiv.style.animation = 'fadeIn 0.3s ease-out';
+        document.getElementById('ai-messages').appendChild(typingDiv);
+        document.getElementById('ai-messages').scrollTop = document.getElementById('ai-messages').scrollHeight;
+        return typingDiv;
+    }
+    
+    // Remove typing indicator
+    function removeTypingIndicator() {
+        const typingDiv = document.getElementById('typing-indicator');
+        if (typingDiv) {
+            typingDiv.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => typingDiv.remove(), 300);
+        }
+    }
+    
+    // Get AI response
+    async function getAIResponse(question) {
+        try {
+            const response = await fetch('https://murasakiwastaken.vercel.app/api/ai-proxy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ question })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data.response || "I didn't get a response.";
+        } catch (error) {
+            console.error('AI Error:', error);
+            return `Error: ${error.message}`;
+        }
+    }
+    
+    // Handle sending message
+    async function handleAIInput() {
+        const question = document.getElementById('ai-input').value.trim();
+        if (!question) return;
+        
+        // Display user message
+        addAIMessage(question, true);
+        
+        // Clear input and show typing indicator
+        document.getElementById('ai-input').value = '';
+        const typingDiv = showTypingIndicator();
+        
+        try {
+            const response = await getAIResponse(question);
+            removeTypingIndicator();
+            addAIMessage(response);
+        } catch (error) {
+            removeTypingIndicator();
+            addAIMessage("Sorry, I couldn't process your request. Please try again.");
+        }
+    }
+    
+    // Event listeners
+    document.getElementById('ai-send-btn').addEventListener('click', handleAIInput);
+    document.getElementById('ai-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleAIInput();
+    });
+    
+    // Redirect to image analysis service
+    document.getElementById('ai-attach-btn').addEventListener('click', () => {
+        if (confirm("Image analysis requires visiting an external site. Proceed?")) {
+            window.location.href = "https://aiassistantbot.pages.dev";
+        }
+    });
+    
+    // ======================
+    // FEEDBACK SYSTEM
+    // ======================
+    function initFeedbackSystem() {
+        const feedbackBtn = document.getElementById('feedback-btn');
+        const feedbackModal = document.getElementById('feedback-modal');
+        const closeFeedback = document.querySelector('.close-feedback');
+        const feedbackInput = document.getElementById('feedback-input');
+        const sendFeedbackBtn = document.getElementById('send-feedback');
+        const feedbackMessages = document.getElementById('feedback-messages');
+        const mediaUpload = document.getElementById('media-upload');
+        const mediaPreview = document.getElementById('media-preview');
+        
+        // Use the same reference as chat for consistency
+        const feedbackRef = database.ref('feedback');
+        let selectedFile = null;
+        let feedbackUsername = auth.currentUser ? auth.currentUser.email.split('@')[0] : '';
+        
+        // Toggle feedback modal
+        feedbackBtn.addEventListener('click', () => {
+            feedbackModal.classList.toggle('active');
+            if (feedbackModal.classList.contains('active')) {
+                loadFeedbackMessages();
+            }
+        });
+        
+        closeFeedback.addEventListener('click', () => {
+            feedbackModal.classList.remove('active');
+        });
+        
+        // Handle file upload
+        mediaUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                selectedFile = file;
                 
-                // ======================
-                // CHAT SYSTEM
-                // ======================
-                const usernameModal = document.getElementById('username-modal');
-                const chatUsernameInput = document.getElementById('username-input');
-                const setUsernameBtn = document.getElementById('set-username-btn');
-                const messageInput = document.getElementById('message-input');
-                const sendBtn = document.getElementById('send-btn');
-                const chatMessages = document.getElementById('chat-messages');
-                const chatRef = database.ref('chat');
+                // Show preview
+                mediaPreview.innerHTML = '';
+                const previewElement = file.type.startsWith('image/') ? 
+                    document.createElement('img') : 
+                    document.createElement('video');
                 
-                let chatUsername = localStorage.getItem('chatUsername') || '';
+                previewElement.src = URL.createObjectURL(file);
+                previewElement.controls = true;
                 
-                // Username handling
-                function checkUsername() {
-                    if (!chatUsername) {
-                        usernameModal.classList.add('active');
-                        chatUsernameInput.focus();
-                    } else {
-                        usernameModal.classList.remove('active');
-                        loadChatHistory();
-                    }
-                }
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-media';
+                removeBtn.innerHTML = '×';
+                removeBtn.addEventListener('click', () => {
+                    selectedFile = null;
+                    mediaUpload.value = '';
+                    mediaPreview.style.display = 'none';
+                });
                 
-                function setUsername() {
-                    const newUsername = chatUsernameInput.value.trim();
-                    if (newUsername) {
-                        chatUsername = newUsername;
-                        localStorage.setItem('chatUsername', chatUsername);
-                        usernameModal.classList.remove('active');
-                        
-                        // System welcome message
-                        chatRef.push({
-                            username: 'System',
-                            message: `${chatUsername} joined the chat!`,
-                            timestamp: Date.now()
-                        });
-                        
-                        loadChatHistory();
-                    }
-                }
-                
-                function loadChatHistory() {
-                    chatRef.limitToLast(100).on('value', (snapshot) => {
-                        chatMessages.innerHTML = '';
-                        
-                        snapshot.forEach((childSnapshot) => {
-                            const msg = childSnapshot.val();
-                            displayMessage({
-                                ...msg,
-                                key: childSnapshot.key
-                            });
-                        });
-                        
-                        scrollToBottom();
+                const previewContainer = document.createElement('div');
+                previewContainer.appendChild(previewElement);
+                previewContainer.appendChild(removeBtn);
+                mediaPreview.appendChild(previewContainer);
+                mediaPreview.style.display = 'block';
+            }
+        });
+        
+        // Load feedback messages
+        function loadFeedbackMessages() {
+            feedbackRef.limitToLast(50).on('value', (snapshot) => {
+                feedbackMessages.innerHTML = '';
+                snapshot.forEach((childSnapshot) => {
+                    const msg = childSnapshot.val();
+                    displayFeedbackMessage({
+                        ...msg,
+                        key: childSnapshot.key
                     });
+                });
+                scrollFeedbackToBottom();
+            });
+        }
+        
+        // Display a feedback message
+        function displayFeedbackMessage({ username, message, timestamp, key, mediaUrl, mediaType }) {
+            const isCurrentUser = username === feedbackUsername;
+            
+            const messageEl = document.createElement('div');
+            messageEl.className = `feedback-message ${isCurrentUser ? 'user' : ''}`;
+            messageEl.style.animation = 'fadeIn 0.3s ease-out';
+            
+            const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            let mediaHtml = '';
+            if (mediaUrl) {
+                if (mediaType === 'image') {
+                    mediaHtml = `<img src="${mediaUrl}" class="media-attachment" alt="Attached image" loading="lazy">`;
+                } else {
+                    mediaHtml = `<video src="${mediaUrl}" class="media-attachment" controls></video>`;
                 }
+            }
+            
+            let deleteBtn = '';
+            if (isCurrentUser) {
+                deleteBtn = `<button class="delete-message" data-key="${key}">×</button>`;
+            }
+            
+            messageEl.innerHTML = `
+                ${deleteBtn}
+                <div class="message-meta">
+                    <span class="message-username">${username}:</span>
+                    <span class="message-time">${time}</span>
+                </div>
+                ${message ? `<p class="message-text">${message}</p>` : ''}
+                ${mediaHtml}
+            `;
+            
+            feedbackMessages.appendChild(messageEl);
+            
+            // Add delete handler if current user
+            if (isCurrentUser) {
+                messageEl.querySelector('.delete-message')?.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const messageKey = e.target.getAttribute('data-key');
+                    deleteFeedbackMessage(messageKey);
+                });
+            }
+        }
+        
+        // Delete feedback message
+        function deleteFeedbackMessage(messageKey) {
+            if (confirm('Delete this feedback?')) {
+                feedbackRef.child(messageKey).remove();
+            }
+        }
+        
+        // Send feedback
+        function sendFeedback() {
+            const message = feedbackInput.value.trim();
+            if (!message && !selectedFile) return;
+            
+            // Require login to post feedback
+            if (!auth.currentUser) {
+                alert('Please sign in to submit feedback');
+                return;
+            }
+            
+            const feedbackData = {
+                username: feedbackUsername,
+                message,
+                timestamp: Date.now()
+            };
+            
+            // Handle file upload if exists
+            if (selectedFile) {
+                const storageRef = storage.ref(`feedback/${Date.now()}_${selectedFile.name}`);
+                const uploadTask = storageRef.put(selectedFile);
                 
-                function displayMessage({ username, message, timestamp, key, isSystem }) {
-                    const isCurrentUser = username === chatUsername;
-                    const isSystemMsg = username === 'System' || username === 'AI Assistant' || isSystem;
-                    
-                    const messageEl = document.createElement('div');
-                    messageEl.className = `message ${isCurrentUser ? 'your-message' : ''} ${isSystemMsg ? 'system-message' : ''}`;
-                    
-                    const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    
-                    let deleteBtn = '';
-                    if (isCurrentUser && !isSystemMsg) {
-                        deleteBtn = `<button class="delete-message" data-key="${key}">×</button>`;
-                    }
-                    
-                    messageEl.innerHTML = `
-                        ${deleteBtn}
-                        <span class="message-username" style="color: ${isSystemMsg ? '#ff2d75' : '#00a8ff'}">${username}:</span>
-                        <span class="message-text">${message}</span>
-                        <div class="message-time">${time}</div>
-                    `;
-                    
-                    chatMessages.appendChild(messageEl);
-                    scrollToBottom();
-                    
-                    // Add delete event listener if this is the user's message
-                    if (isCurrentUser && !isSystemMsg) {
-                        messageEl.querySelector('.delete-message').addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            const messageKey = e.target.getAttribute('data-key');
-                            deleteMessage(messageKey);
-                        });
-                    }
-                }
-                
-                function deleteMessage(messageKey) {
-                    if (confirm('Are you sure you want to delete this message?')) {
-                        database.ref('chat/' + messageKey).remove()
+                uploadTask.on('state_changed',
+                    null,
+                    (error) => {
+                        console.error('Upload error:', error);
+                        // Send without media if upload fails
+                        feedbackRef.push(feedbackData)
                             .then(() => {
-                                console.log('Message deleted successfully');
-                            })
-                            .catch((error) => {
-                                console.error('Error deleting message:', error);
-                            });
-                    }
-                }
-                
-                function scrollToBottom() {
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                }
-                
-                // Send message function
-                function sendMessage() {
-                    const message = messageInput.value.trim();
-                    if (message && chatUsername) {
-                        chatRef.push({
-                            username: chatUsername,
-                            message,
-                            timestamp: Date.now()
-                        });
-                        messageInput.value = '';
-                    }
-                }
-                
-                // Event listeners for chat
-                setUsernameBtn.addEventListener('click', setUsername);
-                chatUsernameInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') setUsername();
-                });
-                sendBtn.addEventListener('click', sendMessage);
-                
-                messageInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        const message = messageInput.value.trim();
-                        if (message && chatUsername) {
-                            chatRef.push({
-                                username: chatUsername,
-                                message,
-                                timestamp: Date.now()
-                            });
-                            messageInput.value = '';
-                        }
-                    }
-                });
-                
-                // ======================
-                // AI ASSISTANT
-                // ======================
-                function addAIMessage(text, isUser = false) {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = `ai-message ${isUser ? 'ai-user-message' : ''}`;
-                    messageDiv.style.animation = 'fadeIn 0.3s ease-out';
-                    messageDiv.innerHTML = `<div class="message-text">${text}</div>`;
-                    document.getElementById('ai-messages').appendChild(messageDiv);
-                    document.getElementById('ai-messages').scrollTop = document.getElementById('ai-messages').scrollHeight;
-                }
-                
-                // Show typing indicator
-                function showTypingIndicator() {
-                    const typingDiv = document.createElement('div');
-                    typingDiv.className = 'ai-message ai-typing';
-                    typingDiv.textContent = 'AI is thinking...';
-                    typingDiv.id = 'typing-indicator';
-                    typingDiv.style.animation = 'fadeIn 0.3s ease-out';
-                    document.getElementById('ai-messages').appendChild(typingDiv);
-                    document.getElementById('ai-messages').scrollTop = document.getElementById('ai-messages').scrollHeight;
-                    return typingDiv;
-                }
-                
-                // Remove typing indicator
-                function removeTypingIndicator() {
-                    const typingDiv = document.getElementById('typing-indicator');
-                    if (typingDiv) {
-                        typingDiv.style.animation = 'fadeOut 0.3s ease-out';
-                        setTimeout(() => typingDiv.remove(), 300);
-                    }
-                }
-                
-                // Get AI response
-                async function getAIResponse(question) {
-                    try {
-                        const response = await fetch('https://murasakiwastaken.vercel.app/api/ai-proxy', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ question })
-                        });
-                        
-                        if (!response.ok) {
-                            throw new Error(`API error: ${response.status}`);
-                        }
-                        
-                        const data = await response.json();
-                        return data.response || "I didn't get a response.";
-                    } catch (error) {
-                        console.error('AI Error:', error);
-                        return `Error: ${error.message}`;
-                    }
-                }
-                
-                // Handle sending message
-                async function handleAIInput() {
-                    const question = document.getElementById('ai-input').value.trim();
-                    if (!question) return;
-                    
-                    // Display user message
-                    addAIMessage(question, true);
-                    
-                    // Clear input and show typing indicator
-                    document.getElementById('ai-input').value = '';
-                    const typingDiv = showTypingIndicator();
-                    
-                    try {
-                        const response = await getAIResponse(question);
-                        removeTypingIndicator();
-                        addAIMessage(response);
-                    } catch (error) {
-                        removeTypingIndicator();
-                        addAIMessage("Sorry, I couldn't process your request. Please try again.");
-                    }
-                }
-                
-                // Event listeners
-                document.getElementById('ai-send-btn').addEventListener('click', handleAIInput);
-                document.getElementById('ai-input').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') handleAIInput();
-                });
-                
-                // Redirect to image analysis service
-                document.getElementById('ai-attach-btn').addEventListener('click', () => {
-                    if (confirm("Image analysis requires visiting an external site. Proceed?")) {
-                        window.location.href = "https://aiassistantbot.pages.dev";
-                    }
-                });
-                
-                // ======================
-                // FEEDBACK SYSTEM
-                // ======================
-                function initFeedbackSystem() {
-                    const feedbackBtn = document.getElementById('feedback-btn');
-                    const feedbackModal = document.getElementById('feedback-modal');
-                    const closeFeedback = document.querySelector('.close-feedback');
-                    const feedbackInput = document.getElementById('feedback-input');
-                    const sendFeedbackBtn = document.getElementById('send-feedback');
-                    const feedbackMessages = document.getElementById('feedback-messages');
-                    const mediaUpload = document.getElementById('media-upload');
-                    const mediaPreview = document.getElementById('media-preview');
-                    
-                    // Use the same reference as chat for consistency
-                    const feedbackRef = database.ref('feedback');
-                    let selectedFile = null;
-                    let feedbackUsername = auth.currentUser ? auth.currentUser.email.split('@')[0] : '';
-                    
-                    // Toggle feedback modal
-                    feedbackBtn.addEventListener('click', () => {
-                        feedbackModal.classList.toggle('active');
-                        if (feedbackModal.classList.contains('active')) {
-                            loadFeedbackMessages();
-                        }
-                    });
-                    
-                    closeFeedback.addEventListener('click', () => {
-                        feedbackModal.classList.remove('active');
-                    });
-                    
-                    // Handle file upload
-                    mediaUpload.addEventListener('change', (e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                            selectedFile = file;
-                            
-                            // Show preview
-                            mediaPreview.innerHTML = '';
-                            const previewElement = file.type.startsWith('image/') ? 
-                                document.createElement('img') : 
-                                document.createElement('video');
-                            
-                            previewElement.src = URL.createObjectURL(file);
-                            previewElement.controls = true;
-                            
-                            const removeBtn = document.createElement('button');
-                            removeBtn.className = 'remove-media';
-                            removeBtn.innerHTML = '×';
-                            removeBtn.addEventListener('click', () => {
+                                feedbackInput.value = '';
                                 selectedFile = null;
                                 mediaUpload.value = '';
                                 mediaPreview.style.display = 'none';
                             });
-                            
-                            const previewContainer = document.createElement('div');
-                            previewContainer.appendChild(previewElement);
-                            previewContainer.appendChild(removeBtn);
-                            mediaPreview.appendChild(previewContainer);
-                            mediaPreview.style.display = 'block';
-                        }
-                    });
-                    
-                    // Load feedback messages
-                    function loadFeedbackMessages() {
-                        feedbackRef.limitToLast(50).on('value', (snapshot) => {
-                            feedbackMessages.innerHTML = '';
-                            snapshot.forEach((childSnapshot) => {
-                                const msg = childSnapshot.val();
-                                displayFeedbackMessage({
-                                    ...msg,
-                                    key: childSnapshot.key
-                                });
-                            });
-                            scrollFeedbackToBottom();
-                        });
-                    }
-                    
-                    // Display a feedback message
-                    function displayFeedbackMessage({ username, message, timestamp, key, mediaUrl, mediaType }) {
-                        const isCurrentUser = username === feedbackUsername;
-                        
-                        const messageEl = document.createElement('div');
-                        messageEl.className = `feedback-message ${isCurrentUser ? 'user' : ''}`;
-                        messageEl.style.animation = 'fadeIn 0.3s ease-out';
-                        
-                        const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        
-                        let mediaHtml = '';
-                        if (mediaUrl) {
-                            if (mediaType === 'image') {
-                                mediaHtml = `<img src="${mediaUrl}" class="media-attachment" alt="Attached image" loading="lazy">`;
-                            } else {
-                                mediaHtml = `<video src="${mediaUrl}" class="media-attachment" controls></video>`;
-                            }
-                        }
-                        
-                        let deleteBtn = '';
-                        if (isCurrentUser) {
-                            deleteBtn = `<button class="delete-message" data-key="${key}">×</button>`;
-                        }
-                        
-                        messageEl.innerHTML = `
-                            ${deleteBtn}
-                            <div class="message-meta">
-                                <span class="message-username">${username}:</span>
-                                <span class="message-time">${time}</span>
-                            </div>
-                            ${message ? `<p class="message-text">${message}</p>` : ''}
-                            ${mediaHtml}
-                        `;
-                        
-                        feedbackMessages.appendChild(messageEl);
-                        
-                        // Add delete handler if current user
-                        if (isCurrentUser) {
-                            messageEl.querySelector('.delete-message')?.addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                const messageKey = e.target.getAttribute('data-key');
-                                deleteFeedbackMessage(messageKey);
-                            });
-                        }
-                    }
-                    
-                    // Delete feedback message
-                    function deleteFeedbackMessage(messageKey) {
-                        if (confirm('Delete this feedback?')) {
-                            feedbackRef.child(messageKey).remove();
-                        }
-                    }
-                    
-                    // Send feedback
-                    function sendFeedback() {
-                        const message = feedbackInput.value.trim();
-                        if (!message && !selectedFile) return;
-                        
-                        // Require login to post feedback
-                        if (!auth.currentUser) {
-                            alert('Please sign in to submit feedback');
-                            return;
-                        }
-                        
-                        const feedbackData = {
-                            username: feedbackUsername,
-                            message,
-                            timestamp: Date.now()
-                        };
-                        
-                        // Handle file upload if exists
-                        if (selectedFile) {
-                            const storageRef = storage.ref(`feedback/${Date.now()}_${selectedFile.name}`);
-                            const uploadTask = storageRef.put(selectedFile);
-                            
-                            uploadTask.on('state_changed',
-                                null,
-                                (error) => {
-                                    console.error('Upload error:', error);
-                                    // Send without media if upload fails
-                                    feedbackRef.push(feedbackData)
-                                        .then(() => {
-                                            feedbackInput.value = '';
-                                            selectedFile = null;
-                                            mediaUpload.value = '';
-                                            mediaPreview.style.display = 'none';
-                                        });
-                                },
-                                () => {
-                                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                                        feedbackData.mediaUrl = downloadURL;
-                                        feedbackData.mediaType = selectedFile.type.startsWith('image/') ? 'image' : 'video';
-                                        feedbackRef.push(feedbackData)
-                                            .then(() => {
-                                                feedbackInput.value = '';
-                                                selectedFile = null;
-                                                mediaUpload.value = '';
-                                                mediaPreview.style.display = 'none';
-                                            });
-                                    });
-                                }
-                            );
-                        } else {
+                    },
+                    () => {
+                        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                            feedbackData.mediaUrl = downloadURL;
+                            feedbackData.mediaType = selectedFile.type.startsWith('image/') ? 'image' : 'video';
                             feedbackRef.push(feedbackData)
                                 .then(() => {
                                     feedbackInput.value = '';
+                                    selectedFile = null;
+                                    mediaUpload.value = '';
+                                    mediaPreview.style.display = 'none';
                                 });
-                        }
+                        });
                     }
-                    
-                    function scrollFeedbackToBottom() {
-                        feedbackMessages.scrollTop = feedbackMessages.scrollHeight;
-                    }
-                    
-                    // Event listeners
-                    sendFeedbackBtn.addEventListener('click', sendFeedback);
-                    feedbackInput.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            sendFeedback();
-                        }
+                );
+            } else {
+                feedbackRef.push(feedbackData)
+                    .then(() => {
+                        feedbackInput.value = '';
                     });
-                    
-                    // Update username when auth state changes
-                    auth.onAuthStateChanged((user) => {
-                        if (user) {
-                            feedbackUsername = user.email.split('@')[0];
-                            // Load feedback messages when user logs in
-                            loadFeedbackMessages();
-                        }
-                    });
-                    
-                    // Initial load if already logged in
-                    if (auth.currentUser) {
-                        loadFeedbackMessages();
-                    }
-                }
-                
-                // Initialize the application
-                initTabSystem();
-                initFeedbackSystem();
-                initSettingsPanel();
             }
-            
-            // Start the application
-            initApplication();
+        }
+        
+        function scrollFeedbackToBottom() {
+            feedbackMessages.scrollTop = feedbackMessages.scrollHeight;
+        }
+        
+        // Event listeners
+        sendFeedbackBtn.addEventListener('click', sendFeedback);
+        feedbackInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                sendFeedback();
+            }
         });
-    </script>
+        
+        // Update username when auth state changes
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                feedbackUsername = user.email.split('@')[0];
+                // Load feedback messages when user logs in
+                loadFeedbackMessages();
+            }
+        });
+        
+        // Initial load if already logged in
+        if (auth.currentUser) {
+            loadFeedbackMessages();
+        }
+    }
+    
+    // Initialize the application
+    initTabSystem();
+    initFeedbackSystem();
+    initSettingsPanel();
+});
+</script>
 </body>
 </html>
