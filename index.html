@@ -1612,23 +1612,6 @@ window.addEventListener('resize', () => {
                         // Hide auth page and show main content
                         authPage.style.display = 'none';
                         mainContainer.style.display = 'flex';
-// When showing main content (after login/signup):
-function showMainContent() {
-    document.getElementById('auth-page').style.display = 'none';
-    document.getElementById('main-container').style.display = 'flex';
-    
-    // Remove cloak if returning to site
-    const iframe = document.getElementById('cloak-iframe');
-    if (iframe) iframe.remove();
-    
-    const toggleBtn = document.getElementById('cloak-toggle-btn');
-    if (toggleBtn) toggleBtn.remove();
-    
-    // Restore original title/favicon
-    document.title = "murasaki's center v2 | more features!";
-    updateFavicon('/favicon.ico'); // Set to your original favicon
-}
-                        showMainContent()
                         initParticles();
                         initTabSystem();
                         initFeedbackSystem();
