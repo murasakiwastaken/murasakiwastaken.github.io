@@ -1968,15 +1968,6 @@ document.addEventListener('DOMContentLoaded', checkAboutBlank);
         }
     }
 }
-// Add this to help detect leaks
-setInterval(() => {
-    console.log('Active listeners:', eventListeners.cache ? eventListeners.cache.length : 0);
-    console.log('Firebase listeners:', 
-        (chatRefListener ? 1 : 0) + 
-        (feedbackRefListener ? 1 : 0) + 
-        (authListener ? 1 : 0)
-    );
-}, 10000);
 // Call this when showing settings
 document.getElementById('settings-btn').addEventListener('click', checkPopupBlocker);
 // Check for system preference
