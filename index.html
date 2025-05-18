@@ -57,19 +57,25 @@ h1, h2, h3, h4, h5, h6,
 p, span, a, li {
     transition: color 0.3s ease;
 }
-.fps-display {
-    margin-top: 10px;
-    padding: 8px;
-    background: rgba(0, 168, 255, 0.1);
-    border-radius: 5px;
-    color: #e0e1dd;
+#fps-counter {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    padding: 5px 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 3px;
+    color: white;
     font-family: monospace;
+    font-size: 14px;
+    z-index: 9999;
 }
 
-#fps-value {
-    color: #00a8ff;
-    font-weight: bold;
+body.dark-mode #fps-counter {
+    background: rgba(0, 0, 0, 0.7);
+    color: #e0e1dd;
 }
+
+/* Remove the old FPS display styles */
 /* Inputs and buttons */
 input,
 textarea,
@@ -507,6 +513,10 @@ body.dark-mode #fps-value {
     </script>
 </head>
 <body>
+<!-- Add this right after opening <body> tag -->
+<div id="fps-counter" style="display: none;">
+    FPS: <span id="fps-value">0</span>
+</div>
     <!-- Auth Page (shown by default) -->
     <div class="auth-page" id="auth-page">
         <div class="auth-container">
@@ -2562,53 +2572,57 @@ const fpsStatus = document.getElementById('fps-status');
 const fpsCounter = document.getElementById('fps-counter');
 const fpsValue = document.getElementById('fps-value');
 
-// Load FPS counter state
-const fpsEnabled = localStorage.getItem('fpsEnabled') === 'true';
-fpsToggle.checked = fpsEnabled;
-fpsStatus.textContent = fpsEnabled ? 'Enabled' : 'Disabled';
-if (fpsEnabled) {
-    fpsCounter.style.display = 'block';
-    startFPSCounter();
-}
-
-// FPS Counter logic
-let fpsLastTime = 0;
+// FPS Counter variables
+let fpsLastTime = performance.now();
 let fpsFrames = 0;
 let fps = 0;
 let fpsInterval;
+let fpsEnabled = localStorage.getItem('fpsEnabled') === 'true';
 
+// Initialize FPS counter state
+fpsToggle.checked = fpsEnabled;
+fpsStatus.textContent = fpsEnabled ? 'Enabled' : 'Disabled';
+if (fpsEnabled) {
+    startFPSCounter();
+}
+
+// FPS counter functions
 function startFPSCounter() {
-    fpsInterval = setInterval(() => {
-        fpsValue.textContent = fps;
-    }, 1000);
-    
-    function updateFPS() {
-        fpsFrames++;
-        const now = performance.now();
-        if (now >= fpsLastTime + 1000) {
-            fps = Math.round((fpsFrames * 1000) / (now - fpsLastTime));
-            fpsLastTime = now;
-            fpsFrames = 0;
-        }
-        if (fpsEnabled) {
-            requestAnimationFrame(updateFPS);
-        }
-    }
-    requestAnimationFrame(updateFPS);
+    fpsCounter.style.display = 'block';
+    fpsInterval = setInterval(updateFPSCounter, 1000);
+    requestAnimationFrame(countFPSFrame);
 }
 
 function stopFPSCounter() {
+    fpsCounter.style.display = 'none';
     clearInterval(fpsInterval);
     fpsValue.textContent = '0';
 }
 
+function countFPSFrame() {
+    fpsFrames++;
+    const now = performance.now();
+    if (now >= fpsLastTime + 1000) {
+        fps = Math.round((fpsFrames * 1000) / (now - fpsLastTime));
+        fpsLastTime = now;
+        fpsFrames = 0;
+    }
+    if (fpsEnabled) {
+        requestAnimationFrame(countFPSFrame);
+    }
+}
+
+function updateFPSCounter() {
+    fpsValue.textContent = fps;
+}
+
+// Toggle event listener
 fpsToggle.addEventListener('change', function() {
-    const enabled = this.checked;
-    fpsStatus.textContent = enabled ? 'Enabled' : 'Disabled';
-    fpsCounter.style.display = enabled ? 'block' : 'none';
-    localStorage.setItem('fpsEnabled', enabled);
+    fpsEnabled = this.checked;
+    fpsStatus.textContent = fpsEnabled ? 'Enabled' : 'Disabled';
+    localStorage.setItem('fpsEnabled', fpsEnabled);
     
-    if (enabled) {
+    if (fpsEnabled) {
         startFPSCounter();
     } else {
         stopFPSCounter();
