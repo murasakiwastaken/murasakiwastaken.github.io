@@ -1723,27 +1723,24 @@ body.dark-mode #fps-value {
         };
         
         // Wait for Firebase to load
-// Replace the initializeFirebase function with:
+// Replace the current initializeFirebase function with:
+let firebaseInitialized = false;
+
 function initializeFirebase() {
+    if (firebaseInitialized) return;
+    
     if (typeof firebase === 'undefined') {
-        setTimeout(initializeFirebase, 100);
+        console.log('Firebase not loaded yet, waiting...');
+        setTimeout(initializeFirebase, 500);
         return;
     }
 
     try {
-        // Initialize Firebase if not already initialized
         if (firebase.apps.length === 0) {
             firebase.initializeApp(firebaseConfig);
-            
-            // Initialize services
-            firebase.auth();
-            firebase.database();
-            firebase.storage();
-            
-            initApplication();
-        } else {
-            initApplication();
         }
+        firebaseInitialized = true;
+        initApplication();
     } catch (error) {
         console.error('Firebase initialization error:', error);
         setTimeout(initializeFirebase, 1000);
@@ -2303,26 +2300,29 @@ modal.addEventListener('click', (e) => {
                 }
             }
             
-           // In the chat system initialization
+        // In loadChatHistory function:
 function loadChatHistory() {
-    chatRef.limitToLast(100).on('value', (snapshot) => {
-        // Only clear if we have new messages to avoid flickering
-        if (snapshot.numChildren() > chatMessages.children.length) {
-            chatMessages.innerHTML = '';
+    // Clear previous listener to prevent duplicates
+    if (this.chatRefOff) this.chatRefOff();
+    
+    this.chatRefOff = chatRef.limitToLast(100).on('value', (snapshot) => {
+        const messagesContainer = document.getElementById('chat-messages');
+        const currentMessageCount = messagesContainer.children.length;
+        
+        // Only update if we have new messages
+        if (snapshot.numChildren() > currentMessageCount) {
+            const fragment = document.createDocumentFragment();
+            
+            snapshot.forEach((childSnapshot) => {
+                if (!document.querySelector(`[data-key="${childSnapshot.key}"]`)) {
+                    const msgEl = createMessageElement(childSnapshot);
+                    fragment.appendChild(msgEl);
+                }
+            });
+            
+            messagesContainer.appendChild(fragment);
+            scrollToBottom();
         }
-        
-        snapshot.forEach((childSnapshot) => {
-            const msg = childSnapshot.val();
-            // Check if message already exists
-            if (!document.querySelector(`[data-key="${childSnapshot.key}"]`)) {
-                displayMessage({
-                    ...msg,
-                    key: childSnapshot.key
-                });
-            }
-        });
-        
-        scrollToBottom();
     });
 }
             
