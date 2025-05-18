@@ -2681,34 +2681,68 @@ async function handleAIInput() {
         }
     });
 // Update your auth state listener
-auth.onAuthStateChanged((user) => {
-    try {
-        if (user) {
-            authPage.style.display = 'none';
-            mainContainer.style.display = 'flex';
-            localStorage.setItem('lastLogin', Date.now());
+// 1. Store the unsubscribe function to prevent multiple listeners
+let authStateUnsubscribe = null;
+
+// 2. Modified auth state handler with proper cleanup
+function setupAuthStateListener() {
+    // Clean up previous listener if it exists
+    if (authStateUnsubscribe) {
+        authStateUnsubscribe();
+    }
+    
+    authStateUnsubscribe = auth.onAuthStateChanged((user) => {
+        try {
+            console.log('Auth state changed:', user ? 'Logged in' : 'Logged out');
             
-            // Initialize systems
-            initParticles();
-            initTabSystem();
-            initFeedbackSystem();
-            initSettingsSystem();
-        } else {
-            // Handle signed out state
-            const lastLogin = localStorage.getItem('lastLogin');
-            const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-            
-            if (lastLogin && (Date.now() - parseInt(lastLogin)) > thirtyDays) {
-                localStorage.removeItem('lastLogin');
-                localStorage.removeItem('chatUsername');
+            if (user) {
+                // User is signed in
+                authPage.style.display = 'none';
+                mainContainer.style.display = 'flex';
+                localStorage.setItem('lastLogin', Date.now());
+                
+                // Initialize systems only if they haven't been initialized
+                if (!window.systemsInitialized) {
+                    initParticles();
+                    initTabSystem();
+                    initFeedbackSystem();
+                    initSettingsSystem();
+                    window.systemsInitialized = true;
+                }
+            } else {
+                // User is signed out
+                const lastLogin = localStorage.getItem('lastLogin');
+                const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+                
+                if (lastLogin && (Date.now() - parseInt(lastLogin) > thirtyDays) {
+                    // Clear old session data
+                    localStorage.removeItem('lastLogin');
+                    localStorage.removeItem('chatUsername');
+                }
+                
+                // Reset initialization flag
+                window.systemsInitialized = false;
+            }
+        } catch (error) {
+            console.error('Auth state change error:', error);
+            // Add error throttling
+            if (!window.lastAuthError || Date.now() - window.lastAuthError > 5000) {
+                showError(authStatus, 'Session error. Please refresh.');
+                window.lastAuthError = Date.now();
             }
         }
-    } catch (error) {
-        console.error('Auth state change error:', error);
-        showError(authStatus, 'Session error. Please refresh the page.');
+    });
+}
+
+// 3. Call this when initializing your app
+setupAuthStateListener();
+
+// 4. Clean up when needed (e.g., before page unload)
+window.addEventListener('beforeunload', () => {
+    if (authStateUnsubscribe) {
+        authStateUnsubscribe();
     }
 });
-
 
 
             // ======================
