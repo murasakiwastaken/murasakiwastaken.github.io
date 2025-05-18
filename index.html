@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="murasaki's center  with enhanced features and performance">
-    <title>murasaki's center v2.5 | enhanced experience</title>
+    <title>murasaki's center v3 | enhanced experience</title>
     
     <!-- Preload critical resources -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rubik:wght@400;700&display=swap" as="style">
@@ -634,7 +634,7 @@ body.dark-mode #fps-value {
     <div class="particles-container" id="particles-js"></div>
     <div class="main-container" id="main-container">
         <header class="header">
-            <h1 class="title">murasaki's center v2.5 | enhanced experience</h1>
+            <h1 class="title">murasaki's center v3 | enhanced experience</h1>
         </header>
         
         <div class="tabs">
@@ -1723,7 +1723,6 @@ body.dark-mode #fps-value {
         };
         
         // Wait for Firebase to load
-// Replace the initializeFirebase function with:
 function initializeFirebase() {
     if (typeof firebase === 'undefined') {
         setTimeout(initializeFirebase, 100);
@@ -1952,7 +1951,15 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
             const auth = firebase.auth();
             const database = firebase.database();
             const storage = firebase.storage();
-            
+                // Set auth persistence to LOCAL (will persist across sessions)
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(() => {
+            console.log("Auth persistence set to LOCAL");
+        })
+        .catch((error) => {
+            console.error("Error setting auth persistence:", error);
+        });
+
             // DOM Elements
             const authPage = document.getElementById('auth-page');
             const mainContainer = document.getElementById('main-container');
@@ -1985,90 +1992,88 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
             });
             
             // Login function
-            loginBtn.addEventListener('click', () => {
-                const username = usernameInput.value.trim();
-                const password = passwordInput.value.trim();
-                
-                if (!username || !password) {
-                    showError(authStatus, 'Please enter both username and password');
-                    return;
-                }
-                
-                // For demo, we'll use username@example.com as the email
-                const email = `${username}@example.com`;
-                
-                loginBtn.disabled = true;
-                loginBtn.textContent = 'Logging in...';
-                
-                auth.signInWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        showSuccess(authStatus, 'Login successful!');
-                        // Hide auth page and show main content
-                        authPage.style.display = 'none';
-                        mainContainer.style.display = 'flex';
-                        // After successful login/signup:
-localStorage.setItem('lastLogin', Date.now());
+           // Login function
+loginBtn.addEventListener('click', () => {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    
+    if (!username || !password) {
+        showError(authStatus, 'Please enter both username and password');
+        return;
+    }
+    
+    const email = `${username}@example.com`;
+    
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Logging in...';
+    
+    // Set persistence before signing in
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(() => {
+            return auth.signInWithEmailAndPassword(email, password);
+        })
+        .then((userCredential) => {
+            showSuccess(authStatus, 'Login successful!');
+            authPage.style.display = 'none';
+            mainContainer.style.display = 'flex';
+            localStorage.setItem('lastLogin', Date.now());
+            initParticles();
+            initTabSystem();
+            initFeedbackSystem();
+            initSettingsSystem();
+        })
+        .catch((error) => {
+            showError(authStatus, getErrorMessage(error));
+        })
+        .finally(() => {
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Log In';
+        });
+});
 
-// Then add this check when initializing:
-const lastLogin = localStorage.getItem('lastLogin');
-if (lastLogin && (Date.now() - parseInt(lastLogin)) > 30 * 24 * 60 * 60 * 1000) {
-    // If last login was more than 30 days ago, force fresh login
-    auth.signOut();
-}
-                        initParticles();
-                        initTabSystem();
-                        initFeedbackSystem();
-                        initSettingsSystem();
-                    })
-                    .catch((error) => {
-                        showError(authStatus, getErrorMessage(error));
-                    })
-                    .finally(() => {
-                        loginBtn.disabled = false;
-                        loginBtn.textContent = 'Log In';
-                    });
-            });
-            
-            // Signup function
-            signupBtn.addEventListener('click', () => {
-                const username = newUsernameInput.value.trim();
-                const password = newPasswordInput.value.trim();
-                
-                if (!username || !password) {
-                    showError(signupStatus, 'Please enter both username and password');
-                    return;
-                }
-                
-                if (password.length < 6) {
-                    showError(signupStatus, 'Password must be at least 6 characters');
-                    return;
-                }
-                
-                // For demo, we'll use username@example.com as the email
-                const email = `${username}@example.com`;
-                
-                signupBtn.disabled = true;
-                signupBtn.textContent = 'Creating account...';
-                
-                auth.createUserWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        showSuccess(signupStatus, 'Account created successfully!');
-                        // Hide auth page and show main content
-                        authPage.style.display = 'none';
-                        mainContainer.style.display = 'flex';
-                        initParticles();
-                        initTabSystem();
-                        initFeedbackSystem();
-                        initSettingsSystem();
-                    })
-                    .catch((error) => {
-                        showError(signupStatus, getErrorMessage(error));
-                    })
-                    .finally(() => {
-                        signupBtn.disabled = false;
-                        signupBtn.textContent = 'Sign Up';
-                    });
-            });
+// Signup function
+signupBtn.addEventListener('click', () => {
+    const username = newUsernameInput.value.trim();
+    const password = newPasswordInput.value.trim();
+    
+    if (!username || !password) {
+        showError(signupStatus, 'Please enter both username and password');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showError(signupStatus, 'Password must be at least 6 characters');
+        return;
+    }
+    
+    const email = `${username}@example.com`;
+    
+    signupBtn.disabled = true;
+    signupBtn.textContent = 'Creating account...';
+    
+    // Set persistence before creating account
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(() => {
+            return auth.createUserWithEmailAndPassword(email, password);
+        })
+        .then((userCredential) => {
+            showSuccess(signupStatus, 'Account created successfully!');
+            authPage.style.display = 'none';
+            mainContainer.style.display = 'flex';
+            localStorage.setItem('lastLogin', Date.now());
+            initParticles();
+            initTabSystem();
+            initFeedbackSystem();
+            initSettingsSystem();
+        })
+        .catch((error) => {
+            showError(signupStatus, getErrorMessage(error));
+        })
+        .finally(() => {
+            signupBtn.disabled = false;
+            signupBtn.textContent = 'Sign Up';
+        });
+});
             
             // Helper functions
             function clearInputs() {
@@ -2629,36 +2634,40 @@ async function handleAIInput() {
     });
 auth.onAuthStateChanged((user) => {
     if (user) {
-        // Check last login with a delay to prevent throttling
-        setTimeout(() => {
-            const lastLogin = localStorage.getItem('lastLogin');
-            const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-            
-            if (lastLogin && (Date.now() - parseInt(lastLogin)) > thirtyDays) {
-                // Add visual feedback before signing out
-                if (confirm('Your session has expired. Please log in again.')) {
-                    auth.signOut().then(() => {
-                        localStorage.removeItem('lastLogin');
-                        window.location.reload();
-                    });
-                }
-            } else {
-                // Update last login time
-                localStorage.setItem('lastLogin', Date.now());
-            }
-        }, 1000); // 1 second delay prevents throttling
+        // User is signed in
+        authPage.style.display = 'none';
+        mainContainer.style.display = 'flex';
+        
+        // Update last login time
+        localStorage.setItem('lastLogin', Date.now());
+        
+        initParticles();
+        initTabSystem();
+        initFeedbackSystem();
+        initSettingsSystem();
+    } else {
+        // User is signed out
+        
+        // Check if session expired (30 days)
+        const lastLogin = localStorage.getItem('lastLogin');
+        const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+        
+        if (lastLogin && (Date.now() - parseInt(lastLogin)) > thirtyDays) {
+            // Session expired - clear everything
+            localStorage.removeItem('lastLogin');
+            localStorage.removeItem('chatUsername');
+            authPage.style.display = 'flex';
+            mainContainer.style.display = 'none';
+        } else if (!lastLogin) {
+            // No previous session
+            authPage.style.display = 'flex';
+            mainContainer.style.display = 'none';
+        }
+        // Else: Firebase will automatically restore the session
     }
 });
 
-// Modify your login/signup success handlers to persist auth state:
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    .then(() => {
-        // Existing login/signup code
-    })
-    .catch((error) => {
-        console.error("Error setting auth persistence:", error);
-    });
-}
+
 
             // ======================
             // SETTINGS SYSTEM (NEW)
@@ -2690,8 +2699,9 @@ cancelLogoutBtn.addEventListener('click', () => {
 
 confirmLogoutBtn.addEventListener('click', () => {
     auth.signOut().then(() => {
-        // Clear any sensitive data
+        // Clear sensitive data
         localStorage.removeItem('chatUsername');
+        localStorage.removeItem('lastLogin');
         
         // Reset UI
         logoutConfirmModal.style.display = 'none';
@@ -2711,7 +2721,6 @@ confirmLogoutBtn.addEventListener('click', () => {
         alert("Error during logout. Please try again.");
     });
 });
-
     // Event Listeners
     settingsBtn.addEventListener('click', () => settingsModal.classList.toggle('active'));
     closeSettings.addEventListener('click', () => settingsModal.classList.remove('active'));
