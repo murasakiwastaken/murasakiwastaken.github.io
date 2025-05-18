@@ -2741,6 +2741,7 @@ confirmLogoutBtn.addEventListener('click', () => {
         // Show auth page
         authPage.style.display = 'flex';
         mainContainer.style.display = 'none';
+        window.location.href = 'https://murasakiwastaken.vercel.app';
     }).catch((error) => {
         console.error("Logout error:", error);
         alert("Error during logout. Please try again.");
