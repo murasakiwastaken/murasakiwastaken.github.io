@@ -1725,27 +1725,31 @@ body.dark-mode #fps-value {
     
     <!-- Main JavaScript -->
    <script>
-  import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getDatabase } from "firebase/database";
-import { getStorage } from "firebase/storage";
+ // Then modify your initialization:
+function initializeFirebase() {
+  if (typeof firebase === 'undefined') {
+    setTimeout(initializeFirebase, 100);
+    return;
+  }
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
-  authDomain: "chatroommurasaki.firebaseapp.com",
-  projectId: "chatroommurasaki",
-  storageBucket: "chatroommurasaki.appspot.com",
-  messagingSenderId: "649572971936",
-  appId: "1:649572971936:web:5d0aaf1be9f09cb428a0c5",
-  measurementId: "G-1113622WQQ"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const database = getDatabase(app);
-const storage = getStorage(app);
-
+  try {
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+      
+      // Initialize services like this:
+      const auth = firebase.auth();
+      const database = firebase.database();
+      const storage = firebase.storage(); // Now this will work
+      
+      initApplication(auth, database, storage);
+    } else {
+      initApplication(firebase.auth(), firebase.database(), firebase.storage());
+    }
+  } catch (error) {
+    console.error('Firebase initialization error:', error);
+    setTimeout(initializeFirebase, 1000);
+  }
+}
     // Initialize particles.js
     function initParticles() {
         if (typeof particlesJS !== 'undefined') {
