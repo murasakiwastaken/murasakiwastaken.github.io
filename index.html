@@ -3133,7 +3133,6 @@ function toggleDarkMode(e) {
 
 }
         
-        
 document.addEventListener('DOMContentLoaded', () => {
     try {
         loadDeferredStyles();
@@ -3152,9 +3151,8 @@ document.addEventListener('DOMContentLoaded', () => {
         errorDiv.style.zIndex = '9999';
         errorDiv.textContent = 'Error initializing application. Please refresh the page.';
         document.body.appendChild(errorDiv);
-    
-    
-});  // This closes both the catch block and the DOMContentLoaded callback
+    }
+});  // Properly closed now
     </script>
     <div class="logout-confirm-modal" id="logout-confirm-modal">
     <div class="logout-confirm-content">
