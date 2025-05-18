@@ -2345,7 +2345,13 @@ function addAIMessage(text, isUser = false) {
         return `Error: ${error.message}`;
     }
 }
-
+function clearConversation() {
+    conversationHistory = [];
+    document.getElementById('ai-messages').innerHTML = '';
+    // Add initial messages back
+    addAIMessage("Hello! I'm murasaki's AI assistant. How can I help you today?");
+    addAIMessage("For image analysis, this AI is currently unsupported, please use the attach button below to redirect yourself to another website. Thank you for your understanding.", false);
+}
 async function handleAIInput() {
     const question = document.getElementById('ai-input').value.trim();
     if (!question) return;
@@ -2367,13 +2373,7 @@ async function handleAIInput() {
     }
 }
             // Clear conversation when switching tabs or reloading
-function clearConversation() {
-    conversationHistory = [];
-    document.getElementById('ai-messages').innerHTML = '';
-    // Add initial messages back
-    addAIMessage("Hello! I'm murasaki's AI assistant. How can I help you today?");
-    addAIMessage("For image analysis, this AI is currently unsupported, please use the attach button below to redirect yourself to another website. Thank you for your understanding.", false);
-}
+
 
             // Event listeners
             document.getElementById('ai-send-btn').addEventListener('click', handleAIInput);
