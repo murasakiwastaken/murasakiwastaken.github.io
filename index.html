@@ -3134,24 +3134,7 @@ function toggleDarkMode(e) {
 }
         
 document.addEventListener('DOMContentLoaded', () => {
-    try {
-        loadDeferredStyles();
-        initializeFirebase();
-    } catch (error) {
-        console.error('Initialization error:', error);
-        // Show user-friendly error message
-        const errorDiv = document.createElement('div');
-        errorDiv.style.position = 'fixed';
-        errorDiv.style.top = '0';
-        errorDiv.style.left = '0';
-        errorDiv.style.width = '100%';
-        errorDiv.style.padding = '20px';
-        errorDiv.style.backgroundColor = '#f44336';
-        errorDiv.style.color = 'white';
-        errorDiv.style.zIndex = '9999';
-        errorDiv.textContent = 'Error initializing application. Please refresh the page.';
-        document.body.appendChild(errorDiv);
-    }
+    console.log('Loaded successfully!');
 });
     </script>
     <div class="logout-confirm-modal" id="logout-confirm-modal">
