@@ -1727,6 +1727,15 @@ body.dark-mode #fps-value {
    <script>
  // Then modify your initialization:
 function initializeFirebase() {
+const firebaseConfig = {
+  apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
+  authDomain: "chatroommurasaki.firebaseapp.com",
+  projectId: "chatroommurasaki",
+  storageBucket: "chatroommurasaki.appspot.com",
+  messagingSenderId: "649572971936",
+  appId: "1:649572971936:web:5d0aaf1be9f09cb428a0c5",
+  measurementId: "G-1113622WQQ"
+};
   if (typeof firebase === 'undefined') {
     setTimeout(initializeFirebase, 100);
     return;
