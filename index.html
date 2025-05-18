@@ -2627,24 +2627,26 @@ async function handleAIInput() {
             sendFeedback();
         }
     });
-
-// In your initApplication() function, modify the auth state handling:
 auth.onAuthStateChanged((user) => {
     if (user) {
-        // User is signed in
-        authPage.style.display = 'none';
-        mainContainer.style.display = 'flex';
-        initParticles();
-        initTabSystem();
-        initFeedbackSystem();
-        initSettingsSystem();
-        
-        // Load chat username if exists
-        chatUsername = localStorage.getItem('chatUsername') || user.email.split('@')[0];
-    } else {
-        // User is signed out
-        authPage.style.display = 'flex';
-        mainContainer.style.display = 'none';
+        // Check last login with a delay to prevent throttling
+        setTimeout(() => {
+            const lastLogin = localStorage.getItem('lastLogin');
+            const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+            
+            if (lastLogin && (Date.now() - parseInt(lastLogin)) > thirtyDays) {
+                // Add visual feedback before signing out
+                if (confirm('Your session has expired. Please log in again.')) {
+                    auth.signOut().then(() => {
+                        localStorage.removeItem('lastLogin');
+                        window.location.reload();
+                    });
+                }
+            } else {
+                // Update last login time
+                localStorage.setItem('lastLogin', Date.now());
+            }
+        }, 1000); // 1 second delay prevents throttling
     }
 });
 
