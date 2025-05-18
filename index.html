@@ -3128,6 +3128,7 @@ function resetCloak() {
     localStorage.removeItem('cloakActive');
 }
  }
+} 
 
     // Expose cleanup for use elsewhere
     return { resetCloak };
@@ -3158,7 +3159,7 @@ document.addEventListener('DOMContentLoaded', () => {
         errorDiv.textContent = 'Error initializing application. Please refresh the page.';
         document.body.appendChild(errorDiv);
     }
-});
+});  // This closes both the catch block and the DOMContentLoaded callback
     </script>
     <div class="logout-confirm-modal" id="logout-confirm-modal">
     <div class="logout-confirm-content">
