@@ -73,7 +73,21 @@ body.dark-mode .logout-btn {
 body.dark-mode .logout-btn:hover {
     background: rgba(255, 45, 117, 0.2);
 }
+auth-btn.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
 
+.auth-btn.loading::after {
+    content: '...';
+    animation: loadingDots 1.5s infinite;
+}
+
+@keyframes loadingDots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+}
 /* Confirmation modal styles */
 .logout-confirm-modal {
     position: fixed;
@@ -1992,8 +2006,12 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
             });
             
             // Login function
-           // Login function
-loginBtn.addEventListener('click', () => {
+        // Updated login function
+loginBtn.addEventListener('click', async () => {
+if (typeof firebase === 'undefined' || !firebase.apps.length) {
+    showError(authStatus, 'Authentication system is loading. Please wait...');
+    return;
+}
     const username = usernameInput.value.trim();
     const password = passwordInput.value.trim();
     
@@ -2004,33 +2022,63 @@ loginBtn.addEventListener('click', () => {
     
     const email = `${username}@example.com`;
     
-    loginBtn.disabled = true;
-    loginBtn.textContent = 'Logging in...';
-    
-    // Set persistence before signing in
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .then(() => {
-            return auth.signInWithEmailAndPassword(email, password);
-        })
-        .then((userCredential) => {
-            showSuccess(authStatus, 'Login successful!');
-            authPage.style.display = 'none';
-            mainContainer.style.display = 'flex';
-            localStorage.setItem('lastLogin', Date.now());
-            initParticles();
-            initTabSystem();
-            initFeedbackSystem();
-            initSettingsSystem();
-        })
-        .catch((error) => {
-            showError(authStatus, getErrorMessage(error));
-        })
-        .finally(() => {
-            loginBtn.disabled = false;
-            loginBtn.textContent = 'Log In';
-        });
+    try {
+        // Disable button and show loading state
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Logging in...';
+        
+        // Wait for Firebase to be ready
+        if (typeof firebase === 'undefined') {
+            throw new Error('Firebase not loaded yet');
+        }
+        
+        // Set persistence and sign in
+        await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        
+        // Login successful
+        showSuccess(authStatus, 'Login successful!');
+        authPage.style.display = 'none';
+        mainContainer.style.display = 'flex';
+        localStorage.setItem('lastLogin', Date.now());
+        
+        // Initialize systems
+        initParticles();
+        initTabSystem();
+        initFeedbackSystem();
+        initSettingsSystem();
+        
+    } catch (error) {
+        console.error('Login error:', error);
+        let errorMessage = 'Login failed. Please try again.';
+        
+        // Specific error messages
+        if (error.code) {
+            switch (error.code) {
+                case 'auth/wrong-password':
+                    errorMessage = 'Incorrect password';
+                    break;
+                case 'auth/user-not-found':
+                    errorMessage = 'Username not found';
+                    break;
+                case 'auth/too-many-requests':
+                    errorMessage = 'Too many attempts. Try again later.';
+                    break;
+                case 'auth/network-request-failed':
+                    errorMessage = 'Network error. Check your connection.';
+                    break;
+            }
+        } else if (error.message.includes('Firebase not loaded')) {
+            errorMessage = 'System still loading. Please wait...';
+        }
+        
+        showError(authStatus, errorMessage);
+    } finally {
+        // Reset button state
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Log In';
+    }
 });
-
 // Signup function
 signupBtn.addEventListener('click', () => {
     const username = newUsernameInput.value.trim();
@@ -2632,38 +2680,32 @@ async function handleAIInput() {
             sendFeedback();
         }
     });
+// Update your auth state listener
 auth.onAuthStateChanged((user) => {
-    if (user) {
-        // User is signed in
-        authPage.style.display = 'none';
-        mainContainer.style.display = 'flex';
-        
-        // Update last login time
-        localStorage.setItem('lastLogin', Date.now());
-        
-        initParticles();
-        initTabSystem();
-        initFeedbackSystem();
-        initSettingsSystem();
-    } else {
-        // User is signed out
-        
-        // Check if session expired (30 days)
-        const lastLogin = localStorage.getItem('lastLogin');
-        const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-        
-        if (lastLogin && (Date.now() - parseInt(lastLogin)) > thirtyDays) {
-            // Session expired - clear everything
-            localStorage.removeItem('lastLogin');
-            localStorage.removeItem('chatUsername');
-            authPage.style.display = 'flex';
-            mainContainer.style.display = 'none';
-        } else if (!lastLogin) {
-            // No previous session
-            authPage.style.display = 'flex';
-            mainContainer.style.display = 'none';
+    try {
+        if (user) {
+            authPage.style.display = 'none';
+            mainContainer.style.display = 'flex';
+            localStorage.setItem('lastLogin', Date.now());
+            
+            // Initialize systems
+            initParticles();
+            initTabSystem();
+            initFeedbackSystem();
+            initSettingsSystem();
+        } else {
+            // Handle signed out state
+            const lastLogin = localStorage.getItem('lastLogin');
+            const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+            
+            if (lastLogin && (Date.now() - parseInt(lastLogin)) > thirtyDays) {
+                localStorage.removeItem('lastLogin');
+                localStorage.removeItem('chatUsername');
+            }
         }
-        // Else: Firebase will automatically restore the session
+    } catch (error) {
+        console.error('Auth state change error:', error);
+        showError(authStatus, 'Session error. Please refresh the page.');
     }
 });
 
