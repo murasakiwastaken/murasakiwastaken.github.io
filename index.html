@@ -605,6 +605,33 @@ body.dark-mode #fps-value {
   const MAX_LOAD_ATTEMPTS = 5;
 
   // Function to load Firebase scripts
+            // Add this before loadFirebase() call
+console.log('Running diagnostic checks...');
+
+// Check if scripts are being blocked
+fetch('https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js')
+  .then(response => {
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    console.log('Firebase CDN is accessible');
+  })
+  .catch(error => {
+    console.error('Firebase CDN access check failed:', error);
+    showFirebaseError(
+      'Network restrictions detected. ' +
+      'Your network may be blocking essential resources. ' +
+      'Please try using a different network or browser.'
+    );
+  });
+
+// Check for Content Security Policy issues
+const cspCheck = document.createElement('meta');
+cspCheck.httpEquiv = 'Content-Security-Policy';
+cspCheck.content = 'script-src *';
+document.head.appendChild(cspCheck);
+setTimeout(() => {
+  document.head.removeChild(cspCheck);
+  console.log('CSP check completed');
+}, 1000);
   function loadFirebase() {
     if (firebaseLoaded || firebaseLoadAttempts >= MAX_LOAD_ATTEMPTS) return;
 
@@ -3183,5 +3210,217 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
     </div>
 </div>
+<!-- Place this right before your closing </body> tag -->
+<script>
+  // Configuration
+  const FIREBASE_VERSION = '8.10.0';
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY = 2000; // 2 seconds
+  
+  // State tracking
+  let firebaseLoadAttempt = 0;
+  let fallbackTriggered = false;
+
+  // Primary Firebase CDN
+  const PRIMARY_CDN = 'https://www.gstatic.com/firebasejs';
+  
+  // Fallback CDNs (ordered by reliability)
+  const FALLBACK_CDNS = [
+    'https://cdn.jsdelivr.net/npm/firebase@' + FIREBASE_VERSION,
+    'https://unpkg.com/firebase@' + FIREBASE_VERSION
+  ];
+
+  // Core Firebase services we need
+  const CORE_SERVICES = [
+    'firebase-app',
+    'firebase-auth',
+    'firebase-database',
+    'firebase-storage'
+  ];
+
+  // Error display function
+  function showFirebaseError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.id = 'firebase-load-error';
+    errorDiv.innerHTML = `
+      <h3>Application Loading Issue</h3>
+      <p>${message}</p>
+      <div class="error-actions">
+        <button onclick="retryFirebaseLoad()">Retry</button>
+        <button onclick="location.reload()">Reload Page</button>
+      </div>
+      <div class="technical-details" style="display:none">
+        <p><small>Technical details:</small></p>
+        <pre id="error-details"></pre>
+      </div>
+      <a href="#" onclick="document.querySelector('.technical-details').style.display='block';return false;">
+        Show technical details
+      </a>
+    `;
+    document.body.prepend(errorDiv);
+  }
+
+  // Retry function
+  window.retryFirebaseLoad = function() {
+    document.getElementById('firebase-load-error')?.remove();
+    firebaseLoadAttempt = 0;
+    fallbackTriggered = false;
+    loadFirebase();
+  };
+
+  // Main loading function
+  function loadFirebase() {
+    firebaseLoadAttempt++;
+    
+    if (firebaseLoadAttempt > MAX_RETRIES && !fallbackTriggered) {
+      fallbackTriggered = true;
+      firebaseLoadAttempt = 0;
+      tryNextFallback();
+      return;
+    }
+
+    if (firebaseLoadAttempt > MAX_RETRIES * 2) {
+      showFirebaseError(
+        'Failed to load required resources after multiple attempts. ' +
+        'Please check your network connection and try again later.'
+      );
+      return;
+    }
+
+    const baseUrl = fallbackTriggered 
+      ? FALLBACK_CDNS[0] 
+      : PRIMARY_CDN + '/' + FIREBASE_VERSION + '/';
+
+    console.log(`Attempting to load Firebase from: ${baseUrl}`);
+
+    let loadedCount = 0;
+    let hasErrors = false;
+
+    CORE_SERVICES.forEach(service => {
+      const script = document.createElement('script');
+      script.src = baseUrl + service + '.js';
+      
+      script.onload = () => {
+        loadedCount++;
+        if (loadedCount === CORE_SERVICES.length && !hasErrors) {
+          initializeFirebase();
+        }
+      };
+      
+      script.onerror = () => {
+        console.error(`Failed to load ${service}`);
+        hasErrors = true;
+        if (!fallbackTriggered && firebaseLoadAttempt >= MAX_RETRIES) {
+          tryNextFallback();
+        } else if (!document.getElementById('firebase-load-error')) {
+          setTimeout(loadFirebase, RETRY_DELAY);
+        }
+      };
+      
+      document.body.appendChild(script);
+    });
+  }
+
+  function tryNextFallback() {
+    if (FALLBACK_CDNS.length > 0) {
+      console.log(`Trying fallback CDN: ${FALLBACK_CDNS[0]}`);
+      loadFirebase();
+    } else {
+      showFirebaseError(
+        'All loading attempts failed. Please try again later or contact support.'
+      );
+    }
+  }
+
+  // Initialize Firebase once loaded
+  function initializeFirebase() {
+    try {
+      if (typeof firebase === 'undefined' || !firebase.initializeApp) {
+        throw new Error('Firebase SDK not properly loaded');
+      }
+
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+        console.log('Firebase initialized successfully');
+        
+        // Initialize your application
+        if (typeof initApplication === 'function') {
+          initApplication();
+        }
+      }
+    } catch (error) {
+      console.error('Firebase initialization error:', error);
+      showFirebaseError(
+        'Configuration error detected. ' +
+        'Please refresh the page or contact support if the problem persists.'
+      );
+    }
+  }
+
+  // Start loading when DOM is ready
+  document.addEventListener('DOMContentLoaded', loadFirebase);
+
+  // Final attempt after timeout
+  setTimeout(() => {
+    if (typeof firebase === 'undefined' && !document.getElementById('firebase-load-error')) {
+      showFirebaseError(
+        'Loading is taking longer than expected. ' +
+        'You may continue waiting or try refreshing the page.'
+      );
+    }
+  }, 10000);
+</script>
+
+<style>
+  #firebase-load-error {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #0d1b2a;
+    color: #e0e1dd;
+    padding: 20px;
+    border-bottom: 2px solid #ff2d75;
+    z-index: 99999;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  }
+  
+  #firebase-load-error h3 {
+    color: #ff2d75;
+    margin-bottom: 10px;
+  }
+  
+  .error-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .error-actions button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .error-actions button:first-child {
+    background: rgba(0, 168, 255, 0.2);
+    color: #00a8ff;
+    border: 1px solid #00a8ff;
+  }
+  
+  .error-actions button:last-child {
+    background: rgba(255, 45, 117, 0.2);
+    color: #ff2d75;
+    border: 1px solid #ff2d75;
+  }
+  
+  #error-details {
+    background: rgba(0,0,0,0.3);
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    overflow-x: auto;
+  }
+</style>
 </body>
 </html>
