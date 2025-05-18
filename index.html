@@ -48,7 +48,81 @@
                 background: rgba(0, 168, 255, 0.2);
                 transform: scale(1.05);
             }
+.logout-btn {
+    width: 100%;
+    padding: 10px;
+    background: rgba(255, 45, 117, 0.2);
+    color: #ff2d75;
+    border: 1px solid #ff2d75;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
 
+.logout-btn:hover {
+    background: rgba(255, 45, 117, 0.3);
+}
+
+body.dark-mode .logout-btn {
+    background: rgba(255, 45, 117, 0.1);
+    color: #ff6b8b;
+    border-color: #ff6b8b;
+}
+
+body.dark-mode .logout-btn:hover {
+    background: rgba(255, 45, 117, 0.2);
+}
+
+/* Confirmation modal styles */
+.logout-confirm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+}
+
+.logout-confirm-content {
+    background: #0d1b2a;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    border: 1px solid #ff2d75;
+}
+
+.logout-confirm-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.confirm-btn, .cancel-btn {
+    padding: 8px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.confirm-btn {
+    background: #ff2d75;
+    color: white;
+    border: none;
+}
+
+.cancel-btn {
+    background: transparent;
+    color: #00a8ff;
+    border: 1px solid #00a8ff;
+}
 /* UI Components */
 .game-card,
 .tab,
@@ -807,6 +881,14 @@ body.dark-mode #fps-value {
                         <button id="apply-cloak" class="apply-cloak-btn">Apply Cloak</button>
                     </div>
                 </div>
+                <div class="settings-section">
+    <h3>Account</h3>
+    <div class="settings-option">
+        <button id="logout-btn" class="logout-btn">
+            Log Out
+        </button>
+    </div>
+</div>
             </div>
         </div>
     </div>
@@ -1924,6 +2006,15 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
                         // Hide auth page and show main content
                         authPage.style.display = 'none';
                         mainContainer.style.display = 'flex';
+                        // After successful login/signup:
+localStorage.setItem('lastLogin', Date.now());
+
+// Then add this check when initializing:
+const lastLogin = localStorage.getItem('lastLogin');
+if (lastLogin && (Date.now() - parseInt(lastLogin)) > 30 * 24 * 60 * 60 * 1000) {
+    // If last login was more than 30 days ago, force fresh login
+    auth.signOut();
+}
                         initParticles();
                         initTabSystem();
                         initFeedbackSystem();
@@ -2537,13 +2628,33 @@ async function handleAIInput() {
         }
     });
 
-    // Update username when auth state changes
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            feedbackUsername = user.email.split('@')[0];
-        } else {
-            feedbackUsername = 'Anonymous';
-        }
+// In your initApplication() function, modify the auth state handling:
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        // User is signed in
+        authPage.style.display = 'none';
+        mainContainer.style.display = 'flex';
+        initParticles();
+        initTabSystem();
+        initFeedbackSystem();
+        initSettingsSystem();
+        
+        // Load chat username if exists
+        chatUsername = localStorage.getItem('chatUsername') || user.email.split('@')[0];
+    } else {
+        // User is signed out
+        authPage.style.display = 'flex';
+        mainContainer.style.display = 'none';
+    }
+});
+
+// Modify your login/signup success handlers to persist auth state:
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .then(() => {
+        // Existing login/signup code
+    })
+    .catch((error) => {
+        console.error("Error setting auth persistence:", error);
     });
 }
 
@@ -2561,6 +2672,43 @@ async function handleAIInput() {
     const cloakPreset = document.getElementById('cloak-preset');
     const customCloakUrl = document.getElementById('custom-cloak-url');
     const applyCloakBtn = document.getElementById('apply-cloak');
+     // In your initSettingsSystem() function:
+const logoutBtn = document.getElementById('logout-btn');
+const logoutConfirmModal = document.getElementById('logout-confirm-modal');
+const confirmLogoutBtn = document.getElementById('confirm-logout');
+const cancelLogoutBtn = document.getElementById('cancel-logout');
+
+logoutBtn.addEventListener('click', () => {
+    logoutConfirmModal.style.display = 'flex';
+});
+
+cancelLogoutBtn.addEventListener('click', () => {
+    logoutConfirmModal.style.display = 'none';
+});
+
+confirmLogoutBtn.addEventListener('click', () => {
+    auth.signOut().then(() => {
+        // Clear any sensitive data
+        localStorage.removeItem('chatUsername');
+        
+        // Reset UI
+        logoutConfirmModal.style.display = 'none';
+        settingsModal.classList.remove('active');
+        
+        // Show auth page
+        authPage.style.display = 'flex';
+        mainContainer.style.display = 'none';
+        
+        // Reset any cloak if active
+        const cloakSystem = initSettingsSystem();
+        if (cloakSystem && cloakSystem.resetCloak) {
+            cloakSystem.resetCloak();
+        }
+    }).catch((error) => {
+        console.error("Logout error:", error);
+        alert("Error during logout. Please try again.");
+    });
+});
 
     // Event Listeners
     settingsBtn.addEventListener('click', () => settingsModal.classList.toggle('active'));
@@ -2927,5 +3075,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
     </script>
+    <div class="logout-confirm-modal" id="logout-confirm-modal">
+    <div class="logout-confirm-content">
+        <h3>Confirm Logout</h3>
+        <p>Are you sure you want to log out?</p>
+        <div class="logout-confirm-buttons">
+            <button class="confirm-btn" id="confirm-logout">Log Out</button>
+            <button class="cancel-btn" id="cancel-logout">Cancel</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
