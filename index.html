@@ -2742,7 +2742,27 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-
+function resetCloak() {
+    const iframe = document.getElementById('cloak-iframe');
+    const toggleBtn = document.getElementById('cloak-toggle-btn');
+    if (iframe) iframe.remove();
+    if (toggleBtn) toggleBtn.remove();
+    
+    // Restore all UI elements
+    document.querySelectorAll('.main-container > *').forEach(el => {
+        el.style.display = '';
+    });
+    
+    // Restore feedback button
+    const feedbackBtn = document.getElementById('feedback-btn');
+    if (feedbackBtn) feedbackBtn.style.display = '';
+    
+    // Restore settings button
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) settingsBtn.style.display = '';
+    
+    localStorage.removeItem('cloakActive');
+}
             // ======================
             // SETTINGS SYSTEM (NEW)
             // ======================
@@ -2786,10 +2806,7 @@ confirmLogoutBtn.addEventListener('click', () => {
         mainContainer.style.display = 'none';
         
         // Reset any cloak if active
-        const cloakSystem = initSettingsSystem();
-        if (cloakSystem && cloakSystem.resetCloak) {
-            cloakSystem.resetCloak();
-        }
+        resetCloak(); // Just call directly instead of through initSettingsSystem()
     }).catch((error) => {
         console.error("Logout error:", error);
         alert("Error during logout. Please try again.");
@@ -3106,29 +3123,6 @@ function toggleDarkMode(e) {
         }
     }
 
-function resetCloak() {
-    const iframe = document.getElementById('cloak-iframe');
-    const toggleBtn = document.getElementById('cloak-toggle-btn');
-    if (iframe) iframe.remove();
-    if (toggleBtn) toggleBtn.remove();
-    
-    // Restore all UI elements
-    document.querySelectorAll('.main-container > *').forEach(el => {
-        el.style.display = '';
-    });
-    
-    // Restore feedback button
-    const feedbackBtn = document.getElementById('feedback-btn');
-    if (feedbackBtn) feedbackBtn.style.display = '';
-    
-    // Restore settings button
-    const settingsBtn = document.getElementById('settings-btn');
-    if (settingsBtn) settingsBtn.style.display = '';
-    
-    localStorage.removeItem('cloakActive');
-}
- }
-} 
 
     // Expose cleanup for use elsewhere
     return { resetCloak };
