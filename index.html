@@ -85,61 +85,79 @@ select {
         .hidden {
             display: none;
         }
-/* Dark Blue Dark Mode */
+
+
+/* Ultra Dark Blue Dark Mode */
 body.dark-mode {
-    background: #11114e !important;  /* Very dark blue */
-    color: #e0e1dd;
+    background: #0f1046 !important;  /* VERY dark blue */
+    color: #f0f4ff;  /* Bright blue-white text */
 }
 
 /* Game Cards */
 body.dark-mode .game-card {
-    background: rgba(10, 17, 40, 0.9); /* Slightly transparent dark blue */
-    border: 1px solid #1a2a5f; /* Dark blue border */
-    color: #e0e1dd;
+    background: rgba(15, 16, 70, 0.9); /* Slightly transparent */
+    border: 1px solid #242679; /* Slightly lighter blue border */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Text Elements */
-body.dark-mode .title,
-body.dark-mode h1, 
-body.dark-mode h2,
-body.dark-mode h3,
-body.dark-mode h4,
-body.dark-mode p {
-    color: #e0e1dd;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+body.dark-mode .title {
+    background: linear-gradient(90deg, #4a54ff, #7b83ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode h1, h2, h3, h4 {
+    color: #d6dcff;
 }
 
 /* Buttons */
 body.dark-mode .play-btn {
-    background: linear-gradient(90deg, #1a5fb4, #0d52bf); /* Blue gradient */
+    background: linear-gradient(90deg, #3032a8, #242679);
     color: white;
+    border: none;
 }
 
 /* Tabs */
 body.dark-mode .tab {
-    background: rgba(10, 17, 40, 0.7);
-    color: #e0e1dd;
-    border: 1px solid #1a2a5f;
+    background: rgba(15, 16, 70, 0.7);
+    color: #d6dcff;
+    border: 1px solid #3032a8;
 }
 
-body.dark-mode .tab:hover, 
+body.dark-mode .tab:hover,
 body.dark-mode .tab.active {
-    background: rgba(26, 95, 180, 0.3); /* Blue tint */
-    border-color: #1a5fb4;
+    background: rgba(48, 50, 168, 0.4);
+    border-color: #4a54ff;
 }
 
-/* Fix for overlays */
+/* Special Adjustments */
 body.dark-mode .bg-animation {
     background: linear-gradient(135deg, 
-        #0a1128 0%, 
-        #0f1a3a 25%, 
-        #14244e 50%, 
-        #1a2a5f 75%, 
-        #14244e 100%) !important;
+        #0f1046 0%, 
+        #14175e 25%, 
+        #191d75 50%, 
+        #242679 75%, 
+        #191d75 100%) !important;
 }
 
 body.dark-mode .particles-js-canvas-el {
-    opacity: 0.5 !important;
+    opacity: 0.3 !important;
+}
+
+/* Input Fields */
+body.dark-mode input,
+body.dark-mode textarea {
+    background: rgba(15, 16, 70, 0.6);
+    color: #f0f4ff;
+    border: 1px solid #3032a8;
+}
+
+/* Ensure contrast for all text */
+body.dark-mode p, 
+body.dark-mode .game-info p {
+    color: #c2c8ff;
 }
 /* Toggle switch styles */
 .toggle-container {
@@ -823,13 +841,7 @@ input:checked + .slider:before {
                 font-size: 1rem;
                 transition: all 0.3s ease;
             }
-            body.dark-mode .auth-input,
-body.dark-mode .chat-input,
-body.dark-mode .ai-input {
-    background: rgba(224, 225, 221, 0.1);
-    color: #e0e1dd;
-    border: 1px solid rgba(0, 168, 255, 0.3);
-}
+     
             .auth-input:focus {
                 outline: none;
                 box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
@@ -953,11 +965,7 @@ body.dark-mode .ai-input {
                 animation: fadeIn 0.6s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
                 will-change: transform, box-shadow;
             }
-body.dark-mode .game-card {
-    background: rgba(13, 27, 42, 0.7);
-    border: 2px solid rgba(0, 168, 255, 0.3);
-    color: #e0e1dd;
-}
+
             
             /* Staggered animation for game cards */
             .game-card:nth-child(1) { animation-delay: 0.1s; }
