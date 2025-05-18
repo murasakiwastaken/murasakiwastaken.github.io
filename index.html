@@ -1725,43 +1725,26 @@ body.dark-mode #fps-value {
     
     <!-- Main JavaScript -->
    <script>
-    // Initialize Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
-        authDomain: "chatroommurasaki.firebaseapp.com",
-        projectId: "chatroommurasaki",
-        storageBucket: "chatroommurasaki.appspot.com",
-        messagingSenderId: "649572971936",
-        appId: "1:649572971936:web:5d0aaf1be9f09cb428a0c5",
-        measurementId: "G-1113622WQQ"
-    };
+  import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getDatabase } from "firebase/database";
+import { getStorage } from "firebase/storage";
 
-    // Wait for Firebase to load
-    function initializeFirebase() {
-        if (typeof firebase === 'undefined') {
-            setTimeout(initializeFirebase, 100);
-            return;
-        }
+const firebaseConfig = {
+  apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
+  authDomain: "chatroommurasaki.firebaseapp.com",
+  projectId: "chatroommurasaki",
+  storageBucket: "chatroommurasaki.appspot.com",
+  messagingSenderId: "649572971936",
+  appId: "1:649572971936:web:5d0aaf1be9f09cb428a0c5",
+  measurementId: "G-1113622WQQ"
+};
 
-        try {
-            // Initialize Firebase if not already initialized
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-                
-                // Initialize services
-                firebase.auth();
-                firebase.database();
-                firebase.storage();
-                
-                initApplication();
-            } else {
-                initApplication();
-            }
-        } catch (error) {
-            console.error('Firebase initialization error:', error);
-            setTimeout(initializeFirebase, 1000);
-        }
-    }
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+const storage = getStorage(app);
 
     // Initialize particles.js
     function initParticles() {
