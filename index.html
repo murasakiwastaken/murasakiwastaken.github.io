@@ -12,6 +12,7 @@
     <link rel="preload" href="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js" as="script">
     
 
+
     <!-- Inline critical CSS -->
     <style>
         /* Critical CSS - minimal styles needed for initial render */
@@ -316,31 +317,6 @@ body.dark-mode .game-info p {
 #ai-clear-btn:hover {
     background: rgba(255, 45, 117, 0.3);
 }
-/* Add to your CSS */
-.auth-error {
-  background: rgba(255, 45, 117, 0.2);
-  border: 1px solid #ff2d75;
-  border-radius: 8px;
-  padding: 15px;
-  margin-top: 20px;
-  color: #e0e1dd;
-  animation: fadeIn 0.5s ease-out;
-}
-
-.auth-error button {
-  background: rgba(0, 168, 255, 0.2);
-  color: #00a8ff;
-  border: 1px solid #00a8ff;
-  border-radius: 5px;
-  padding: 8px 15px;
-  margin-top: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.auth-error button:hover {
-  background: rgba(0, 168, 255, 0.3);
-}
 input:checked + .slider {
     background: linear-gradient(90deg, #00a8ff, #ff2d75);
 }
@@ -599,104 +575,27 @@ body.dark-mode #fps-value {
         
         // Load non-critical resources after page load
         function loadDeferredResources() {
-          // Firebase loading state
-  let firebaseLoaded = false;
-  let firebaseLoadAttempts = 0;
-  const MAX_LOAD_ATTEMPTS = 5;
-
-  // Function to load Firebase scripts
-            // Add this before loadFirebase() call
-console.log('Running diagnostic checks...');
-
-// Check if scripts are being blocked
-fetch('https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js')
-  .then(response => {
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    console.log('Firebase CDN is accessible');
-  })
-  .catch(error => {
-    console.error('Firebase CDN access check failed:', error);
-    showFirebaseError(
-      'Network restrictions detected. ' +
-      'Your network may be blocking essential resources. ' +
-      'Please try using a different network or browser.'
-    );
-  });
-
-// Check for Content Security Policy issues
-const cspCheck = document.createElement('meta');
-cspCheck.httpEquiv = 'Content-Security-Policy';
-cspCheck.content = 'script-src *';
-document.head.appendChild(cspCheck);
-setTimeout(() => {
-  document.head.removeChild(cspCheck);
-  console.log('CSP check completed');
-}, 1000);
-  function loadFirebase() {
-    if (firebaseLoaded || firebaseLoadAttempts >= MAX_LOAD_ATTEMPTS) return;
-
-    firebaseLoadAttempts++;
-    console.log(`Loading Firebase (attempt ${firebaseLoadAttempts})`);
-
-    const firebaseScripts = [
-      'https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js',
-      'https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js',
-      'https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js',
-      'https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js'
-    ];
-
-    let loadedCount = 0;
-
-    firebaseScripts.forEach(src => {
-      const script = document.createElement('script');
-      script.src = src;
-      script.onload = () => {
-        loadedCount++;
-        if (loadedCount === firebaseScripts.length) {
-          firebaseLoaded = true;
-          initializeFirebase();
+            const resources = [
+                'https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js',
+                'https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js',
+                'https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js',
+                'https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js',
+                'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js',
+                'https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js'
+            ];
+            
+            resources.forEach(src => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = true;
+                document.body.appendChild(script);
+            });
         }
-      };
-      script.onerror = () => {
-        console.error(`Failed to load ${src}`);
-        // Retry loading if all scripts fail
-        if (++loadedCount === firebaseScripts.length && !firebaseLoaded) {
-          setTimeout(loadFirebase, 2000 * firebaseLoadAttempts);
-        }
-      };
-      document.body.appendChild(script);
-    });
-  }
-
-  // Start loading Firebase when DOM is ready
-  document.addEventListener('DOMContentLoaded', loadFirebase);
+        
+        // Start loading deferred resources after DOM is parsed
+        document.addEventListener('DOMContentLoaded', loadDeferredResources);
     </script>
 </head>
-<script>
-  // Final check after 10 seconds
-  setTimeout(() => {
-    if (!firebaseLoaded) {
-      console.error('Firebase failed to load after timeout');
-      const fallbackScript = document.createElement('script');
-      fallbackScript.src = 'https://cdn.jsdelivr.net/npm/firebase@8.10.0/firebase-app.min.js';
-      fallbackScript.onload = () => {
-        const additionalScripts = [
-          'https://cdn.jsdelivr.net/npm/firebase@8.10.0/firebase-auth.min.js',
-          'https://cdn.jsdelivr.net/npm/firebase@8.10.0/firebase-database.min.js'
-        ];
-        
-        additionalScripts.forEach(src => {
-          const s = document.createElement('script');
-          s.src = src;
-          document.body.appendChild(s);
-        });
-        
-        initializeFirebase();
-      };
-      document.body.appendChild(fallbackScript);
-    }
-  }, 10000);
-</script>
 <body>
 <!-- Add this right after opening <body> tag -->
 <div id="fps-counter" style="display: none;">
@@ -1813,6 +1712,10 @@ setTimeout(() => {
     
     <!-- Main JavaScript -->
     <script>
+// Add this at the top of your script
+let authListener = null;
+let chatRefListener = null;
+let feedbackRefListener = null;
         // Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
@@ -1825,58 +1728,46 @@ setTimeout(() => {
         };
         
         // Wait for Firebase to load
+// Replace the initializeFirebase function with:
 function initializeFirebase() {
-  try {
-    // Check if Firebase is loaded
-    if (typeof firebase === 'undefined' || 
-        typeof firebase.initializeApp === 'undefined') {
-      throw new Error('Firebase not fully loaded');
+    if (typeof firebase === 'undefined') {
+        setTimeout(initializeFirebase, 100);
+        return;
     }
 
-    // Initialize only once
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-      console.log('Firebase initialized successfully');
-      
-      // Set up auth state persistence
-      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .then(() => initApplication())
-        .catch(err => console.error('Persistence error:', err));
-    } else {
-      initApplication();
+    try {
+        // Initialize Firebase if not already initialized
+        if (firebase.apps.length === 0) {
+            firebase.initializeApp(firebaseConfig);
+            
+            // Initialize services
+            firebase.auth();
+            firebase.database();
+            firebase.storage();
+            
+            initApplication();
+        } else {
+            initApplication();
+        }
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        setTimeout(initializeFirebase, 1000);
     }
-  } catch (error) {
-    console.error('Firebase init error:', error);
-    
-    // Show user-friendly error
-    const authPage = document.getElementById('auth-page');
-    if (authPage) {
-      const errorDiv = document.createElement('div');
-      errorDiv.className = 'auth-error';
-      errorDiv.innerHTML = `
-        <p>Failed to load required resources. Please:</p>
-        <ol>
-          <li>Check your internet connection</li>
-          <li>Disable ad-blockers for this site</li>
-          <li>Refresh the page</li>
-        </ol>
-        <button onclick="window.location.reload()">Refresh Page</button>
-      `;
-      authPage.appendChild(errorDiv);
-    }
-    
-    // Final attempt after delay
-    if (firebaseLoadAttempts < MAX_LOAD_ATTEMPTS) {
-      setTimeout(loadFirebase, 3000);
-    }
-  }
 }
         
-        // Initialize particles.js
-        function initParticles() {
-            if (typeof particlesJS !== 'undefined') {
-                particlesJS('particles-js', {
-                    "particles": {
+       
+
+let particlesInstance = null;
+
+function initParticles() {
+    if (typeof particlesJS !== 'undefined') {
+        // Destroy previous instance if exists
+        if (particlesInstance) {
+            destroyParticles();
+        }
+        
+        particlesInstance = particlesJS('particles-js', {
+   "particles": {
                         "number": {
                             "value": 60,  // Reduced for performance
                             "density": {
@@ -1957,11 +1848,27 @@ function initializeFirebase() {
                         }
                     },
                     "retina_detect": true
-                });
-            } else {
-                setTimeout(initParticles, 100);
-            }
+        });
+    } else {
+        setTimeout(initParticles, 100);
+    }
+}
+
+function destroyParticles() {
+    if (particlesInstance) {
+        // Cancel animation frame if used
+        if (particlesInstance.pJS && particlesInstance.pJS.fn.vendors.destroypJS) {
+            particlesInstance.pJS.fn.vendors.destroypJS();
         }
+        particlesInstance = null;
+        
+        // Clear the canvas
+        const canvas = document.getElementById('particles-js');
+        if (canvas) {
+            canvas.innerHTML = '';
+        }
+    }
+}
 let isScrolling = false;
 
 // Throttle scroll events
@@ -2061,7 +1968,15 @@ document.addEventListener('DOMContentLoaded', checkAboutBlank);
         }
     }
 }
-
+// Add this to help detect leaks
+setInterval(() => {
+    console.log('Active listeners:', eventListeners.cache ? eventListeners.cache.length : 0);
+    console.log('Firebase listeners:', 
+        (chatRefListener ? 1 : 0) + 
+        (feedbackRefListener ? 1 : 0) + 
+        (authListener ? 1 : 0)
+    );
+}, 10000);
 // Call this when showing settings
 document.getElementById('settings-btn').addEventListener('click', checkPopupBlocker);
 // Check for system preference
@@ -2425,29 +2340,26 @@ modal.addEventListener('click', (e) => {
                 }
             }
             
-        // In loadChatHistory function:
+           // In the chat system initialization
 function loadChatHistory() {
-    // Clear previous listener to prevent duplicates
-    if (this.chatRefOff) this.chatRefOff();
-    
-    this.chatRefOff = chatRef.limitToLast(100).on('value', (snapshot) => {
-        const messagesContainer = document.getElementById('chat-messages');
-        const currentMessageCount = messagesContainer.children.length;
-        
-        // Only update if we have new messages
-        if (snapshot.numChildren() > currentMessageCount) {
-            const fragment = document.createDocumentFragment();
-            
-            snapshot.forEach((childSnapshot) => {
-                if (!document.querySelector(`[data-key="${childSnapshot.key}"]`)) {
-                    const msgEl = createMessageElement(childSnapshot);
-                    fragment.appendChild(msgEl);
-                }
-            });
-            
-            messagesContainer.appendChild(fragment);
-            scrollToBottom();
+    chatRef.limitToLast(100).on('value', (snapshot) => {
+        // Only clear if we have new messages to avoid flickering
+        if (snapshot.numChildren() > chatMessages.children.length) {
+            chatMessages.innerHTML = '';
         }
+        
+        snapshot.forEach((childSnapshot) => {
+            const msg = childSnapshot.val();
+            // Check if message already exists
+            if (!document.querySelector(`[data-key="${childSnapshot.key}"]`)) {
+                displayMessage({
+                    ...msg,
+                    key: childSnapshot.key
+                });
+            }
+        });
+        
+        scrollToBottom();
     });
 }
             
@@ -2752,27 +2664,60 @@ async function handleAIInput() {
             sendFeedback();
         }
     });
-
-// In your initApplication() function, modify the auth state handling:
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        // User is signed in
-        authPage.style.display = 'none';
-        mainContainer.style.display = 'flex';
-        initParticles();
-        initTabSystem();
-        initFeedbackSystem();
-        initSettingsSystem();
-        
-        // Load chat username if exists
-        chatUsername = localStorage.getItem('chatUsername') || user.email.split('@')[0];
-    } else {
-        // User is signed out
-        authPage.style.display = 'flex';
-        mainContainer.style.display = 'none';
+// Modify your auth state handling
+function initAuthStateListener() {
+    // Clean up previous listener if exists
+    if (authListener) {
+        authListener(); // This removes the listener
     }
-});
+    
+    authListener = auth.onAuthStateChanged((user) => {
+        if (user) {
+            // User is signed in
+            authPage.style.display = 'none';
+            mainContainer.style.display = 'flex';
+            initParticles();
+            initTabSystem();
+            initFeedbackSystem();
+            initSettingsSystem();
+            
+            // Load chat username if exists
+            chatUsername = localStorage.getItem('chatUsername') || user.email.split('@')[0];
+        } else {
+            // User is signed out
+            authPage.style.display = 'flex';
+            mainContainer.style.display = 'none';
+            
+            // Clean up when logged out
+            cleanupListeners();
+            destroyParticles();
+        }
+    });
+}
 
+
+function cleanupListeners() {
+    // Chat listener
+    if (chatRefListener) {
+        chatRef.off('value', chatRefListener);
+        chatRefListener = null;
+    }
+    
+    // Feedback listener
+    if (feedbackRefListener) {
+        feedbackRef.off('value', feedbackRefListener);
+        feedbackRefListener = null;
+    }
+    
+    // Stop FPS counter
+    stopFPSCounter();
+    
+    // Clear any intervals
+    if (fpsInterval) {
+        clearInterval(fpsInterval);
+        fpsInterval = null;
+    }
+}
 // Modify your login/signup success handlers to persist auth state:
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
     .then(() => {
@@ -2811,6 +2756,7 @@ cancelLogoutBtn.addEventListener('click', () => {
     logoutConfirmModal.style.display = 'none';
 });
 
+// Modify your logout function
 confirmLogoutBtn.addEventListener('click', () => {
     auth.signOut().then(() => {
         // Clear any sensitive data
@@ -2820,15 +2766,13 @@ confirmLogoutBtn.addEventListener('click', () => {
         logoutConfirmModal.style.display = 'none';
         settingsModal.classList.remove('active');
         
+        // Clean up resources
+        cleanupListeners();
+        destroyParticles();
+        
         // Show auth page
         authPage.style.display = 'flex';
         mainContainer.style.display = 'none';
-        
-        // Reset any cloak if active
-        const cloakSystem = initSettingsSystem();
-        if (cloakSystem && cloakSystem.resetCloak) {
-            cloakSystem.resetCloak();
-        }
     }).catch((error) => {
         console.error("Logout error:", error);
         alert("Error during logout. Please try again.");
@@ -3210,217 +3154,5 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
     </div>
 </div>
-<!-- Place this right before your closing </body> tag -->
-<script>
-  // Configuration
-  const FIREBASE_VERSION = '8.10.0';
-  const MAX_RETRIES = 3;
-  const RETRY_DELAY = 2000; // 2 seconds
-  
-  // State tracking
-  let firebaseLoadAttempt = 0;
-  let fallbackTriggered = false;
-
-  // Primary Firebase CDN
-  const PRIMARY_CDN = 'https://www.gstatic.com/firebasejs';
-  
-  // Fallback CDNs (ordered by reliability)
-  const FALLBACK_CDNS = [
-    'https://cdn.jsdelivr.net/npm/firebase@' + FIREBASE_VERSION,
-    'https://unpkg.com/firebase@' + FIREBASE_VERSION
-  ];
-
-  // Core Firebase services we need
-  const CORE_SERVICES = [
-    'firebase-app',
-    'firebase-auth',
-    'firebase-database',
-    'firebase-storage'
-  ];
-
-  // Error display function
-  function showFirebaseError(message) {
-    const errorDiv = document.createElement('div');
-    errorDiv.id = 'firebase-load-error';
-    errorDiv.innerHTML = `
-      <h3>Application Loading Issue</h3>
-      <p>${message}</p>
-      <div class="error-actions">
-        <button onclick="retryFirebaseLoad()">Retry</button>
-        <button onclick="location.reload()">Reload Page</button>
-      </div>
-      <div class="technical-details" style="display:none">
-        <p><small>Technical details:</small></p>
-        <pre id="error-details"></pre>
-      </div>
-      <a href="#" onclick="document.querySelector('.technical-details').style.display='block';return false;">
-        Show technical details
-      </a>
-    `;
-    document.body.prepend(errorDiv);
-  }
-
-  // Retry function
-  window.retryFirebaseLoad = function() {
-    document.getElementById('firebase-load-error')?.remove();
-    firebaseLoadAttempt = 0;
-    fallbackTriggered = false;
-    loadFirebase();
-  };
-
-  // Main loading function
-  function loadFirebase() {
-    firebaseLoadAttempt++;
-    
-    if (firebaseLoadAttempt > MAX_RETRIES && !fallbackTriggered) {
-      fallbackTriggered = true;
-      firebaseLoadAttempt = 0;
-      tryNextFallback();
-      return;
-    }
-
-    if (firebaseLoadAttempt > MAX_RETRIES * 2) {
-      showFirebaseError(
-        'Failed to load required resources after multiple attempts. ' +
-        'Please check your network connection and try again later.'
-      );
-      return;
-    }
-
-    const baseUrl = fallbackTriggered 
-      ? FALLBACK_CDNS[0] 
-      : PRIMARY_CDN + '/' + FIREBASE_VERSION + '/';
-
-    console.log(`Attempting to load Firebase from: ${baseUrl}`);
-
-    let loadedCount = 0;
-    let hasErrors = false;
-
-    CORE_SERVICES.forEach(service => {
-      const script = document.createElement('script');
-      script.src = baseUrl + service + '.js';
-      
-      script.onload = () => {
-        loadedCount++;
-        if (loadedCount === CORE_SERVICES.length && !hasErrors) {
-          initializeFirebase();
-        }
-      };
-      
-      script.onerror = () => {
-        console.error(`Failed to load ${service}`);
-        hasErrors = true;
-        if (!fallbackTriggered && firebaseLoadAttempt >= MAX_RETRIES) {
-          tryNextFallback();
-        } else if (!document.getElementById('firebase-load-error')) {
-          setTimeout(loadFirebase, RETRY_DELAY);
-        }
-      };
-      
-      document.body.appendChild(script);
-    });
-  }
-
-  function tryNextFallback() {
-    if (FALLBACK_CDNS.length > 0) {
-      console.log(`Trying fallback CDN: ${FALLBACK_CDNS[0]}`);
-      loadFirebase();
-    } else {
-      showFirebaseError(
-        'All loading attempts failed. Please try again later or contact support.'
-      );
-    }
-  }
-
-  // Initialize Firebase once loaded
-  function initializeFirebase() {
-    try {
-      if (typeof firebase === 'undefined' || !firebase.initializeApp) {
-        throw new Error('Firebase SDK not properly loaded');
-      }
-
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-        console.log('Firebase initialized successfully');
-        
-        // Initialize your application
-        if (typeof initApplication === 'function') {
-          initApplication();
-        }
-      }
-    } catch (error) {
-      console.error('Firebase initialization error:', error);
-      showFirebaseError(
-        'Configuration error detected. ' +
-        'Please refresh the page or contact support if the problem persists.'
-      );
-    }
-  }
-
-  // Start loading when DOM is ready
-  document.addEventListener('DOMContentLoaded', loadFirebase);
-
-  // Final attempt after timeout
-  setTimeout(() => {
-    if (typeof firebase === 'undefined' && !document.getElementById('firebase-load-error')) {
-      showFirebaseError(
-        'Loading is taking longer than expected. ' +
-        'You may continue waiting or try refreshing the page.'
-      );
-    }
-  }, 10000);
-</script>
-
-<style>
-  #firebase-load-error {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: #0d1b2a;
-    color: #e0e1dd;
-    padding: 20px;
-    border-bottom: 2px solid #ff2d75;
-    z-index: 99999;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-  }
-  
-  #firebase-load-error h3 {
-    color: #ff2d75;
-    margin-bottom: 10px;
-  }
-  
-  .error-actions {
-    margin-top: 15px;
-    display: flex;
-    gap: 10px;
-  }
-  
-  .error-actions button {
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .error-actions button:first-child {
-    background: rgba(0, 168, 255, 0.2);
-    color: #00a8ff;
-    border: 1px solid #00a8ff;
-  }
-  
-  .error-actions button:last-child {
-    background: rgba(255, 45, 117, 0.2);
-    color: #ff2d75;
-    border: 1px solid #ff2d75;
-  }
-  
-  #error-details {
-    background: rgba(0,0,0,0.3);
-    padding: 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    overflow-x: auto;
-  }
-</style>
 </body>
 </html>
