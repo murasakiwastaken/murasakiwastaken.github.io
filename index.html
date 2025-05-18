@@ -29,10 +29,42 @@
             flex-direction: column;
             overflow-x: hidden;
             font-family: 'Rubik', sans-serif;
+             transition: 
+        background-color 0.3s ease,
+        color 0.3s ease;
         }
         body.dark-mode {
     background: #0d1b2a;
     color: #e0e1dd;
+}
+
+/* UI Components */
+.game-card,
+.tab,
+.message,
+.settings-content,
+.chat-container,
+.ai-container {
+    transition: 
+        background-color 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+/* Text elements */
+h1, h2, h3, h4, h5, h6,
+p, span, a, li {
+    transition: color 0.3s ease;
+}
+
+/* Inputs and buttons */
+input,
+textarea,
+button,
+select {
+    transition: 
+        background-color 0.3s ease,
+        color 0.3s ease,
+        border-color 0.3s ease;
 }
         .auth-page {
             display: flex;
@@ -55,6 +87,117 @@
         .hidden {
             display: none;
         }
+/* Dark Mode Styles */
+body.dark-mode {
+    background: #202124; /* Dark gray similar to Google's dark mode */
+    color: #e8eaed; /* Light gray text for better contrast */
+}
+
+/* Text Elements */
+body.dark-mode .title,
+body.dark-mode h1, 
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode p {
+    color: #e8eaed;
+}
+
+/* Game Cards */
+body.dark-mode .game-card {
+    background: rgba(32, 33, 36, 0.9); /* Dark gray with slight transparency */
+    border: 1px solid #5f6368; /* Subtle border */
+    color: #e8eaed;
+}
+
+body.dark-mode .game-info h3 {
+    color: #8ab4f8; /* Google's blue accent color */
+}
+
+body.dark-mode .game-info p {
+    color: #9aa0a6; /* Lighter gray for secondary text */
+}
+
+/* Input Fields */
+body.dark-mode .auth-input,
+body.dark-mode .chat-input,
+body.dark-mode .ai-input,
+body.dark-mode .username-input {
+    background: rgba(32, 33, 36, 0.8);
+    color: #e8eaed;
+    border: 1px solid #5f6368;
+}
+
+/* Buttons */
+body.dark-mode .auth-btn,
+body.dark-mode .play-btn,
+body.dark-mode .send-btn,
+body.dark-mode .ai-send-btn,
+body.dark-mode .set-username-btn {
+    background: linear-gradient(90deg, #8ab4f8, #669df6); /* Google blue gradient */
+    color: #202124; /* Dark text for better readability */
+}
+
+/* Tabs */
+body.dark-mode .tab {
+    background: rgba(32, 33, 36, 0.7);
+    color: #e8eaed;
+    border: 1px solid #5f6368;
+}
+
+body.dark-mode .tab:hover, 
+body.dark-mode .tab.active {
+    background: rgba(138, 180, 248, 0.2); /* Google blue tint */
+    border-color: #8ab4f8;
+}
+
+/* Chat and AI Containers */
+body.dark-mode .chat-container,
+body.dark-mode .ai-container,
+body.dark-mode .settings-content {
+    background: rgba(32, 33, 36, 0.9);
+    border: 1px solid #5f6368;
+}
+
+/* Messages */
+body.dark-mode .message,
+body.dark-mode .ai-message {
+    background: rgba(32, 33, 36, 0.7);
+    border-left: 3px solid #8ab4f8;
+}
+
+body.dark-mode .your-message,
+body.dark-mode .ai-user-message {
+    background: rgba(138, 180, 248, 0.2);
+}
+
+body.dark-mode .system-message {
+    background: rgba(234, 67, 53, 0.1); /* Google red for system messages */
+    border-left: 3px solid #ea4335;
+}
+
+/* Settings Modal */
+body.dark-mode .settings-modal {
+    background: rgba(0, 0, 0, 0.85);
+}
+
+body.dark-mode .settings-content {
+    background: #202124;
+    border: 1px solid #5f6368;
+}
+
+/* Scrollbars */
+body.dark-mode ::-webkit-scrollbar-track {
+    background: rgba(32, 33, 36, 0.5);
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background: #5f6368;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: #8ab4f8;
+}
 /* Toggle switch styles */
 .toggle-container {
     display: flex;
@@ -1697,6 +1840,12 @@ document.addEventListener('DOMContentLoaded', checkAboutBlank);
 
 // Call this when showing settings
 document.getElementById('settings-btn').addEventListener('click', checkPopupBlocker);
+
+// Check for system preference
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.body.classList.add('dark-mode');
+    document.getElementById('dark-mode-toggle').checked = true;
+}
         // Main application initialization
         function initApplication() {
             const auth = firebase.auth();
@@ -2582,12 +2731,23 @@ aboutBlankToggle.addEventListener('change', function() {
     // ======================
     // APPEARANCE SETTINGS
     // ======================
-    function toggleDarkMode(e) {
-        const enabled = e.target.checked;
-        document.body.classList.toggle('dark-mode', enabled);
-        localStorage.setItem('darkMode', enabled);
-    }
-
+function toggleDarkMode(e) {
+    const enabled = e.target.checked;
+    
+    // Start transition
+    document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
+    
+    // Apply the class change
+    document.body.classList.toggle('dark-mode', enabled);
+    
+    // Store preference
+    localStorage.setItem('darkMode', enabled);
+    
+    // Clean up after transition
+    setTimeout(() => {
+        document.body.style.transition = '';
+    }, 300);
+}
     function applyBackgroundColor() {
         const color = bgColorPicker.value;
         document.body.style.backgroundColor = color;
