@@ -2680,35 +2680,13 @@ function initAuthStateListener() {
             mainContainer.style.display = 'none';
             
             // Clean up when logged out
-            cleanupListeners();
             destroyParticles();
         }
     });
 }
 
 
-function cleanupListeners() {
-    // Chat listener
-    if (chatRefListener) {
-        chatRef.off('value', chatRefListener);
-        chatRefListener = null;
-    }
-    
-    // Feedback listener
-    if (feedbackRefListener) {
-        feedbackRef.off('value', feedbackRefListener);
-        feedbackRefListener = null;
-    }
-    
-    // Stop FPS counter
-    stopFPSCounter();
-    
-    // Clear any intervals
-    if (fpsInterval) {
-        clearInterval(fpsInterval);
-        fpsInterval = null;
-    }
-}
+
 // Modify your login/signup success handlers to persist auth state:
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
     .then(() => {
