@@ -1,8 +1,4 @@
 const axios = require('axios');
-const FormData = require('form-data');
-const fs = require('fs');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
 
 module.exports = async (req, res) => {
     // Enable CORS
@@ -10,27 +6,16 @@ module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Methods', 'POST');
 
     try {
-        // Check if we have multipart/form-data (file upload)
-        if (req.headers['content-type']?.includes('multipart/form-data')) {
-            // Handle file uploads - this is a simplified version
-            // In a real implementation, you would process the file here
-            
-            // For now, we'll just acknowledge the file
-            return res.status(200).json({ 
-                response: "I received your file! While I can't analyze files directly yet, " +
-                         "you can describe its contents and I'll help with that."
-            });
+        const { messages } = req.body;
+        if (!messages || !Array.isArray(messages)) {
+            return res.status(400).json({ error: "Messages array required" });
         }
-
-        // Handle regular text questions
-        const { question } = req.body;
-        if (!question) return res.status(400).json({ error: "Question required" });
 
         const response = await axios.post(
             'https://api.groq.com/openai/v1/chat/completions',
             {
                 model: 'llama3-70b-8192',
-                messages: [{ role: 'user', content: question }],
+                messages: messages,
                 temperature: 0.7,
             },
             {
@@ -38,7 +23,7 @@ module.exports = async (req, res) => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
                 },
-                timeout: 10000 // Increased timeout
+                timeout: 10000
             }
         );
 
