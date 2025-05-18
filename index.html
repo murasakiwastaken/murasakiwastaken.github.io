@@ -34,7 +34,7 @@
         color 0.3s ease;
         }
 
-  .feedback-message .media-attachment {
+          .media-upload-btn {
                 margin-top: 10px;
                 max-width: 100%;
                 border-radius: 5px;
@@ -57,7 +57,19 @@ h1, h2, h3, h4, h5, h6,
 p, span, a, li {
     transition: color 0.3s ease;
 }
+.fps-display {
+    margin-top: 10px;
+    padding: 8px;
+    background: rgba(0, 168, 255, 0.1);
+    border-radius: 5px;
+    color: #e0e1dd;
+    font-family: monospace;
+}
 
+#fps-value {
+    color: #00a8ff;
+    font-weight: bold;
+}
 /* Inputs and buttons */
 input,
 textarea,
@@ -436,7 +448,14 @@ input:checked + .slider:before {
             border-radius: 5px;
             display: none;
         }
+body.dark-mode .fps-display {
+    background: rgba(26, 95, 180, 0.2);
+    color: #d6dcff;
+}
 
+body.dark-mode #fps-value {
+    color: #8ab4f8;
+}
         .apply-cloak-btn {
             padding: 8px 15px;
             background: linear-gradient(90deg, #00a8ff, #ff2d75);
@@ -702,7 +721,7 @@ input:checked + .slider:before {
                 
                 <div class="settings-section">
                     <h3>Appearance</h3>
-                    
+
                     <div class="settings-option">
                         <label>
                             <input type="checkbox" id="dark-mode-toggle">
@@ -718,6 +737,23 @@ input:checked + .slider:before {
                         </div>
                     </div>
                 </div>
+                <div class="settings-section">
+    <h3>Performance</h3>
+    
+    <div class="settings-option">
+        <h4>FPS Counter</h4>
+        <div class="toggle-container">
+            <label class="switch">
+                <input type="checkbox" id="fps-toggle">
+                <span class="slider round"></span>
+            </label>
+            <span id="fps-status">Disabled</span>
+        </div>
+        <div id="fps-counter" class="fps-display" style="display: none;">
+            Current FPS: <span id="fps-value">0</span>
+        </div>
+    </div>
+</div>
                 <div class="settings-section">
     <h3>Advanced Cloaking</h3>
     
@@ -2388,132 +2424,109 @@ async function handleAIInput() {
             });
             document.getElementById('ai-clear-btn').addEventListener('click', clearConversation);
 
-            // ======================
-            // FEEDBACK SYSTEM (MODIFIED)
-            // ======================
-            function initFeedbackSystem() {
-                const feedbackBtn = document.getElementById('feedback-btn');
-                const feedbackModal = document.getElementById('feedback-modal');
-                const closeFeedback = document.querySelector('.close-feedback');
-                const feedbackInput = document.getElementById('feedback-input');
-                const sendFeedbackBtn = document.getElementById('send-feedback');
-                const feedbackMessages = document.getElementById('feedback-messages');
-                
-                const feedbackRef = database.ref('feedback');
-                let feedbackUsername = auth.currentUser ? auth.currentUser.email.split('@')[0] : '';
-                
-                // Toggle feedback modal
-                feedbackBtn.addEventListener('click', () => {
-                    feedbackModal.classList.toggle('active');
-                    if (feedbackModal.classList.contains('active')) {
-                        loadFeedbackMessages();
-                    }
+           function initFeedbackSystem() {
+    const feedbackBtn = document.getElementById('feedback-btn');
+    const feedbackModal = document.getElementById('feedback-modal');
+    const closeFeedback = document.querySelector('.close-feedback');
+    const feedbackInput = document.getElementById('feedback-input');
+    const sendFeedbackBtn = document.getElementById('send-feedback');
+    const feedbackMessages = document.getElementById('feedback-messages');
+    
+    const feedbackRef = database.ref('feedback');
+    let feedbackUsername = auth.currentUser ? auth.currentUser.email.split('@')[0] : 'Anonymous';
+
+    // Load and display existing feedback
+    function loadFeedbackMessages() {
+        feedbackRef.orderByChild('timestamp').limitToLast(50).on('value', (snapshot) => {
+            feedbackMessages.innerHTML = ''; // Clear current messages
+            
+            snapshot.forEach((childSnapshot) => {
+                const msg = childSnapshot.val();
+                displayFeedbackMessage({
+                    ...msg,
+                    key: childSnapshot.key
                 });
-                
-                closeFeedback.addEventListener('click', () => {
-                    feedbackModal.classList.remove('active');
-                });
-                
-                // Load feedback messages
-                function loadFeedbackMessages() {
-                    feedbackRef.limitToLast(50).on('value', (snapshot) => {
-                        feedbackMessages.innerHTML = '';
-                        snapshot.forEach((childSnapshot) => {
-                            const msg = childSnapshot.val();
-                            displayFeedbackMessage({
-                                ...msg,
-                                key: childSnapshot.key
-                            });
-                        });
-                        scrollFeedbackToBottom();
-                    });
-                }
-                
-                // Display a feedback message
-                function displayFeedbackMessage({ username, message, timestamp, key }) {
-                    const isCurrentUser = username === feedbackUsername;
-                    
-                    const messageEl = document.createElement('div');
-                    messageEl.className = `feedback-message ${isCurrentUser ? 'user' : ''}`;
-                    messageEl.style.animation = 'fadeIn 0.3s ease-out';
-                    
-                    const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    
-                    let deleteBtn = '';
-                    if (isCurrentUser) {
-                        deleteBtn = `<button class="delete-message" data-key="${key}">×</button>`;
-                    }
-                    
-                    messageEl.innerHTML = `
-                        ${deleteBtn}
-                        <div class="message-meta">
-                            <span class="message-username">${username}:</span>
-                            <span class="message-time">${time}</span>
-                        </div>
-                        ${message ? `<p class="message-text">${message}</p>` : ''}
-                    `;
-                    
-                    feedbackMessages.appendChild(messageEl);
-                    
-                    // Add delete handler if current user
-                    if (isCurrentUser) {
-                        messageEl.querySelector('.delete-message')?.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            const messageKey = e.target.getAttribute('data-key');
-                            deleteFeedbackMessage(messageKey);
-                        });
-                    }
-                }
-                
-                // Delete feedback message
-                function deleteFeedbackMessage(messageKey) {
-                    if (confirm('Delete this feedback?')) {
-                        feedbackRef.child(messageKey).remove();
-                    }
-                }
-                
-                // Send feedback
-                function sendFeedback() {
-                    const message = feedbackInput.value.trim();
-                    if (!message) return;
-                    
-                    // Require login to post feedback
-                    if (!auth.currentUser) {
-                        alert('Please sign in to submit feedback');
-                        return;
-                    }
-                    
-                    const feedbackData = {
-                        username: feedbackUsername,
-                        message,
-                        timestamp: Date.now()
-                    };
-                    
-                    feedbackRef.push(feedbackData);
-                    
-                    // Clear input
-                    feedbackInput.value = '';
-                }
-                
-                function scrollFeedbackToBottom() {
-                    feedbackMessages.scrollTop = feedbackMessages.scrollHeight;
-                }
-                
-                // Event listeners
-                sendFeedbackBtn.addEventListener('click', sendFeedback);
-                feedbackInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        sendFeedback();
-                    }
-                });
-                
-                // Update username when auth state changes
-                auth.onAuthStateChanged((user) => {
-                    if (user) {
-                        feedbackUsername = user.email.split('@')[0];
-                    }
-                });
-            }
+            });
+            
+            scrollFeedbackToBottom();
+        });
+    }
+
+    // Display a single feedback message
+    function displayFeedbackMessage({ username, message, timestamp, key }) {
+        const messageEl = document.createElement('div');
+        messageEl.className = 'feedback-message';
+        messageEl.style.animation = 'fadeIn 0.3s ease-out';
+        
+        const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        messageEl.innerHTML = `
+            <div class="message-meta">
+                <span class="message-username">${username}:</span>
+                <span class="message-time">${time}</span>
+            </div>
+            <p class="message-text">${message}</p>
+        `;
+        
+        feedbackMessages.appendChild(messageEl);
+    }
+
+    // Send new feedback
+    function sendFeedback() {
+        const message = feedbackInput.value.trim();
+        if (!message) return;
+        
+        const feedbackData = {
+            username: feedbackUsername,
+            message: message,
+            timestamp: Date.now()
+        };
+        
+        // Push to Firebase
+        feedbackRef.push(feedbackData)
+            .then(() => {
+                feedbackInput.value = ''; // Clear input
+                scrollFeedbackToBottom();
+            })
+            .catch(error => {
+                console.error("Error sending feedback:", error);
+                alert("Failed to send feedback. Please try again.");
+            });
+    }
+
+    function scrollFeedbackToBottom() {
+        feedbackMessages.scrollTop = feedbackMessages.scrollHeight;
+    }
+
+    // Event listeners
+    feedbackBtn.addEventListener('click', () => {
+        feedbackModal.classList.toggle('active');
+        if (feedbackModal.classList.contains('active')) {
+            loadFeedbackMessages();
+        }
+    });
+
+    closeFeedback.addEventListener('click', () => {
+        feedbackModal.classList.remove('active');
+    });
+
+    sendFeedbackBtn.addEventListener('click', sendFeedback);
+    
+    feedbackInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            sendFeedback();
+        }
+    });
+
+    // Update username when auth state changes
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            feedbackUsername = user.email.split('@')[0];
+        } else {
+            feedbackUsername = 'Anonymous';
+        }
+    });
+}
 
             // ======================
             // SETTINGS SYSTEM (NEW)
@@ -2543,7 +2556,64 @@ async function handleAIInput() {
 // About:Blank toggle
 const aboutBlankToggle = document.getElementById('about-blank-toggle');
 const aboutBlankStatus = document.getElementById('about-blank-status');
+// FPS Counter
+const fpsToggle = document.getElementById('fps-toggle');
+const fpsStatus = document.getElementById('fps-status');
+const fpsCounter = document.getElementById('fps-counter');
+const fpsValue = document.getElementById('fps-value');
 
+// Load FPS counter state
+const fpsEnabled = localStorage.getItem('fpsEnabled') === 'true';
+fpsToggle.checked = fpsEnabled;
+fpsStatus.textContent = fpsEnabled ? 'Enabled' : 'Disabled';
+if (fpsEnabled) {
+    fpsCounter.style.display = 'block';
+    startFPSCounter();
+}
+
+// FPS Counter logic
+let fpsLastTime = 0;
+let fpsFrames = 0;
+let fps = 0;
+let fpsInterval;
+
+function startFPSCounter() {
+    fpsInterval = setInterval(() => {
+        fpsValue.textContent = fps;
+    }, 1000);
+    
+    function updateFPS() {
+        fpsFrames++;
+        const now = performance.now();
+        if (now >= fpsLastTime + 1000) {
+            fps = Math.round((fpsFrames * 1000) / (now - fpsLastTime));
+            fpsLastTime = now;
+            fpsFrames = 0;
+        }
+        if (fpsEnabled) {
+            requestAnimationFrame(updateFPS);
+        }
+    }
+    requestAnimationFrame(updateFPS);
+}
+
+function stopFPSCounter() {
+    clearInterval(fpsInterval);
+    fpsValue.textContent = '0';
+}
+
+fpsToggle.addEventListener('change', function() {
+    const enabled = this.checked;
+    fpsStatus.textContent = enabled ? 'Enabled' : 'Disabled';
+    fpsCounter.style.display = enabled ? 'block' : 'none';
+    localStorage.setItem('fpsEnabled', enabled);
+    
+    if (enabled) {
+        startFPSCounter();
+    } else {
+        stopFPSCounter();
+    }
+});
 // Load current state
 const aboutBlankState = localStorage.getItem("aboutBlank") === "enabled";
 aboutBlankToggle.checked = aboutBlankState;
