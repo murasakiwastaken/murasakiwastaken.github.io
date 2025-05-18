@@ -316,6 +316,31 @@ body.dark-mode .game-info p {
 #ai-clear-btn:hover {
     background: rgba(255, 45, 117, 0.3);
 }
+/* Add to your CSS */
+.auth-error {
+  background: rgba(255, 45, 117, 0.2);
+  border: 1px solid #ff2d75;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 20px;
+  color: #e0e1dd;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.auth-error button {
+  background: rgba(0, 168, 255, 0.2);
+  color: #00a8ff;
+  border: 1px solid #00a8ff;
+  border-radius: 5px;
+  padding: 8px 15px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-error button:hover {
+  background: rgba(0, 168, 255, 0.3);
+}
 input:checked + .slider {
     background: linear-gradient(90deg, #00a8ff, #ff2d75);
 }
@@ -574,27 +599,77 @@ body.dark-mode #fps-value {
         
         // Load non-critical resources after page load
         function loadDeferredResources() {
-            const resources = [
-                'https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js',
-                'https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js',
-                'https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js',
-                'https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js',
-                'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js',
-                'https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js'
-            ];
-            
-            resources.forEach(src => {
-                const script = document.createElement('script');
-                script.src = src;
-                script.async = true;
-                document.body.appendChild(script);
-            });
+          // Firebase loading state
+  let firebaseLoaded = false;
+  let firebaseLoadAttempts = 0;
+  const MAX_LOAD_ATTEMPTS = 5;
+
+  // Function to load Firebase scripts
+  function loadFirebase() {
+    if (firebaseLoaded || firebaseLoadAttempts >= MAX_LOAD_ATTEMPTS) return;
+
+    firebaseLoadAttempts++;
+    console.log(`Loading Firebase (attempt ${firebaseLoadAttempts})`);
+
+    const firebaseScripts = [
+      'https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js',
+      'https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js',
+      'https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js',
+      'https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js'
+    ];
+
+    let loadedCount = 0;
+
+    firebaseScripts.forEach(src => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = () => {
+        loadedCount++;
+        if (loadedCount === firebaseScripts.length) {
+          firebaseLoaded = true;
+          initializeFirebase();
         }
-        
-        // Start loading deferred resources after DOM is parsed
-        document.addEventListener('DOMContentLoaded', loadDeferredResources);
+      };
+      script.onerror = () => {
+        console.error(`Failed to load ${src}`);
+        // Retry loading if all scripts fail
+        if (++loadedCount === firebaseScripts.length && !firebaseLoaded) {
+          setTimeout(loadFirebase, 2000 * firebaseLoadAttempts);
+        }
+      };
+      document.body.appendChild(script);
+    });
+  }
+
+  // Start loading Firebase when DOM is ready
+  document.addEventListener('DOMContentLoaded', loadFirebase);
     </script>
 </head>
+<script>
+  // Final check after 10 seconds
+  setTimeout(() => {
+    if (!firebaseLoaded) {
+      console.error('Firebase failed to load after timeout');
+      const fallbackScript = document.createElement('script');
+      fallbackScript.src = 'https://cdn.jsdelivr.net/npm/firebase@8.10.0/firebase-app.min.js';
+      fallbackScript.onload = () => {
+        const additionalScripts = [
+          'https://cdn.jsdelivr.net/npm/firebase@8.10.0/firebase-auth.min.js',
+          'https://cdn.jsdelivr.net/npm/firebase@8.10.0/firebase-database.min.js'
+        ];
+        
+        additionalScripts.forEach(src => {
+          const s = document.createElement('script');
+          s.src = src;
+          document.body.appendChild(s);
+        });
+        
+        initializeFirebase();
+      };
+      document.body.appendChild(fallbackScript);
+    }
+  }, 10000);
+</script>
 <body>
 <!-- Add this right after opening <body> tag -->
 <div id="fps-counter" style="display: none;">
@@ -1723,28 +1798,51 @@ body.dark-mode #fps-value {
         };
         
         // Wait for Firebase to load
-// Replace the current initializeFirebase function with:
-let firebaseInitialized = false;
-
 function initializeFirebase() {
-    if (firebaseInitialized) return;
-    
-    if (typeof firebase === 'undefined') {
-        console.log('Firebase not loaded yet, waiting...');
-        setTimeout(initializeFirebase, 500);
-        return;
+  try {
+    // Check if Firebase is loaded
+    if (typeof firebase === 'undefined' || 
+        typeof firebase.initializeApp === 'undefined') {
+      throw new Error('Firebase not fully loaded');
     }
 
-    try {
-        if (firebase.apps.length === 0) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        firebaseInitialized = true;
-        initApplication();
-    } catch (error) {
-        console.error('Firebase initialization error:', error);
-        setTimeout(initializeFirebase, 1000);
+    // Initialize only once
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+      console.log('Firebase initialized successfully');
+      
+      // Set up auth state persistence
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(() => initApplication())
+        .catch(err => console.error('Persistence error:', err));
+    } else {
+      initApplication();
     }
+  } catch (error) {
+    console.error('Firebase init error:', error);
+    
+    // Show user-friendly error
+    const authPage = document.getElementById('auth-page');
+    if (authPage) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'auth-error';
+      errorDiv.innerHTML = `
+        <p>Failed to load required resources. Please:</p>
+        <ol>
+          <li>Check your internet connection</li>
+          <li>Disable ad-blockers for this site</li>
+          <li>Refresh the page</li>
+        </ol>
+        <button onclick="window.location.reload()">Refresh Page</button>
+      `;
+      authPage.appendChild(errorDiv);
+    }
+    
+    // Final attempt after delay
+    if (firebaseLoadAttempts < MAX_LOAD_ATTEMPTS) {
+      setTimeout(loadFirebase, 3000);
+    }
+  }
 }
         
         // Initialize particles.js
