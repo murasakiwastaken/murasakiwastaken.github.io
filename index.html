@@ -1805,7 +1805,6 @@ document.addEventListener('DOMContentLoaded', checkAboutBlank);
 
 // Call this when showing settings
 document.getElementById('settings-btn').addEventListener('click', checkPopupBlocker);
-document.getElementById('ai-clear-btn').addEventListener('click', clearConversation);
 // Check for system preference
 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.body.classList.add('dark-mode');
@@ -2387,7 +2386,8 @@ async function handleAIInput() {
                     window.location.href = "https://aiassistantbot.pages.dev";
                 }
             });
-            
+            document.getElementById('ai-clear-btn').addEventListener('click', clearConversation);
+
             // ======================
             // FEEDBACK SYSTEM (MODIFIED)
             // ======================
