@@ -34,10 +34,19 @@
         color 0.3s ease;
         }
 
-          .media-upload-btn {
-                margin-top: 10px;
-                max-width: 100%;
+  .media-upload-btn {
+                padding: 8px 12px;
+                background: rgba(0, 168, 255, 0.1);
                 border-radius: 5px;
+                cursor: pointer;
+                color: var(--primary);
+                border: 1px dashed var(--primary);
+                transition: all 0.2s ease;
+            }
+            
+            .media-upload-btn:hover {
+                background: rgba(0, 168, 255, 0.2);
+                transform: scale(1.05);
             }
 
 /* UI Components */
@@ -689,10 +698,10 @@ body.dark-mode #fps-value {
         <div class="ai-input-area">
     <input type="text" class="ai-input" id="ai-input" placeholder="Type your question...">
     <button id="ai-clear-btn" class="media-upload-btn" style="margin-right: 1rem;">
-        🗑️ Clear
+        🗑️ Clear 
     </button>
     <button id="ai-attach-btn" class="media-upload-btn" style="margin-right: 1rem;">
-        📎 Attach (redirects to different website)
+        📎 Attach (redirects to different website) 
     </button>
     <button class="ai-send-btn" id="ai-send-btn">Send</button>
 </div>
