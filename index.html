@@ -2366,7 +2366,15 @@ async function handleAIInput() {
         addAIMessage("Sorry, I couldn't process your request. Please try again.");
     }
 }
-            
+            // Clear conversation when switching tabs or reloading
+function clearConversation() {
+    conversationHistory = [];
+    document.getElementById('ai-messages').innerHTML = '';
+    // Add initial messages back
+    addAIMessage("Hello! I'm murasaki's AI assistant. How can I help you today?");
+    addAIMessage("For image analysis, this AI is currently unsupported, please use the attach button below to redirect yourself to another website. Thank you for your understanding.", false);
+}
+
             // Event listeners
             document.getElementById('ai-send-btn').addEventListener('click', handleAIInput);
             document.getElementById('ai-input').addEventListener('keypress', (e) => {
