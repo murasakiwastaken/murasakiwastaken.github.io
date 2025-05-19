@@ -1621,7 +1621,22 @@ body.dark-mode #fps-value {
                 transform: translateY(-5px) scale(1.05);
                 box-shadow: 0 8px 20px rgba(0, 168, 255, 0.4);
             }
-            
+            /* Make delete button always visible on mobile */
+@media (max-width: 768px) {
+    .delete-message {
+        opacity: 0.5 !important; /* Make it semi-transparent by default */
+    }
+    
+    .delete-message:hover, 
+    .delete-message:active {
+        opacity: 1 !important;
+    }
+    
+    /* Or show delete button only when message is tapped */
+    .message.active .delete-message {
+        opacity: 1 !important;
+    }
+}
             /* Responsive Adjustments */
             @media (max-width: 768px) {
                 .title {
@@ -2355,39 +2370,64 @@ function loadChatHistory() {
 }
             
 function displayMessage({ username, message, timestamp, key, isSystem }) {
-                const isCurrentUser = username === chatUsername;
-                const isSystemMsg = username === 'System' || username === 'AI Assistant' || isSystem;
-                
-                const messageEl = document.createElement('div');
-                messageEl.className = `message ${isCurrentUser ? 'your-message' : ''} ${isSystemMsg ? 'system-message' : ''}`;
-                
-                const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                
-                let deleteBtn = '';
-                if (isCurrentUser && !isSystemMsg) {
-                    deleteBtn = `<button class="delete-message" data-key="${key}">×</button>`;
-                }
-                 messageEl.setAttribute('data-key', key);
-
-                messageEl.innerHTML = `
-                    ${deleteBtn}
-                    <span class="message-username" style="color: ${isSystemMsg ? '#ff2d75' : '#00a8ff'}">${username}:</span>
-                    <span class="message-text">${message}</span>
-                    <div class="message-time">${time}</div>
-                `;
-                
-                chatMessages.appendChild(messageEl);
-                scrollToBottom();
-                
-                // Add delete event listener if this is the user's message
-                if (isCurrentUser && !isSystemMsg) {
-                    messageEl.querySelector('.delete-message').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const messageKey = e.target.getAttribute('data-key');
-                        deleteMessage(messageKey);
-                    });
-                }
-            }
+    const isCurrentUser = username === chatUsername;
+    const isSystemMsg = username === 'System' || username === 'AI Assistant' || isSystem;
+    
+    const messageEl = document.createElement('div');
+    messageEl.className = `message ${isCurrentUser ? 'your-message' : ''} ${isSystemMsg ? 'system-message' : ''}`;
+    
+    const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    let deleteBtn = '';
+    if (isCurrentUser && !isSystemMsg) {
+        deleteBtn = `<button class="delete-message" data-key="${key}">×</button>`;
+    }
+    
+    messageEl.setAttribute('data-key', key);
+    messageEl.innerHTML = `
+        ${deleteBtn}
+        <span class="message-username" style="color: ${isSystemMsg ? '#ff2d75' : '#00a8ff'}">${username}:</span>
+        <span class="message-text">${message}</span>
+        <div class="message-time">${time}</div>
+    `;
+    
+    chatMessages.appendChild(messageEl);
+    scrollToBottom();
+    
+    // Add delete event listener if this is the user's message
+    if (isCurrentUser && !isSystemMsg) {
+        const deleteBtn = messageEl.querySelector('.delete-message');
+        
+        // Desktop hover behavior
+        messageEl.addEventListener('mouseenter', () => {
+            deleteBtn.style.opacity = '1';
+        });
+        
+        messageEl.addEventListener('mouseleave', () => {
+            deleteBtn.style.opacity = '0';
+        });
+        
+        // Mobile touch behavior
+        let touchTimer;
+        messageEl.addEventListener('touchstart', (e) => {
+            touchTimer = setTimeout(() => {
+                deleteBtn.style.opacity = '1';
+                e.preventDefault(); // Prevent context menu
+            }, 500); // 500ms long press
+        });
+        
+        messageEl.addEventListener('touchend', () => {
+            clearTimeout(touchTimer);
+        });
+        
+        // Click/tap to delete
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const messageKey = e.target.getAttribute('data-key');
+            deleteMessage(messageKey);
+        });
+    }
+}
             
             function deleteMessage(messageKey) {
                 if (confirm('Are you sure you want to delete this message?')) {
