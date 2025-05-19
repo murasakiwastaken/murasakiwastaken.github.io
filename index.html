@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="murasaki's center  with enhanced features and performance">
-    <title>murasaki's center v2.5 | enhanced experience</title>
+    <meta name="description" content="murasaki's center with enhanced features and performance">
+    <title>murasaki's center v3 | enhanced experience</title>
     
     <!-- Preload critical resources -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rubik:wght@400;700&display=swap" as="style">
@@ -34,7 +34,14 @@
         background-color 0.3s ease,
         color 0.3s ease;
         }
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}
 
+.message {
+    transition: all 0.3s ease;
+}
   .media-upload-btn {
                 padding: 8px 12px;
                 background: rgba(0, 168, 255, 0.1);
@@ -635,7 +642,7 @@ body.dark-mode #fps-value {
     <div class="particles-container" id="particles-js"></div>
     <div class="main-container" id="main-container">
         <header class="header">
-            <h1 class="title">murasaki's center v2.5 | enhanced experience</h1>
+            <h1 class="title">murasaki's center v3 | enhanced experience</h1>
         </header>
         
         <div class="tabs">
@@ -659,7 +666,126 @@ body.dark-mode #fps-value {
                     <a href="#" class="play-btn" data-game="https://slope-game.github.io/rungame/slope/">PLAY NOW</a>
                 </div>
             </div>
-            
+              <div class="game-card" data-category="arcade">
+                <img src="https://watchdocumentaries.com/wp-content/uploads/slope-game.jpg" alt="Slope" loading="lazy">
+                <div class="game-info">
+                    <h3>Asphalt 8</h3>
+                    <p>Race and outmatch your opponents at high speed!</p>
+                    <a href="#" class="play-btn" data-game="https://www.easyfun.gg/embed/asphalt-8-car-racing-game-cloud-online.html">PLAY NOW</a>
+                </div>
+            </div>
+            <div class="game-card" data-category="action">
+                <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Subway Surfers" loading="lazy">
+                <div class="game-info">
+                    <h3>Subway Surfers: San Fransisco</h3>
+                    <p>You already know what this game is, stop reading this shit.</p>
+                    <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/cdn/projects/subway-surfers/">PLAY NOW</a>
+                </div>
+            </div>
+ <div class="game-card" data-category="action">
+                <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Subway Surfers" loading="lazy">
+                <div class="game-info">
+                    <h3>FNAF</h3>
+                    <p>Guy kills his friends daughter and they both go insane</p>
+                    <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/fnaf1/">PLAY NOW</a>
+                </div>
+            </div>
+<div class="game-card" data-category="action">
+                <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Subway Surfers" loading="lazy">
+                <div class="game-info">
+                    <h3>FNAF 2</h3>
+                    <p>Ooooh lore! MatPat get some heroin and lean this shit gonna be fire</p>
+                    <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/fnaf2/">PLAY NOW</a>
+                </div>
+            </div>
+            <div class="game-card" data-category="action">
+                <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Subway Surfers" loading="lazy">
+                <div class="game-info">
+                    <h3>FNAF 3</h3>
+                    <p>Man burns in springtrap suit and is lusting for children's screams worse than EDP445</p>
+                    <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/fnaf3/">PLAY NOW</a>
+                </div>
+            </div>
+                    <div class="game-card" data-category="action">
+                <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Subway Surfers" loading="lazy">
+                <div class="game-info">
+                    <h3>FNAF 4</h3>
+                    <p>Little kid is geeked and stoned, has hallucinations, and gets solo'd by a fatass in a springlock costume</p>
+                    <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/fnaf4/">PLAY NOW</a>
+                </div>
+            </div>
+             <div class="game-card" data-category="retro">
+                <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Subway Surfers" loading="lazy">
+                <div class="game-info">
+                    <h3>Tube Jumpers</h3>
+                    <p>Jump off your tube and drown to death like a dumbass</p>
+                    <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/cdn/projects/tube-jumpers/">PLAY NOW</a>
+                </div>
+            </div>
+                 <div class="game-card" data-category="arcade">
+                <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Subway Surfers" loading="lazy">
+                <div class="game-info">
+                    <h3>Crossy Roads</h3>
+                    <p>Why did the chicken cross the road</p>
+                    <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/crossyroad/">PLAY NOW</a>
+                </div>
+            </div>
+              <div class="game-card" data-category="arcade">
+                <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Subway Surfers" loading="lazy">
+                <div class="game-info">
+                    <h3>Slow Roads</h3>
+                    <p>Try not to crash with your Porsche (911)</p>
+                    <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/slowroads/">PLAY NOW</a>
+                </div>
+            </div>
+                  <div class="game-card" data-category="action">
+                <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Subway Surfers" loading="lazy">
+                <div class="game-info">
+                    <h3>Dante</h3>
+                    <p>No we're not talking about the guy from Devil May Cry</p>
+                    <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/dante/">PLAY NOW</a>
+                </div>
+            </div>
+                   <div class="game-card" data-category="action">
+                <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Subway Surfers" loading="lazy">
+                <div class="game-info">
+                    <h3>Stickman Hook</h3>
+                    <p>Swing around on stretchy cum</p>
+                    <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/cdn/projects/stickman-hook/index.html">PLAY NOW</a>
+                </div>
+            </div>
+             <div class="game-card" data-category="action">
+                <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Subway Surfers" loading="lazy">
+                <div class="game-info">
+                    <h3>OvO</h3>
+                    <p>Just your ordinary fuckass platformer game</p>
+                    <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/cdn/projects/ovo/index.html">PLAY NOW</a>
+                </div>
+            </div>
+                 <div class="game-card" data-category="arcade">
+                <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Subway Surfers" loading="lazy">
+                <div class="game-info">
+                    <h3>Tomb of the Mask</h3>
+                    <p>Idfk what to put here nigga</p>
+                    <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/math/chapters/chapter2/page2/tomb-of-the-mask.html">PLAY NOW</a>
+                </div>
+            </div>
+            <div class="game-card" data-category="action">
+                <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Subway Surfers" loading="lazy">
+                <div class="game-info">
+                    <h3>Boxing Random</h3>
+                    <p>Beat other people and maybe you'll beat their dick too</p>
+                    <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/boxing-random/">PLAY NOW</a>
+                </div>
+            </div>
+             <div class="game-card" data-category="action">
+                <img src="https://img.gamepix.com/games/eaglercraft/cover/eaglercraft.png?w=400&ar=16:10" alt="Subway Surfers" loading="lazy">
+                <div class="game-info">
+                    <h3>Moto X3M</h3>
+                    <p>Ride on a motorcycle up and down (while a dildo is stuck in your ass)</p>
+                    <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/cdn/projects/motox3m/index.html">PLAY NOW</a>
+                </div>
+            </div>
             <!-- Cookie Clicker -->
             <div class="game-card" data-category="arcade">
                 <img src="https://www.thumbculture.co.uk/wp-content/uploads/2021/08/Cookies-1024x597.png" alt="Cookie Clicker" loading="lazy">
@@ -2346,17 +2472,26 @@ modal.addEventListener('click', (e) => {
                 }
             }
             
-           // In the chat system initialization
 function loadChatHistory() {
     chatRef.limitToLast(100).on('value', (snapshot) => {
-        // Only clear if we have new messages to avoid flickering
-        if (snapshot.numChildren() > chatMessages.children.length) {
-            chatMessages.innerHTML = '';
-        }
-        
+        // Get all current message keys in Firebase
+        const currentMessageKeys = [];
+        snapshot.forEach((childSnapshot) => {
+            currentMessageKeys.push(childSnapshot.key);
+        });
+
+        // Remove any local messages that don't exist in Firebase anymore
+        document.querySelectorAll('.message').forEach(msgElement => {
+            const msgKey = msgElement.getAttribute('data-key');
+            if (!currentMessageKeys.includes(msgKey)) {
+                msgElement.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => msgElement.remove(), 300);
+            }
+        });
+
+        // Add any new messages from Firebase
         snapshot.forEach((childSnapshot) => {
             const msg = childSnapshot.val();
-            // Check if message already exists
             if (!document.querySelector(`[data-key="${childSnapshot.key}"]`)) {
                 displayMessage({
                     ...msg,
@@ -2370,6 +2505,8 @@ function loadChatHistory() {
 }
             
 function displayMessage({ username, message, timestamp, key, isSystem }) {
+  const existingMsg = document.querySelector(`[data-key="${key}"]`);
+    if (existingMsg) return; // Skip if already displayed
     const isCurrentUser = username === chatUsername;
     const isSystemMsg = username === 'System' || username === 'AI Assistant' || isSystem;
     
@@ -2409,23 +2546,30 @@ function displayMessage({ username, message, timestamp, key, isSystem }) {
         
         // Mobile touch behavior
         let touchTimer;
-        messageEl.addEventListener('touchstart', (e) => {
-            touchTimer = setTimeout(() => {
-                deleteBtn.style.opacity = '1';
-                e.preventDefault(); // Prevent context menu
-            }, 500); // 500ms long press
-        });
-        
-        messageEl.addEventListener('touchend', () => {
-            clearTimeout(touchTimer);
-        });
-        
-        // Click/tap to delete
-        deleteBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const messageKey = e.target.getAttribute('data-key');
-            deleteMessage(messageKey);
-        });
+// Update your displayMessage function's touch handlers:
+messageEl.addEventListener('touchstart', (e) => {
+    touchTimer = setTimeout(() => {
+        deleteBtn.style.opacity = '1';
+        // Highlight the message
+        messageEl.style.backgroundColor = 'rgba(255, 45, 117, 0.2)';
+        e.preventDefault();
+    }, 500);
+});
+
+messageEl.addEventListener('touchend', () => {
+    clearTimeout(touchTimer);
+    // Remove highlight if not deleted
+    setTimeout(() => {
+        if (deleteBtn.style.opacity !== '1') {
+            messageEl.style.backgroundColor = '';
+        }
+    }, 100);
+});
+
+messageEl.addEventListener('touchmove', () => {
+    clearTimeout(touchTimer);
+    messageEl.style.backgroundColor = '';
+});
     }
 }
             
