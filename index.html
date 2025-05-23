@@ -1898,6 +1898,9 @@ function initializeFirebase() {
                         firebase.initializeApp(firebaseConfig);
                     }
                     resolve(firebase);
+                      const auth = firebase.auth();
+         const database = firebase.database();
+         const storage = firebase.storage();
                 } catch (error) {
                     reject(error);
                 }
@@ -1908,9 +1911,7 @@ function initializeFirebase() {
         checkFirebase();
     });
 }      
-            const auth = firebase.auth();
-         const database = firebase.database();
-         const storage = firebase.storage();
+          
 
 let particlesInstance = null;
 
