@@ -1866,7 +1866,6 @@ let feedbackRefListener = null;
         };
         
         // Wait for Firebase to load
-// Replace the initializeFirebase function with:
 function initializeFirebase() {
     if (typeof firebase === 'undefined') {
         setTimeout(initializeFirebase, 100);
@@ -1874,17 +1873,8 @@ function initializeFirebase() {
     }
 
     try {
-        // Initialize Firebase if not already initialized
         if (firebase.apps.length === 0) {
             firebase.initializeApp(firebaseConfig);
-            
-            // Initialize services
-            firebase.auth();
-            firebase.database();
-            firebase.storage();
-            
-            initApplication();
-        } else {
             initApplication();
         }
     } catch (error) {
@@ -2155,8 +2145,15 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
             const signupForm = document.getElementById('signup-form');
             const showSignup = document.getElementById('show-signup');
             const showLogin = document.getElementById('show-login');
-            const loginBtn = document.getElementById('login-btn');
-            const signupBtn = document.getElementById('signup-btn');
+    // Add null checks for all DOM elements
+    const loginBtn = document.getElementById('login-btn');
+    const signupBtn = document.getElementById('signup-btn');
+    
+    if (!loginBtn || !signupBtn) {
+        console.error('Required elements not found');
+        setTimeout(initApplication, 100);
+        return;
+    }
             const usernameInput = document.getElementById('username');
             const passwordInput = document.getElementById('password');
             const newUsernameInput = document.getElementById('new-username');
@@ -2178,7 +2175,8 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
                 loginForm.classList.remove('hidden');
                 clearStatus();
             });
-            
+                // Only proceed with event listeners if elements exist
+ 
             // Login function
             loginBtn.addEventListener('click', () => {
                 const username = usernameInput.value.trim();
@@ -3325,6 +3323,16 @@ document.addEventListener('DOMContentLoaded', () => {
         errorDiv.style.zIndex = '9999';
         errorDiv.textContent = 'Error initializing application. Please refresh the page.';
         document.body.appendChild(errorDiv);
+    }
+});
+document.addEventListener('DOMContentLoaded', function() {
+    // Ensure all elements exist before trying to access them
+    if (document.getElementById('login-btn') && document.getElementById('signup-btn')) {
+        initializeFirebase();
+    } else {
+        setTimeout(function() {
+            initializeFirebase();
+        }, 500);
     }
 });
     </script>
