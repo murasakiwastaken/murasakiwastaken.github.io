@@ -58,6 +58,22 @@
                 background: rgba(0, 168, 255, 0.2);
                 transform: scale(1.05);
             }
+.auth-switch {
+    text-align: center;
+    margin-top: 15px;
+    color: #e0e1dd;
+}
+
+.auth-switch a {
+    color: #00a8ff;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.auth-switch a:hover {
+    color: #ff2d75;
+    text-decoration: underline;
+}
 .logout-btn {
     width: 100%;
     padding: 10px;
@@ -612,27 +628,33 @@ body.dark-mode #fps-value {
 </div>
     <!-- Auth Page (shown by default) -->
     <div class="auth-page" id="auth-page">
-        <div class="auth-container">
-  <div id="login-form">
-    <h2 class="auth-title">Login to Your Account</h2>
-    <input type="text" id="username" class="auth-input" placeholder="Username" required>
-    <input type="password" id="password" class="auth-input" placeholder="Password" required>
-    <input type="text" id="invite-code" class="auth-input" placeholder="Invite Code" required>
-    <button id="login-btn" class="auth-btn">Log In</button>
-    <div id="auth-status" class="auth-status"></div>
-</div>
-
-<!-- Inside your signup form -->
-<div id="signup-form" class="hidden">
-    <h2 class="auth-title">Create New Account</h2>
-    <input type="text" id="new-username" class="auth-input" placeholder="Choose a username" required>
-    <input type="password" id="new-password" class="auth-input" placeholder="Create password (min 6 chars)" required>
-    <input type="text" id="new-invite-code" class="auth-input" placeholder="Invite Code" required>
-    <button id="signup-btn" class="auth-btn">Sign Up</button>
-    <div id="signup-status" class="auth-status"></div>
-</div>
+      <div class="auth-container">
+    <div id="login-form">
+        <h2 class="auth-title">Login to Your Account</h2>
+        <input type="text" id="username" class="auth-input" placeholder="Username" required>
+        <input type="password" id="password" class="auth-input" placeholder="Password" required>
+        <input type="text" id="invite-code" class="auth-input" placeholder="Invite Code" required>
+        <button id="login-btn" class="auth-btn">Log In</button>
+        <div id="auth-status" class="auth-status"></div>
+        <div class="auth-switch">
+            <a href="#" id="show-signup">Create account</a>
+            <span> | </span>
+            <a href="#" id="show-login">Login</a>
         </div>
     </div>
+
+    <div id="signup-form" class="hidden">
+        <h2 class="auth-title">Create New Account</h2>
+        <input type="text" id="new-username" class="auth-input" placeholder="Choose a username" required>
+        <input type="password" id="new-password" class="auth-input" placeholder="Create password (min 6 chars)" required>
+        <input type="text" id="new-invite-code" class="auth-input" placeholder="Invite Code" required>
+        <button id="signup-btn" class="auth-btn">Sign Up</button>
+        <div id="signup-status" class="auth-status"></div>
+        <div class="auth-switch">
+            <a href="#" id="show-login">Already have an account? Login</a>
+        </div>
+    </div>
+</div>
 
     <!-- Main Content (hidden until auth) -->
     <div class="bg-animation"></div>
@@ -1866,23 +1888,26 @@ let feedbackRefListener = null;
         };
         
         // Wait for Firebase to load
+// Replace your initializeFirebase function with this:
 function initializeFirebase() {
-    if (typeof firebase === 'undefined') {
-        setTimeout(initializeFirebase, 100);
-        return;
-    }
-
-    try {
-        if (firebase.apps.length === 0) {
-            firebase.initializeApp(firebaseConfig);
-            initApplication();
-        }
-    } catch (error) {
-        console.error('Firebase initialization error:', error);
-        setTimeout(initializeFirebase, 1000);
-    }
-}
-        
+    return new Promise((resolve, reject) => {
+        const checkFirebase = () => {
+            if (typeof firebase !== 'undefined' && firebase.apps) {
+                try {
+                    if (firebase.apps.length === 0) {
+                        firebase.initializeApp(firebaseConfig);
+                    }
+                    resolve(firebase);
+                } catch (error) {
+                    reject(error);
+                }
+            } else {
+                setTimeout(checkFirebase, 100);
+            }
+        };
+        checkFirebase();
+    });
+}      
        
 
 let particlesInstance = null;
@@ -2133,184 +2158,183 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
     document.getElementById('dark-mode-toggle').checked = true;
 }
         // Main application initialization
-        function initApplication() {
-            const auth = firebase.auth();
-            const database = firebase.database();
-            const storage = firebase.storage();
+  async function initApplication() {
+    try {
+        await initializeFirebase();
+        const auth = firebase.auth();
+        
+        // Initialize auth state listener
+        initAuthStateListener();
+        
+        // Get DOM elements
+        const authPage = document.getElementById('auth-page');
+        const mainContainer = document.getElementById('main-container');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const showSignup = document.getElementById('show-signup');
+        const showLogin = document.getElementById('show-login');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const newUsernameInput = document.getElementById('new-username');
+        const newPasswordInput = document.getElementById('new-password');
+        const authStatus = document.getElementById('auth-status');
+        const signupStatus = document.getElementById('signup-status');
+        
+        // Form switching
+        showSignup.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.classList.add('hidden');
+            signupForm.classList.remove('hidden');
+            clearStatus();
+        });
+        
+        showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            signupForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            clearStatus();
+        });
+        
+        // Login function
+        loginBtn.addEventListener('click', async () => {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            const inviteCode = document.getElementById('invite-code').value.trim();
             
-            // DOM Elements
-            const authPage = document.getElementById('auth-page');
-            const mainContainer = document.getElementById('main-container');
-            const loginForm = document.getElementById('login-form');
-            const signupForm = document.getElementById('signup-form');
-            const showSignup = document.getElementById('show-signup');
-            const showLogin = document.getElementById('show-login');
-    // Add null checks for all DOM elements
-    const loginBtn = document.getElementById('login-btn');
-    const signupBtn = document.getElementById('signup-btn');
-    
-    if (!loginBtn || !signupBtn) {
-        console.error('Required elements not found');
-        setTimeout(initApplication, 100);
-        return;
-    }
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            const newUsernameInput = document.getElementById('new-username');
-            const newPasswordInput = document.getElementById('new-password');
-            const authStatus = document.getElementById('auth-status');
-            const signupStatus = document.getElementById('signup-status');
+            if (!verifyInviteCode(inviteCode)) return;
             
-            // Toggle between login and signup forms
-            showSignup.addEventListener('click', (e) => {
-                e.preventDefault();
-                loginForm.classList.add('hidden');
-                signupForm.classList.remove('hidden');
-                clearStatus();
-            });
+            if (!username || !password) {
+                showError(authStatus, 'Please enter both username and password');
+                return;
+            }
             
-            showLogin.addEventListener('click', (e) => {
-                e.preventDefault();
-                signupForm.classList.add('hidden');
-                loginForm.classList.remove('hidden');
-                clearStatus();
-            });
-                // Only proceed with event listeners if elements exist
- 
-            // Login function
-            loginBtn.addEventListener('click', () => {
-                const username = usernameInput.value.trim();
-                const password = passwordInput.value.trim();
-                    const inviteCode = document.getElementById('invite-code').value.trim();
-    
-    if (!verifyInviteCode(inviteCode)) return;
-                
-                if (!username || !password) {
-                    showError(authStatus, 'Please enter both username and password');
-                    return;
-                }
-                
-                // For demo, we'll use username@example.com as the email
-                const email = `${username}@example.com`;
-                
+            const email = `${username}@example.com`;
+            
+            try {
                 loginBtn.disabled = true;
                 loginBtn.textContent = 'Logging in...';
                 
-                auth.signInWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        showSuccess(authStatus, 'Login successful!');
-                        // Hide auth page and show main content
-                        authPage.style.display = 'none';
-                        mainContainer.style.display = 'flex';
-                        // After successful login/signup:
-localStorage.setItem('lastLogin', Date.now());
-
-// Then add this check when initializing:
-const lastLogin = localStorage.getItem('lastLogin');
-if (lastLogin && (Date.now() - parseInt(lastLogin)) > 30 * 24 * 60 * 60 * 1000) {
-    // If last login was more than 30 days ago, force fresh login
-    auth.signOut();
-}
-                        initParticles();
-                        initTabSystem();
-                        initFeedbackSystem();
-                        initSettingsSystem();
-                    })
-                    .catch((error) => {
-                        showError(authStatus, getErrorMessage(error));
-                    })
-                    .finally(() => {
-                        loginBtn.disabled = false;
-                        loginBtn.textContent = 'Log In';
-                    });
-            });
+                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                
+                showSuccess(authStatus, 'Login successful!');
+                localStorage.setItem('lastLogin', Date.now());
+                
+                authPage.style.display = 'none';
+                mainContainer.style.display = 'flex';
+                initParticles();
+                initTabSystem();
+                initFeedbackSystem();
+                initSettingsSystem();
+            } catch (error) {
+                showError(authStatus, getErrorMessage(error));
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Log In';
+            }
+        });
+        
+        // Signup function
+        signupBtn.addEventListener('click', async () => {
+            const username = newUsernameInput.value.trim();
+            const password = newPasswordInput.value.trim();
+            const inviteCode = document.getElementById('new-invite-code').value.trim();
             
-            // Signup function
-            signupBtn.addEventListener('click', () => {
-                const username = newUsernameInput.value.trim();
-                const password = newPasswordInput.value.trim();
-                    const inviteCode = document.getElementById('new-invite-code').value.trim();
-    
-    if (!verifyInviteCode(inviteCode)) return;
-                if (!username || !password) {
-                    showError(signupStatus, 'Please enter both username and password');
-                    return;
-                }
-                
-                if (password.length < 6) {
-                    showError(signupStatus, 'Password must be at least 6 characters');
-                    return;
-                }
-                
-                // For demo, we'll use username@example.com as the email
-                const email = `${username}@example.com`;
-                
+            if (!verifyInviteCode(inviteCode)) return;
+            
+            if (!username || !password) {
+                showError(signupStatus, 'Please enter both username and password');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError(signupStatus, 'Password must be at least 6 characters');
+                return;
+            }
+            
+            const email = `${username}@example.com`;
+            
+            try {
                 signupBtn.disabled = true;
                 signupBtn.textContent = 'Creating account...';
                 
-                auth.createUserWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        showSuccess(signupStatus, 'Account created successfully!');
-                        // Hide auth page and show main content
-                        authPage.style.display = 'none';
-                        mainContainer.style.display = 'flex';
-                        initParticles();
-                        initTabSystem();
-                        initFeedbackSystem();
-                        initSettingsSystem();
-                    })
-                    .catch((error) => {
-                        showError(signupStatus, getErrorMessage(error));
-                    })
-                    .finally(() => {
-                        signupBtn.disabled = false;
-                        signupBtn.textContent = 'Sign Up';
-                    });
-            });
-            
-            // Helper functions
-            function clearInputs() {
-                usernameInput.value = '';
-                passwordInput.value = '';
-                newUsernameInput.value = '';
-                newPasswordInput.value = '';
+                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                
+                showSuccess(signupStatus, 'Account created successfully!');
+                localStorage.setItem('lastLogin', Date.now());
+                
+                authPage.style.display = 'none';
+                mainContainer.style.display = 'flex';
+                initParticles();
+                initTabSystem();
+                initFeedbackSystem();
+                initSettingsSystem();
+            } catch (error) {
+                showError(signupStatus, getErrorMessage(error));
+            } finally {
+                signupBtn.disabled = false;
+                signupBtn.textContent = 'Sign Up';
             }
-            
-            function clearStatus() {
-                authStatus.classList.remove('success', 'error');
-                authStatus.style.display = 'none';
-                signupStatus.classList.remove('success', 'error');
-                signupStatus.style.display = 'none';
+        });
+        
+        // Helper functions
+        function clearStatus() {
+            authStatus.textContent = '';
+            authStatus.className = 'auth-status';
+            authStatus.style.display = 'none';
+            signupStatus.textContent = '';
+            signupStatus.className = 'auth-status';
+            signupStatus.style.display = 'none';
+        }
+        
+        function showError(element, message) {
+            element.textContent = message;
+            element.className = 'auth-status error';
+            element.style.display = 'block';
+        }
+        
+        function showSuccess(element, message) {
+            element.textContent = message;
+            element.className = 'auth-status success';
+            element.style.display = 'block';
+        }
+        
+        function getErrorMessage(error) {
+            switch (error.code) {
+                case 'auth/wrong-password':
+                    return 'Incorrect password';
+                case 'auth/user-not-found':
+                    return 'Username not found';
+                case 'auth/email-already-in-use':
+                    return 'Username already taken';
+                case 'auth/weak-password':
+                    return 'Password must be at least 6 characters';
+                case 'auth/too-many-requests':
+                    return 'Too many attempts. Try again later.';
+                default:
+                    return 'Login failed. Please try again.';
             }
-            
-            function showError(element, message) {
-                element.textContent = message;
-                element.classList.remove('success');
-                element.classList.add('error');
-                element.style.display = 'block';
-            }
-            
-            function showSuccess(element, message) {
-                element.textContent = message;
-                element.classList.remove('error');
-                element.classList.add('success');
-                element.style.display = 'block';
-            }
-            
-            function getErrorMessage(error) {
-                switch (error.code) {
-                    case 'auth/wrong-password':
-                        return 'Incorrect password';
-                    case 'auth/user-not-found':
-                        return 'Username not found';
-                    case 'auth/email-already-in-use':
-                        return 'Username already taken';
-                    case 'auth/weak-password':
-                        return 'Password must be at least 6 characters';
-                    default:
-                        return 'Login failed. Please try again.';
-                }
-            }
+        }
+        
+    } catch (error) {
+        console.error('Initialization error:', error);
+        // Show error to user
+        const errorDiv = document.createElement('div');
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.top = '0';
+        errorDiv.style.left = '0';
+        errorDiv.style.width = '100%';
+        errorDiv.style.padding = '20px';
+        errorDiv.style.backgroundColor = '#f44336';
+        errorDiv.style.color = 'white';
+        errorDiv.style.zIndex = '9999';
+        errorDiv.textContent = 'Error initializing application. Please refresh the page.';
+        document.body.appendChild(errorDiv);
+    }
+}
             
             // ======================
             // TAB SYSTEM
