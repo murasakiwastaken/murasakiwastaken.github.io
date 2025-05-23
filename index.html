@@ -1898,9 +1898,6 @@ function initializeFirebase() {
                         firebase.initializeApp(firebaseConfig);
                     }
                     resolve(firebase);
-                      const auth = firebase.auth();
-         const database = firebase.database();
-         const storage = firebase.storage();
                 } catch (error) {
                     reject(error);
                 }
@@ -2164,7 +2161,9 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
   async function initApplication() {
     try {
         await initializeFirebase();
-
+ const auth = firebase.auth();
+            const database = firebase.database();
+            const storage = firebase.storage();
         // Initialize auth state listener
         initAuthStateListener();
         
