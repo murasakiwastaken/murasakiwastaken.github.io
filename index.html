@@ -2019,7 +2019,35 @@ window.addEventListener('scroll', () => {
         }, 100);
     }
 });
+// Define your invite code
+const INVITE_CODE = "youpassed";
 
+// Function to verify invite code and redirect if invalid
+function verifyInviteCode(code) {
+    if (code !== INVITE_CODE) {
+        // Create fullscreen iframe with redirect
+        const iframe = document.createElement('iframe');
+        iframe.src = 'https://getoutofmywebsite.vercel.app';
+        iframe.style.position = 'fixed';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.width = '100vw';
+        iframe.style.height = '100vh';
+        iframe.style.border = 'none';
+        iframe.style.zIndex = '99999';
+        document.body.innerHTML = '';
+        document.body.appendChild(iframe);
+        
+        // Prevent going back
+        history.pushState(null, null, location.href);
+        window.onpopstate = function() {
+            history.go(1);
+        };
+        
+        return false;
+    }
+    return true;
+}
 // Debounce resize events
 let resizeTimeout;
 window.addEventListener('resize', () => {
@@ -2108,35 +2136,7 @@ document.addEventListener('DOMContentLoaded', checkAboutBlank);
 }
 // Call this when showing settings
 document.getElementById('settings-btn').addEventListener('click', checkPopupBlocker);
-// Define your invite code
-const INVITE_CODE = "youpassed";
 
-// Function to verify invite code and redirect if invalid
-function verifyInviteCode(code) {
-    if (code !== INVITE_CODE) {
-        // Create fullscreen iframe with redirect
-        const iframe = document.createElement('iframe');
-        iframe.src = 'https://getoutofmywebsite.vercel.app';
-        iframe.style.position = 'fixed';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.style.width = '100vw';
-        iframe.style.height = '100vh';
-        iframe.style.border = 'none';
-        iframe.style.zIndex = '99999';
-        document.body.innerHTML = '';
-        document.body.appendChild(iframe);
-        
-        // Prevent going back
-        history.pushState(null, null, location.href);
-        window.onpopstate = function() {
-            history.go(1);
-        };
-        
-        return false;
-    }
-    return true;
-}
 // Check for system preference
 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.body.classList.add('dark-mode');
