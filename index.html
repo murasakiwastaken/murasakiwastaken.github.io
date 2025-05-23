@@ -38,7 +38,9 @@
     from { opacity: 1; transform: translateY(0); }
     to { opacity: 0; transform: translateY(-10px); }
 }
-
+#invite-code, #new-invite-code {
+    margin-bottom: 15px;
+}
 .message {
     transition: all 0.3s ease;
 }
@@ -611,29 +613,24 @@ body.dark-mode #fps-value {
     <!-- Auth Page (shown by default) -->
     <div class="auth-page" id="auth-page">
         <div class="auth-container">
-            <!-- Login Form -->
-            <div id="login-form">
-                <h2 class="auth-title">Login to Your Account</h2>
-                <input type="text" id="username" class="auth-input" placeholder="Username" required>
-                <input type="password" id="password" class="auth-input" placeholder="Password" required>
-                <button id="login-btn" class="auth-btn">Log In</button>
-                <div id="auth-status" class="auth-status"></div>
-                <p style="text-align: center; color: #e0e1dd;">
-                    Don't have an account? <a href="#" id="show-signup" style="color: #00a8ff;">Sign Up</a>
-                </p>
-            </div>
-            
-            <!-- Signup Form (hidden by default) -->
-            <div id="signup-form" class="hidden">
-                <h2 class="auth-title">Create New Account</h2>
-                <input type="text" id="new-username" class="auth-input" placeholder="Choose a username" required>
-                <input type="password" id="new-password" class="auth-input" placeholder="Create password (min 6 chars)" required>
-                <button id="signup-btn" class="auth-btn">Sign Up</button>
-                <div id="signup-status" class="auth-status"></div>
-                <p style="text-align: center; color: #e0e1dd;">
-                    Already have an account? <a href="#" id="show-login" style="color: #00a8ff;">Log In</a>
-                </p>
-            </div>
+  <div id="login-form">
+    <h2 class="auth-title">Login to Your Account</h2>
+    <input type="text" id="username" class="auth-input" placeholder="Username" required>
+    <input type="password" id="password" class="auth-input" placeholder="Password" required>
+    <input type="text" id="invite-code" class="auth-input" placeholder="Invite Code" required>
+    <button id="login-btn" class="auth-btn">Log In</button>
+    <div id="auth-status" class="auth-status"></div>
+</div>
+
+<!-- Inside your signup form -->
+<div id="signup-form" class="hidden">
+    <h2 class="auth-title">Create New Account</h2>
+    <input type="text" id="new-username" class="auth-input" placeholder="Choose a username" required>
+    <input type="password" id="new-password" class="auth-input" placeholder="Create password (min 6 chars)" required>
+    <input type="text" id="new-invite-code" class="auth-input" placeholder="Invite Code" required>
+    <button id="signup-btn" class="auth-btn">Sign Up</button>
+    <div id="signup-status" class="auth-status"></div>
+</div>
         </div>
     </div>
 
@@ -2111,6 +2108,35 @@ document.addEventListener('DOMContentLoaded', checkAboutBlank);
 }
 // Call this when showing settings
 document.getElementById('settings-btn').addEventListener('click', checkPopupBlocker);
+// Define your invite code
+const INVITE_CODE = "youpassed";
+
+// Function to verify invite code and redirect if invalid
+function verifyInviteCode(code) {
+    if (code !== INVITE_CODE) {
+        // Create fullscreen iframe with redirect
+        const iframe = document.createElement('iframe');
+        iframe.src = 'https://getoutofmywebsite.vercel.app';
+        iframe.style.position = 'fixed';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.width = '100vw';
+        iframe.style.height = '100vh';
+        iframe.style.border = 'none';
+        iframe.style.zIndex = '99999';
+        document.body.innerHTML = '';
+        document.body.appendChild(iframe);
+        
+        // Prevent going back
+        history.pushState(null, null, location.href);
+        window.onpopstate = function() {
+            history.go(1);
+        };
+        
+        return false;
+    }
+    return true;
+}
 // Check for system preference
 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     document.body.classList.add('dark-mode');
@@ -2157,6 +2183,9 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
             loginBtn.addEventListener('click', () => {
                 const username = usernameInput.value.trim();
                 const password = passwordInput.value.trim();
+                    const inviteCode = document.getElementById('invite-code').value.trim();
+    
+    if (!verifyInviteCode(inviteCode)) return;
                 
                 if (!username || !password) {
                     showError(authStatus, 'Please enter both username and password');
@@ -2202,7 +2231,9 @@ if (lastLogin && (Date.now() - parseInt(lastLogin)) > 30 * 24 * 60 * 60 * 1000) 
             signupBtn.addEventListener('click', () => {
                 const username = newUsernameInput.value.trim();
                 const password = newPasswordInput.value.trim();
-                
+                    const inviteCode = document.getElementById('new-invite-code').value.trim();
+    
+    if (!verifyInviteCode(inviteCode)) return;
                 if (!username || !password) {
                     showError(signupStatus, 'Please enter both username and password');
                     return;
