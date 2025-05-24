@@ -1876,6 +1876,10 @@ body.dark-mode #fps-value {
 let authListener = null;
 let chatRefListener = null;
 let feedbackRefListener = null;
+// Add these at the top of your script with other declarations
+let auth;
+let database;
+let storage;
         // Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
@@ -1888,8 +1892,7 @@ let feedbackRefListener = null;
         };
         
         // Wait for Firebase to load
-// Replace your initializeFirebase function with this:
-function initializeFirebase() {
+async function initializeFirebase() {
     return new Promise((resolve, reject) => {
         const checkFirebase = () => {
             if (typeof firebase !== 'undefined' && firebase.apps) {
@@ -1897,6 +1900,10 @@ function initializeFirebase() {
                     if (firebase.apps.length === 0) {
                         firebase.initializeApp(firebaseConfig);
                     }
+                    // Initialize services after app
+                    auth = firebase.auth();
+                    database = firebase.database();
+                    storage = firebase.storage();
                     resolve(firebase);
                 } catch (error) {
                     reject(error);
@@ -1907,7 +1914,7 @@ function initializeFirebase() {
         };
         checkFirebase();
     });
-}      
+}
           
 
 let particlesInstance = null;
@@ -2161,9 +2168,6 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
   async function initApplication() {
     try {
         await initializeFirebase();
- const auth = firebase.auth();
-            const database = firebase.database();
-            const storage = firebase.storage();
         // Initialize auth state listener
         initAuthStateListener();
         
