@@ -1898,12 +1898,12 @@ async function initializeFirebase() {
             if (typeof firebase !== 'undefined' && firebase.apps) {
                 try {
                     if (firebase.apps.length === 0) {
-                        firebase.initializeApp(firebaseConfig);
+                        const app = firebase.initializeApp(firebaseConfig);
+                        // Initialize services after app
+                        auth = app.auth();
+                        database = app.database();
+                        storage = app.storage();
                     }
-                    // Initialize services after app
-                    auth = firebase.auth();
-                    database = firebase.database();
-                    storage = firebase.storage();
                     resolve(firebase);
                 } catch (error) {
                     reject(error);
@@ -2497,7 +2497,7 @@ modal.addEventListener('click', (e) => {
             const messageInput = document.getElementById('message-input');
             const sendBtn = document.getElementById('send-btn');
             const chatMessages = document.getElementById('chat-messages');
-            const chatRef = database.ref('chat');
+const chatRef = database.ref('chat');
             
             let chatUsername = localStorage.getItem('chatUsername') || '';
             
