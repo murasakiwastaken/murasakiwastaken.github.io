@@ -2317,6 +2317,491 @@ modal.addEventListener('click', (e) => {
     }
 });
             }
+function initFeedbackSystem() {
+    const feedbackBtn = document.getElementById('feedback-btn');
+    const feedbackModal = document.getElementById('feedback-modal');
+    const closeFeedback = document.querySelector('.close-feedback');
+    const feedbackInput = document.getElementById('feedback-input');
+    const sendFeedbackBtn = document.getElementById('send-feedback');
+    const feedbackMessages = document.getElementById('feedback-messages');
+    
+    const feedbackRef = database.ref('feedback');
+    let feedbackUsername = auth.currentUser ? auth.currentUser.email.split('@')[0] : 'Anonymous';
+
+    // Load and display existing feedback
+    function loadFeedbackMessages() {
+        feedbackRef.orderByChild('timestamp').limitToLast(50).on('value', (snapshot) => {
+            feedbackMessages.innerHTML = ''; // Clear current messages
+            
+            snapshot.forEach((childSnapshot) => {
+                const msg = childSnapshot.val();
+                displayFeedbackMessage({
+                    ...msg,
+                    key: childSnapshot.key
+                });
+            });
+            
+            scrollFeedbackToBottom();
+        });
+    }
+
+    // Display a single feedback message
+    function displayFeedbackMessage({ username, message, timestamp, key }) {
+        const messageEl = document.createElement('div');
+        messageEl.className = 'feedback-message';
+        messageEl.style.animation = 'fadeIn 0.3s ease-out';
+        
+        const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        messageEl.innerHTML = `
+            <div class="message-meta">
+                <span class="message-username">${username}:</span>
+                <span class="message-time">${time}</span>
+            </div>
+            <p class="message-text">${message}</p>
+        `;
+        
+        feedbackMessages.appendChild(messageEl);
+    }
+
+    // Send new feedback
+    function sendFeedback() {
+        const message = feedbackInput.value.trim();
+        if (!message) return;
+        
+        const feedbackData = {
+            username: feedbackUsername,
+            message: message,
+            timestamp: Date.now()
+        };
+        
+        // Push to Firebase
+        feedbackRef.push(feedbackData)
+            .then(() => {
+                feedbackInput.value = ''; // Clear input
+                scrollFeedbackToBottom();
+            })
+            .catch(error => {
+                console.error("Error sending feedback:", error);
+                alert("Failed to send feedback. Please try again.");
+            });
+    }
+
+    function scrollFeedbackToBottom() {
+        feedbackMessages.scrollTop = feedbackMessages.scrollHeight;
+    }
+
+    // Event listeners
+    feedbackBtn.addEventListener('click', () => {
+        feedbackModal.classList.toggle('active');
+        if (feedbackModal.classList.contains('active')) {
+            loadFeedbackMessages();
+        }
+    });
+
+    closeFeedback.addEventListener('click', () => {
+        feedbackModal.classList.remove('active');
+    });
+
+    sendFeedbackBtn.addEventListener('click', sendFeedback);
+    
+    feedbackInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            sendFeedback();
+        }
+    });
+   // ======================
+            // SETTINGS SYSTEM (NEW)
+            // ======================
+ function initSettingsSystem() {
+    // DOM Elements
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const closeSettings = document.querySelector('.settings-close');
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const bgColorPicker = document.getElementById('bg-color-picker');
+    const applyBgColorBtn = document.getElementById('apply-bg-color');
+    const cloakPreset = document.getElementById('cloak-preset');
+    const customCloakUrl = document.getElementById('custom-cloak-url');
+    const applyCloakBtn = document.getElementById('apply-cloak');
+     // In your initSettingsSystem() function:
+const logoutBtn = document.getElementById('logout-btn');
+const logoutConfirmModal = document.getElementById('logout-confirm-modal');
+const confirmLogoutBtn = document.getElementById('confirm-logout');
+const cancelLogoutBtn = document.getElementById('cancel-logout');
+
+logoutBtn.addEventListener('click', () => {
+    logoutConfirmModal.style.display = 'flex';
+});
+
+cancelLogoutBtn.addEventListener('click', () => {
+    logoutConfirmModal.style.display = 'none';
+});
+
+// Modify your logout function
+confirmLogoutBtn.addEventListener('click', () => {
+    auth.signOut().then(() => {
+        // Clear any sensitive data
+        localStorage.removeItem('chatUsername');
+        
+        // Reset UI
+        logoutConfirmModal.style.display = 'none';
+        settingsModal.classList.remove('active');
+        
+        // Clean up resources
+        destroyParticles();
+        
+        // Show auth page
+        authPage.style.display = 'flex';
+        mainContainer.style.display = 'none';
+        window.location.href = 'https://murasakiwastaken.vercel.app';
+    }).catch((error) => {
+        console.error("Logout error:", error);
+        alert("Error during logout. Please try again.");
+    });
+});
+
+    // Event Listeners
+    settingsBtn.addEventListener('click', () => settingsModal.classList.toggle('active'));
+    closeSettings.addEventListener('click', () => settingsModal.classList.remove('active'));
+    cloakPreset.addEventListener('change', handleCloakPresetChange);
+    applyCloakBtn.addEventListener('click', applyCloak);
+    darkModeToggle.addEventListener('change', toggleDarkMode);
+    applyBgColorBtn.addEventListener('click', applyBackgroundColor);
+
+    // Initialize UI
+    loadSettings();
+// About:Blank toggle
+const aboutBlankToggle = document.getElementById('about-blank-toggle');
+const aboutBlankStatus = document.getElementById('about-blank-status');
+// FPS Counter
+const fpsToggle = document.getElementById('fps-toggle');
+const fpsStatus = document.getElementById('fps-status');
+const fpsCounter = document.getElementById('fps-counter');
+const fpsValue = document.getElementById('fps-value');
+
+// FPS Counter variables
+let fpsLastTime = performance.now();
+let fpsFrames = 0;
+let fps = 0;
+let fpsInterval;
+let fpsEnabled = localStorage.getItem('fpsEnabled') === 'true';
+
+// Initialize FPS counter state
+fpsToggle.checked = fpsEnabled;
+fpsStatus.textContent = fpsEnabled ? 'Enabled' : 'Disabled';
+if (fpsEnabled) {
+    startFPSCounter();
+}
+
+// FPS counter functions
+function startFPSCounter() {
+    fpsCounter.style.display = 'block';
+    fpsInterval = setInterval(updateFPSCounter, 1000);
+    requestAnimationFrame(countFPSFrame);
+}
+
+function stopFPSCounter() {
+    fpsCounter.style.display = 'none';
+    clearInterval(fpsInterval);
+    fpsValue.textContent = '0';
+}
+
+function countFPSFrame() {
+    fpsFrames++;
+    const now = performance.now();
+    if (now >= fpsLastTime + 1000) {
+        fps = Math.round((fpsFrames * 1000) / (now - fpsLastTime));
+        fpsLastTime = now;
+        fpsFrames = 0;
+    }
+    if (fpsEnabled) {
+        requestAnimationFrame(countFPSFrame);
+    }
+}
+
+function updateFPSCounter() {
+    fpsValue.textContent = fps;
+}
+
+// Toggle event listener
+fpsToggle.addEventListener('change', function() {
+    fpsEnabled = this.checked;
+    fpsStatus.textContent = fpsEnabled ? 'Enabled' : 'Disabled';
+    localStorage.setItem('fpsEnabled', fpsEnabled);
+    
+    if (fpsEnabled) {
+        startFPSCounter();
+    } else {
+        stopFPSCounter();
+    }
+});
+// Load current state
+const aboutBlankState = localStorage.getItem("aboutBlank") === "enabled";
+aboutBlankToggle.checked = aboutBlankState;
+aboutBlankStatus.textContent = aboutBlankState ? "Enabled" : "Disabled";
+
+// Handle toggle changes
+aboutBlankToggle.addEventListener('change', function() {
+    if (this.checked) {
+        enableAboutBlank();
+    } else {
+        disableAboutBlank();
+    }
+});
+    // ======================
+    // CLOAKING SYSTEM
+    // ======================
+    function handleCloakPresetChange() {
+        customCloakUrl.style.display = this.value === 'custom' ? 'block' : 'none';
+    }
+
+    function applyCloak() {
+        const { targetUrl, title, faviconUrl } = getCloakSettings();
+        if (!targetUrl) return;
+        
+        activateIframeCloak(targetUrl, title, faviconUrl);
+        saveCloakSettings(targetUrl, title, faviconUrl);
+    }
+
+    function getCloakSettings() {
+        let targetUrl, title, faviconUrl;
+
+        switch (cloakPreset.value) {
+            case 'https://docs.google.com':
+                return {
+                    targetUrl: 'https://docs.google.com',
+                    title: 'Google Docs',
+                    faviconUrl: 'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png'
+                };
+            case 'https://classroom.google.com':
+                return {
+                    targetUrl: 'https://classroom.google.com',
+                    title: 'Google Classroom',
+                    faviconUrl: 'https://ssl.gstatic.com/classroom/favicon.png'
+                };
+            case 'https://kamiapp.com':
+                return {
+                    targetUrl: 'https://kamiapp.com',
+                    title: 'Kami',
+                    faviconUrl: 'https://kamiapp.com/favicon.ico'
+                };
+            case 'https://clever.com':
+                return {
+                    targetUrl: 'https://clever.com',
+                    title: 'Clever',
+                    faviconUrl: 'https://clever.com/favicon.ico'
+                };
+            case 'custom':
+                targetUrl = customCloakUrl.value.trim();
+                if (!targetUrl) {
+                    alert('Please enter a valid URL');
+                    return {};
+                }
+                return {
+                    targetUrl,
+                    title: prompt('Enter tab title:') || 'My Tab',
+                    faviconUrl: prompt('Enter favicon URL (optional):') || ''
+                };
+            default:
+                alert('Please select a preset or enter a custom URL!');
+                return {};
+        }
+    }
+
+    function activateIframeCloak(url, title, faviconUrl) {
+    // Hide main content (except settings and cloak toggle button)
+    document.querySelectorAll('.main-container > *').forEach(el => {
+        if (!el.classList.contains('settings-modal') && 
+            el.id !== 'cloak-toggle-btn') {
+            el.style.display = 'none';
+        }
+    });
+    
+    // Also hide the feedback button
+    const feedbackBtn = document.getElementById('feedback-btn');
+    if (feedbackBtn) feedbackBtn.style.display = 'none';
+    
+    // Hide the settings button too
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) settingsBtn.style.display = 'none';
+
+    // Create or update iframe
+    let iframe = document.getElementById('cloak-iframe');
+    if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'cloak-iframe';
+        iframe.style.position = 'fixed';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.zIndex = '9990';
+        document.body.appendChild(iframe);
+    }
+    iframe.src = url;
+
+    // Add/recreate toggle button
+    const toggleBtn = document.getElementById('cloak-toggle-btn') || createToggleButton();
+    setupToggleBehavior(iframe, toggleBtn);
+
+    // Update appearance
+    updateTabAppearance(title, faviconUrl);
+}
+    function createToggleButton() {
+        const btn = document.createElement('button');
+        btn.id = 'cloak-toggle-btn';
+        btn.className = 'cloak-toggle-btn';
+        btn.textContent = '👁️';
+        document.body.appendChild(btn);
+        return btn;
+    }
+
+   function setupToggleBehavior(iframe, btn) {
+    let cloakActive = true;
+    btn.addEventListener('click', () => {
+        cloakActive = !cloakActive;
+        iframe.style.display = cloakActive ? 'block' : 'none';
+        btn.textContent = cloakActive ? '👁️' : '👁️‍🗨️';
+        
+        // When uncloaking, restore the UI
+        if (!cloakActive) {
+            // Show main content
+            document.querySelectorAll('.main-container > *').forEach(el => {
+                el.style.display = '';
+            });
+            
+            // Show feedback button
+            const feedbackBtn = document.getElementById('feedback-btn');
+            if (feedbackBtn) feedbackBtn.style.display = '';
+            
+            // Show settings button
+            const settingsBtn = document.getElementById('settings-btn');
+            if (settingsBtn) settingsBtn.style.display = '';
+        } else {
+            // When recloaking, hide everything again
+            document.querySelectorAll('.main-container > *').forEach(el => {
+                if (!el.classList.contains('settings-modal') && 
+                    el.id !== 'cloak-toggle-btn') {
+                    el.style.display = 'none';
+                }
+            });
+            const feedbackBtn = document.getElementById('feedback-btn');
+            if (feedbackBtn) feedbackBtn.style.display = 'none';
+            const settingsBtn = document.getElementById('settings-btn');
+            if (settingsBtn) settingsBtn.style.display = 'none';
+        }
+    });
+}
+
+    function updateTabAppearance(title, faviconUrl) {
+        document.title = title;
+        updateFavicon(faviconUrl);
+    }
+
+    function updateFavicon(url) {
+        let favicon = document.querySelector('link[rel="icon"]') || 
+                     document.createElement('link');
+        favicon.rel = 'icon';
+        if (url) favicon.href = url;
+        document.head.appendChild(favicon);
+    }
+
+    function saveCloakSettings(url, title, faviconUrl) {
+        localStorage.setItem('cloakActive', 'true');
+        localStorage.setItem('cloakUrl', url);
+        localStorage.setItem('cloakTitle', title);
+        localStorage.setItem('cloakFavicon', faviconUrl);
+        localStorage.setItem('cloakPreset', cloakPreset.value);
+    }
+
+    // ======================
+    // APPEARANCE SETTINGS
+    // ======================
+function toggleDarkMode(e) {
+    const enabled = e.target.checked;
+    
+    // Start transition
+    document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
+    
+    // Apply the class change
+    document.body.classList.toggle('dark-mode', enabled);
+    
+    // Store preference
+    localStorage.setItem('darkMode', enabled);
+    
+    // Clean up after transition
+    setTimeout(() => {
+        document.body.style.transition = '';
+    }, 300);
+}
+    function applyBackgroundColor() {
+        const color = bgColorPicker.value;
+        document.body.style.backgroundColor = color;
+        localStorage.setItem('bgColor', color);
+    }
+
+    // ======================
+    // INITIALIZATION
+    // ======================
+    function loadSettings() {
+        // Dark Mode
+        const darkMode = localStorage.getItem('darkMode') === 'true';
+        darkModeToggle.checked = darkMode;
+        toggleDarkMode({ target: { checked: darkMode } });
+
+        // Background Color
+        const bgColor = localStorage.getItem('bgColor') || '#0d1b2a';
+        bgColorPicker.value = bgColor;
+        document.body.style.backgroundColor = bgColor;
+
+        // Cloaking
+        const cloakPresetValue = localStorage.getItem('cloakPreset') || '';
+        cloakPreset.value = cloakPresetValue;
+        if (cloakPresetValue === 'custom') {
+            customCloakUrl.style.display = 'block';
+            customCloakUrl.value = localStorage.getItem('customCloakUrl') || '';
+        }
+
+        if (localStorage.getItem('cloakActive') === 'true') {
+            const url = localStorage.getItem('cloakUrl');
+            const title = localStorage.getItem('cloakTitle');
+            const favicon = localStorage.getItem('cloakFavicon');
+            if (url && title) activateIframeCloak(url, title, favicon);
+        }
+    }
+
+function resetCloak() {
+    const iframe = document.getElementById('cloak-iframe');
+    const toggleBtn = document.getElementById('cloak-toggle-btn');
+    if (iframe) iframe.remove();
+    if (toggleBtn) toggleBtn.remove();
+    
+    // Restore all UI elements
+    document.querySelectorAll('.main-container > *').forEach(el => {
+        el.style.display = '';
+    });
+    
+    // Restore feedback button
+    const feedbackBtn = document.getElementById('feedback-btn');
+    if (feedbackBtn) feedbackBtn.style.display = '';
+    
+    // Restore settings button
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) settingsBtn.style.display = '';
+    
+    localStorage.removeItem('cloakActive');
+}
+
+    // Expose cleanup for use elsewhere
+    return { resetCloak };
+}
+        
+
+      
+
+}
 function initAuthStateListener() {
     const auth = firebase.auth();
     auth.onAuthStateChanged((user) => {
@@ -2836,100 +3321,7 @@ async function handleAIInput() {
             });
             document.getElementById('ai-clear-btn').addEventListener('click', clearConversation);
 
-           function initFeedbackSystem() {
-    const feedbackBtn = document.getElementById('feedback-btn');
-    const feedbackModal = document.getElementById('feedback-modal');
-    const closeFeedback = document.querySelector('.close-feedback');
-    const feedbackInput = document.getElementById('feedback-input');
-    const sendFeedbackBtn = document.getElementById('send-feedback');
-    const feedbackMessages = document.getElementById('feedback-messages');
-    
-    const feedbackRef = database.ref('feedback');
-    let feedbackUsername = auth.currentUser ? auth.currentUser.email.split('@')[0] : 'Anonymous';
-
-    // Load and display existing feedback
-    function loadFeedbackMessages() {
-        feedbackRef.orderByChild('timestamp').limitToLast(50).on('value', (snapshot) => {
-            feedbackMessages.innerHTML = ''; // Clear current messages
-            
-            snapshot.forEach((childSnapshot) => {
-                const msg = childSnapshot.val();
-                displayFeedbackMessage({
-                    ...msg,
-                    key: childSnapshot.key
-                });
-            });
-            
-            scrollFeedbackToBottom();
-        });
-    }
-
-    // Display a single feedback message
-    function displayFeedbackMessage({ username, message, timestamp, key }) {
-        const messageEl = document.createElement('div');
-        messageEl.className = 'feedback-message';
-        messageEl.style.animation = 'fadeIn 0.3s ease-out';
-        
-        const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        messageEl.innerHTML = `
-            <div class="message-meta">
-                <span class="message-username">${username}:</span>
-                <span class="message-time">${time}</span>
-            </div>
-            <p class="message-text">${message}</p>
-        `;
-        
-        feedbackMessages.appendChild(messageEl);
-    }
-
-    // Send new feedback
-    function sendFeedback() {
-        const message = feedbackInput.value.trim();
-        if (!message) return;
-        
-        const feedbackData = {
-            username: feedbackUsername,
-            message: message,
-            timestamp: Date.now()
-        };
-        
-        // Push to Firebase
-        feedbackRef.push(feedbackData)
-            .then(() => {
-                feedbackInput.value = ''; // Clear input
-                scrollFeedbackToBottom();
-            })
-            .catch(error => {
-                console.error("Error sending feedback:", error);
-                alert("Failed to send feedback. Please try again.");
-            });
-    }
-
-    function scrollFeedbackToBottom() {
-        feedbackMessages.scrollTop = feedbackMessages.scrollHeight;
-    }
-
-    // Event listeners
-    feedbackBtn.addEventListener('click', () => {
-        feedbackModal.classList.toggle('active');
-        if (feedbackModal.classList.contains('active')) {
-            loadFeedbackMessages();
-        }
-    });
-
-    closeFeedback.addEventListener('click', () => {
-        feedbackModal.classList.remove('active');
-    });
-
-    sendFeedbackBtn.addEventListener('click', sendFeedback);
-    
-    feedbackInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            sendFeedback();
-        }
-    });
-
+           
 
 // Modify your login/signup success handlers to persist auth state:
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
@@ -2941,398 +3333,7 @@ auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
     });
 }
 
-            // ======================
-            // SETTINGS SYSTEM (NEW)
-            // ======================
- function initSettingsSystem() {
-    // DOM Elements
-    const settingsBtn = document.getElementById('settings-btn');
-    const settingsModal = document.getElementById('settings-modal');
-    const closeSettings = document.querySelector('.settings-close');
-    const darkModeToggle = document.getElementById('dark-mode-toggle');
-    const bgColorPicker = document.getElementById('bg-color-picker');
-    const applyBgColorBtn = document.getElementById('apply-bg-color');
-    const cloakPreset = document.getElementById('cloak-preset');
-    const customCloakUrl = document.getElementById('custom-cloak-url');
-    const applyCloakBtn = document.getElementById('apply-cloak');
-     // In your initSettingsSystem() function:
-const logoutBtn = document.getElementById('logout-btn');
-const logoutConfirmModal = document.getElementById('logout-confirm-modal');
-const confirmLogoutBtn = document.getElementById('confirm-logout');
-const cancelLogoutBtn = document.getElementById('cancel-logout');
-
-logoutBtn.addEventListener('click', () => {
-    logoutConfirmModal.style.display = 'flex';
-});
-
-cancelLogoutBtn.addEventListener('click', () => {
-    logoutConfirmModal.style.display = 'none';
-});
-
-// Modify your logout function
-confirmLogoutBtn.addEventListener('click', () => {
-    auth.signOut().then(() => {
-        // Clear any sensitive data
-        localStorage.removeItem('chatUsername');
-        
-        // Reset UI
-        logoutConfirmModal.style.display = 'none';
-        settingsModal.classList.remove('active');
-        
-        // Clean up resources
-        destroyParticles();
-        
-        // Show auth page
-        authPage.style.display = 'flex';
-        mainContainer.style.display = 'none';
-        window.location.href = 'https://murasakiwastaken.vercel.app';
-    }).catch((error) => {
-        console.error("Logout error:", error);
-        alert("Error during logout. Please try again.");
-    });
-});
-
-    // Event Listeners
-    settingsBtn.addEventListener('click', () => settingsModal.classList.toggle('active'));
-    closeSettings.addEventListener('click', () => settingsModal.classList.remove('active'));
-    cloakPreset.addEventListener('change', handleCloakPresetChange);
-    applyCloakBtn.addEventListener('click', applyCloak);
-    darkModeToggle.addEventListener('change', toggleDarkMode);
-    applyBgColorBtn.addEventListener('click', applyBackgroundColor);
-
-    // Initialize UI
-    loadSettings();
-// About:Blank toggle
-const aboutBlankToggle = document.getElementById('about-blank-toggle');
-const aboutBlankStatus = document.getElementById('about-blank-status');
-// FPS Counter
-const fpsToggle = document.getElementById('fps-toggle');
-const fpsStatus = document.getElementById('fps-status');
-const fpsCounter = document.getElementById('fps-counter');
-const fpsValue = document.getElementById('fps-value');
-
-// FPS Counter variables
-let fpsLastTime = performance.now();
-let fpsFrames = 0;
-let fps = 0;
-let fpsInterval;
-let fpsEnabled = localStorage.getItem('fpsEnabled') === 'true';
-
-// Initialize FPS counter state
-fpsToggle.checked = fpsEnabled;
-fpsStatus.textContent = fpsEnabled ? 'Enabled' : 'Disabled';
-if (fpsEnabled) {
-    startFPSCounter();
-}
-
-// FPS counter functions
-function startFPSCounter() {
-    fpsCounter.style.display = 'block';
-    fpsInterval = setInterval(updateFPSCounter, 1000);
-    requestAnimationFrame(countFPSFrame);
-}
-
-function stopFPSCounter() {
-    fpsCounter.style.display = 'none';
-    clearInterval(fpsInterval);
-    fpsValue.textContent = '0';
-}
-
-function countFPSFrame() {
-    fpsFrames++;
-    const now = performance.now();
-    if (now >= fpsLastTime + 1000) {
-        fps = Math.round((fpsFrames * 1000) / (now - fpsLastTime));
-        fpsLastTime = now;
-        fpsFrames = 0;
-    }
-    if (fpsEnabled) {
-        requestAnimationFrame(countFPSFrame);
-    }
-}
-
-function updateFPSCounter() {
-    fpsValue.textContent = fps;
-}
-
-// Toggle event listener
-fpsToggle.addEventListener('change', function() {
-    fpsEnabled = this.checked;
-    fpsStatus.textContent = fpsEnabled ? 'Enabled' : 'Disabled';
-    localStorage.setItem('fpsEnabled', fpsEnabled);
-    
-    if (fpsEnabled) {
-        startFPSCounter();
-    } else {
-        stopFPSCounter();
-    }
-});
-// Load current state
-const aboutBlankState = localStorage.getItem("aboutBlank") === "enabled";
-aboutBlankToggle.checked = aboutBlankState;
-aboutBlankStatus.textContent = aboutBlankState ? "Enabled" : "Disabled";
-
-// Handle toggle changes
-aboutBlankToggle.addEventListener('change', function() {
-    if (this.checked) {
-        enableAboutBlank();
-    } else {
-        disableAboutBlank();
-    }
-});
-    // ======================
-    // CLOAKING SYSTEM
-    // ======================
-    function handleCloakPresetChange() {
-        customCloakUrl.style.display = this.value === 'custom' ? 'block' : 'none';
-    }
-
-    function applyCloak() {
-        const { targetUrl, title, faviconUrl } = getCloakSettings();
-        if (!targetUrl) return;
-        
-        activateIframeCloak(targetUrl, title, faviconUrl);
-        saveCloakSettings(targetUrl, title, faviconUrl);
-    }
-
-    function getCloakSettings() {
-        let targetUrl, title, faviconUrl;
-
-        switch (cloakPreset.value) {
-            case 'https://docs.google.com':
-                return {
-                    targetUrl: 'https://docs.google.com',
-                    title: 'Google Docs',
-                    faviconUrl: 'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png'
-                };
-            case 'https://classroom.google.com':
-                return {
-                    targetUrl: 'https://classroom.google.com',
-                    title: 'Google Classroom',
-                    faviconUrl: 'https://ssl.gstatic.com/classroom/favicon.png'
-                };
-            case 'https://kamiapp.com':
-                return {
-                    targetUrl: 'https://kamiapp.com',
-                    title: 'Kami',
-                    faviconUrl: 'https://kamiapp.com/favicon.ico'
-                };
-            case 'https://clever.com':
-                return {
-                    targetUrl: 'https://clever.com',
-                    title: 'Clever',
-                    faviconUrl: 'https://clever.com/favicon.ico'
-                };
-            case 'custom':
-                targetUrl = customCloakUrl.value.trim();
-                if (!targetUrl) {
-                    alert('Please enter a valid URL');
-                    return {};
-                }
-                return {
-                    targetUrl,
-                    title: prompt('Enter tab title:') || 'My Tab',
-                    faviconUrl: prompt('Enter favicon URL (optional):') || ''
-                };
-            default:
-                alert('Please select a preset or enter a custom URL!');
-                return {};
-        }
-    }
-
-    function activateIframeCloak(url, title, faviconUrl) {
-    // Hide main content (except settings and cloak toggle button)
-    document.querySelectorAll('.main-container > *').forEach(el => {
-        if (!el.classList.contains('settings-modal') && 
-            el.id !== 'cloak-toggle-btn') {
-            el.style.display = 'none';
-        }
-    });
-    
-    // Also hide the feedback button
-    const feedbackBtn = document.getElementById('feedback-btn');
-    if (feedbackBtn) feedbackBtn.style.display = 'none';
-    
-    // Hide the settings button too
-    const settingsBtn = document.getElementById('settings-btn');
-    if (settingsBtn) settingsBtn.style.display = 'none';
-
-    // Create or update iframe
-    let iframe = document.getElementById('cloak-iframe');
-    if (!iframe) {
-        iframe = document.createElement('iframe');
-        iframe.id = 'cloak-iframe';
-        iframe.style.position = 'fixed';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        iframe.style.zIndex = '9990';
-        document.body.appendChild(iframe);
-    }
-    iframe.src = url;
-
-    // Add/recreate toggle button
-    const toggleBtn = document.getElementById('cloak-toggle-btn') || createToggleButton();
-    setupToggleBehavior(iframe, toggleBtn);
-
-    // Update appearance
-    updateTabAppearance(title, faviconUrl);
-}
-    function createToggleButton() {
-        const btn = document.createElement('button');
-        btn.id = 'cloak-toggle-btn';
-        btn.className = 'cloak-toggle-btn';
-        btn.textContent = '👁️';
-        document.body.appendChild(btn);
-        return btn;
-    }
-
-   function setupToggleBehavior(iframe, btn) {
-    let cloakActive = true;
-    btn.addEventListener('click', () => {
-        cloakActive = !cloakActive;
-        iframe.style.display = cloakActive ? 'block' : 'none';
-        btn.textContent = cloakActive ? '👁️' : '👁️‍🗨️';
-        
-        // When uncloaking, restore the UI
-        if (!cloakActive) {
-            // Show main content
-            document.querySelectorAll('.main-container > *').forEach(el => {
-                el.style.display = '';
-            });
-            
-            // Show feedback button
-            const feedbackBtn = document.getElementById('feedback-btn');
-            if (feedbackBtn) feedbackBtn.style.display = '';
-            
-            // Show settings button
-            const settingsBtn = document.getElementById('settings-btn');
-            if (settingsBtn) settingsBtn.style.display = '';
-        } else {
-            // When recloaking, hide everything again
-            document.querySelectorAll('.main-container > *').forEach(el => {
-                if (!el.classList.contains('settings-modal') && 
-                    el.id !== 'cloak-toggle-btn') {
-                    el.style.display = 'none';
-                }
-            });
-            const feedbackBtn = document.getElementById('feedback-btn');
-            if (feedbackBtn) feedbackBtn.style.display = 'none';
-            const settingsBtn = document.getElementById('settings-btn');
-            if (settingsBtn) settingsBtn.style.display = 'none';
-        }
-    });
-}
-
-    function updateTabAppearance(title, faviconUrl) {
-        document.title = title;
-        updateFavicon(faviconUrl);
-    }
-
-    function updateFavicon(url) {
-        let favicon = document.querySelector('link[rel="icon"]') || 
-                     document.createElement('link');
-        favicon.rel = 'icon';
-        if (url) favicon.href = url;
-        document.head.appendChild(favicon);
-    }
-
-    function saveCloakSettings(url, title, faviconUrl) {
-        localStorage.setItem('cloakActive', 'true');
-        localStorage.setItem('cloakUrl', url);
-        localStorage.setItem('cloakTitle', title);
-        localStorage.setItem('cloakFavicon', faviconUrl);
-        localStorage.setItem('cloakPreset', cloakPreset.value);
-    }
-
-    // ======================
-    // APPEARANCE SETTINGS
-    // ======================
-function toggleDarkMode(e) {
-    const enabled = e.target.checked;
-    
-    // Start transition
-    document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
-    
-    // Apply the class change
-    document.body.classList.toggle('dark-mode', enabled);
-    
-    // Store preference
-    localStorage.setItem('darkMode', enabled);
-    
-    // Clean up after transition
-    setTimeout(() => {
-        document.body.style.transition = '';
-    }, 300);
-}
-    function applyBackgroundColor() {
-        const color = bgColorPicker.value;
-        document.body.style.backgroundColor = color;
-        localStorage.setItem('bgColor', color);
-    }
-
-    // ======================
-    // INITIALIZATION
-    // ======================
-    function loadSettings() {
-        // Dark Mode
-        const darkMode = localStorage.getItem('darkMode') === 'true';
-        darkModeToggle.checked = darkMode;
-        toggleDarkMode({ target: { checked: darkMode } });
-
-        // Background Color
-        const bgColor = localStorage.getItem('bgColor') || '#0d1b2a';
-        bgColorPicker.value = bgColor;
-        document.body.style.backgroundColor = bgColor;
-
-        // Cloaking
-        const cloakPresetValue = localStorage.getItem('cloakPreset') || '';
-        cloakPreset.value = cloakPresetValue;
-        if (cloakPresetValue === 'custom') {
-            customCloakUrl.style.display = 'block';
-            customCloakUrl.value = localStorage.getItem('customCloakUrl') || '';
-        }
-
-        if (localStorage.getItem('cloakActive') === 'true') {
-            const url = localStorage.getItem('cloakUrl');
-            const title = localStorage.getItem('cloakTitle');
-            const favicon = localStorage.getItem('cloakFavicon');
-            if (url && title) activateIframeCloak(url, title, favicon);
-        }
-    }
-
-function resetCloak() {
-    const iframe = document.getElementById('cloak-iframe');
-    const toggleBtn = document.getElementById('cloak-toggle-btn');
-    if (iframe) iframe.remove();
-    if (toggleBtn) toggleBtn.remove();
-    
-    // Restore all UI elements
-    document.querySelectorAll('.main-container > *').forEach(el => {
-        el.style.display = '';
-    });
-    
-    // Restore feedback button
-    const feedbackBtn = document.getElementById('feedback-btn');
-    if (feedbackBtn) feedbackBtn.style.display = '';
-    
-    // Restore settings button
-    const settingsBtn = document.getElementById('settings-btn');
-    if (settingsBtn) settingsBtn.style.display = '';
-    
-    localStorage.removeItem('cloakActive');
-}
-
-    // Expose cleanup for use elsewhere
-    return { resetCloak };
-}
-        
-
-      
-
-}
+         
         
         
      // Wrap the main initialization in error handling
