@@ -3323,8 +3323,7 @@ auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
 
          
 
-        
-     // Wrap the main initialization in error handling
+   // Wrap the main initialization in error handling
 document.addEventListener('DOMContentLoaded', () => {
     try {
         loadDeferredStyles();
@@ -3344,22 +3343,19 @@ document.addEventListener('DOMContentLoaded', () => {
         errorDiv.textContent = 'Error initializing application. Please refresh the page.';
         document.body.appendChild(errorDiv);
     }
+}); // This was missing - closes the DOMContentLoaded listener
+
+// This should be a separate initialization block
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        // Initialize Firebase first
         const firebaseServices = initializeFirebase();
         if (!firebaseServices) return;
         
         const { auth, database, storage } = firebaseServices;
         
-        // Set up auth state listener
         initAuthStateListener(auth);
-        
-        // Initialize systems that don't require auth
         loadDeferredStyles();
         initParticles();
-        
-        // Set up core UI interactions
         initTabSystem();
         initFeedbackSystem();
         initSettingsSystem(auth);
@@ -3369,7 +3365,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Initialization error:', error);
         showGlobalError('Failed to initialize application. Please refresh.');
     }
-});
+}); // Properly closes the second listener
     </script>
     <div class="logout-confirm-modal" id="logout-confirm-modal">
     <div class="logout-confirm-content">
