@@ -614,11 +614,26 @@ body.dark-mode #fps-value {
     <div class="auth-page" id="auth-page">
         <div class="auth-container">
   <div id="login-form">
+
     <h2 class="auth-title">Login to Your Account</h2>
     <input type="text" id="username" class="auth-input" placeholder="Username" required>
     <input type="password" id="password" class="auth-input" placeholder="Password" required>
     <input type="text" id="invite-code" class="auth-input" placeholder="Invite Code" required>
     <button id="login-btn" class="auth-btn">Log In</button>
+<!-- Add these links in both forms to switch between login/signup -->
+<div id="login-form">
+    ...
+    <p style="text-align: center; color: #e0e1dd;">
+        Don't have an account? <a href="#" id="show-signup">Sign Up</a>
+    </p>
+</div>
+
+<div id="signup-form" class="hidden">
+    ...
+    <p style="text-align: center; color: #e0e1dd;">
+        Already have an account? <a href="#" id="show-login">Log In</a>
+    </p>
+</div>
     <div id="auth-status" class="auth-status"></div>
 </div>
 
@@ -1866,30 +1881,20 @@ let feedbackRefListener = null;
         };
         
         // Wait for Firebase to load
-// Replace the initializeFirebase function with:
 function initializeFirebase() {
-    if (typeof firebase === 'undefined') {
-        setTimeout(initializeFirebase, 100);
-        return;
-    }
-
     try {
-        // Initialize Firebase if not already initialized
         if (firebase.apps.length === 0) {
-            firebase.initializeApp(firebaseConfig);
+            const app = firebase.initializeApp(firebaseConfig);
             
-            // Initialize services
-            firebase.auth();
-            firebase.database();
-            firebase.storage();
-            
-            initApplication();
-        } else {
-            initApplication();
+            // Verify services are initialized
+            if (!app.auth || !app.database || !app.storage) {
+                throw new Error('Firebase services failed to initialize');
+            }
         }
+        initApplication();
     } catch (error) {
-        console.error('Firebase initialization error:', error);
-        setTimeout(initializeFirebase, 1000);
+        console.error('Firebase init error:', error);
+        showGlobalError('Service initialization failed - please refresh');
     }
 }
         
@@ -2144,6 +2149,7 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
 }
         // Main application initialization
         function initApplication() {
+            initAuthStateListener();
             const auth = firebase.auth();
             const database = firebase.database();
             const storage = firebase.storage();
@@ -2183,10 +2189,11 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
             loginBtn.addEventListener('click', () => {
                 const username = usernameInput.value.trim();
                 const password = passwordInput.value.trim();
-                    const inviteCode = document.getElementById('invite-code').value.trim();
-    
-    if (!verifyInviteCode(inviteCode)) return;
-                
+     const inviteCode = document.getElementById('invite-code').value.trim();
+    if (!verifyInviteCode(inviteCode)) {
+        showError(authStatus, 'Invalid invite code');
+        return;
+    }
                 if (!username || !password) {
                     showError(authStatus, 'Please enter both username and password');
                     return;
@@ -2232,12 +2239,10 @@ if (lastLogin && (Date.now() - parseInt(lastLogin)) > 30 * 24 * 60 * 60 * 1000) 
                 const username = newUsernameInput.value.trim();
                 const password = newPasswordInput.value.trim();
                     const inviteCode = document.getElementById('new-invite-code').value.trim();
-    
-    if (!verifyInviteCode(inviteCode)) return;
-                if (!username || !password) {
-                    showError(signupStatus, 'Please enter both username and password');
-                    return;
-                }
+    if (!verifyInviteCode(inviteCode)) {
+        showError(signupStatus, 'Invalid invite code');
+        return;
+    }
                 
                 if (password.length < 6) {
                     showError(signupStatus, 'Password must be at least 6 characters');
@@ -2870,36 +2875,27 @@ async function handleAIInput() {
             sendFeedback();
         }
     });
-// Modify your auth state handling
 function initAuthStateListener() {
-    // Clean up previous listener if exists
-    if (authListener) {
-        authListener(); // This removes the listener
-    }
-    
-    authListener = auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged((user) => {
         if (user) {
-            // User is signed in
-            authPage.style.display = 'none';
-            mainContainer.style.display = 'flex';
-            initParticles();
-            initTabSystem();
-            initFeedbackSystem();
-            initSettingsSystem();
+            // Check last login time
+            const lastLogin = localStorage.getItem('lastLogin');
+            const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
             
-            // Load chat username if exists
-            chatUsername = localStorage.getItem('chatUsername') || user.email.split('@')[0];
-        } else {
-            // User is signed out
-            authPage.style.display = 'flex';
-            mainContainer.style.display = 'none';
-            
-            // Clean up when logged out
-            destroyParticles();
+            if (!lastLogin || (Date.now() - parseInt(lastLogin)) < THIRTY_DAYS) {
+                // Auto-login valid
+                authPage.style.display = 'none';
+                mainContainer.style.display = 'flex';
+                initParticles();
+                initTabSystem();
+                initFeedbackSystem();
+                initSettingsSystem();
+            } else {
+                auth.signOut();
+            }
         }
     });
 }
-
 
 
 // Modify your login/signup success handlers to persist auth state:
