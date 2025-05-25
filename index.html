@@ -2323,7 +2323,18 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
                     return 'Login failed. Please try again.';
             }
         }
-        
+           // Add these event listeners
+    document.getElementById('login-btn').addEventListener('click', handleLogin);
+    document.getElementById('signup-btn').addEventListener('click', handleSignup);
+    document.getElementById('settings-btn').addEventListener('click', toggleSettings);
+    document.getElementById('logout-btn').addEventListener('click', confirmLogout);
+    
+    // Initialize all systems
+    initTabSystem();
+    initChatSystem();
+    initAISystem();
+    initFeedbackSystem();
+    initSettingsSystem();
     } catch (error) {
         console.error('Initialization error:', error);
         // Show error to user
@@ -2340,6 +2351,7 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
         document.body.appendChild(errorDiv);
     }
 }
+
             
             // ======================
             // TAB SYSTEM
@@ -2896,39 +2908,18 @@ async function handleAIInput() {
         }
     });
 function initAuthStateListener() {
-    // Clean up previous listener if exists
-    if (authListener) {
-        authListener();
-    }
-    
-    authListener = auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged((user) => {
         if (user) {
-            // Initialize Firebase services
-            database = firebaseApp.database();
-            storage = firebaseApp.storage();
-            
-            // Initialize chat reference HERE
-            const chatRef = database.ref('chat');
-            
-            // Rest of your user logged in logic
-            authPage.style.display = 'none';
-            mainContainer.style.display = 'flex';
+            // User is authenticated
+            document.getElementById('auth-page').style.display = 'none';
+            document.getElementById('main-container').style.display = 'flex';
             initParticles();
             initTabSystem();
-            initFeedbackSystem();
-            initSettingsSystem();
-            
-            // Load chat username if exists
-            chatUsername = localStorage.getItem('chatUsername') || user.email.split('@')[0];
-            
-            // Initialize chat listeners HERE
-            loadChatHistory();
+            initChatSystem(); // Initialize chat after auth
         } else {
-            // User is signed out
-            authPage.style.display = 'flex';
-            mainContainer.style.display = 'none';
-            
-            // Clean up when logged out
+            // User is logged out
+            document.getElementById('auth-page').style.display = 'flex';
+            document.getElementById('main-container').style.display = 'none';
             destroyParticles();
         }
     });
@@ -3338,25 +3329,15 @@ function resetCloak() {
       
         
         
-     // Wrap the main initialization in error handling
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     try {
         loadDeferredStyles();
-        initializeFirebase();
+        await initializeFirebase();
+        await initApplication(); // Initialize app after Firebase
+        initAuthStateListener(); // Set up auth state monitoring
     } catch (error) {
         console.error('Initialization error:', error);
-        // Show user-friendly error message
-        const errorDiv = document.createElement('div');
-        errorDiv.style.position = 'fixed';
-        errorDiv.style.top = '0';
-        errorDiv.style.left = '0';
-        errorDiv.style.width = '100%';
-        errorDiv.style.padding = '20px';
-        errorDiv.style.backgroundColor = '#f44336';
-        errorDiv.style.color = 'white';
-        errorDiv.style.zIndex = '9999';
-        errorDiv.textContent = 'Error initializing application. Please refresh the page.';
-        document.body.appendChild(errorDiv);
+        showErrorToUser();
     }
 });
 document.addEventListener('DOMContentLoaded', function() {
