@@ -1873,13 +1873,13 @@ body.dark-mode #fps-value {
     <!-- Main JavaScript -->
     <script>
 // Add this at the top of your script
-let authListener = null;
-let chatRefListener = null;
-let feedbackRefListener = null;
-// Add these at the top of your script with other declarations
+let firebaseApp;
 let auth;
 let database;
 let storage;
+let authListener = null;
+let chatRefListener = null;
+let feedbackRefListener = null;
         // Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
@@ -1891,20 +1891,19 @@ let storage;
             measurementId: "G-1113622WQQ"
         };
         
-        // Wait for Firebase to load
 async function initializeFirebase() {
     return new Promise((resolve, reject) => {
         const checkFirebase = () => {
             if (typeof firebase !== 'undefined' && firebase.apps) {
                 try {
                     if (firebase.apps.length === 0) {
-                        const app = firebase.initializeApp(firebaseConfig);
-                        // Initialize services after app
-                        auth = app.auth();
-                        database = app.database();
-                        storage = app.storage();
+                        firebaseApp = firebase.initializeApp(firebaseConfig);
+                        // Initialize services
+                        auth = firebaseApp.auth();
+                        database = firebaseApp.database();
+                        storage = firebaseApp.storage();
                     }
-                    resolve(firebase);
+                    resolve(true);
                 } catch (error) {
                     reject(error);
                 }
@@ -2167,11 +2166,12 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
         // Main application initialization
   async function initApplication() {
     try {
-        await initializeFirebase();
-        // Initialize auth state listener
+             await initializeFirebase();
+        
+        // THEN initialize auth state listener
         initAuthStateListener();
         
-        // Get DOM elements
+        // THEN set up chat system
         const authPage = document.getElementById('auth-page');
         const mainContainer = document.getElementById('main-container');
         const loginForm = document.getElementById('login-form');
