@@ -2171,6 +2171,29 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
     document.body.classList.add('dark-mode');
     document.getElementById('dark-mode-toggle').checked = true;
 }
+function initAuthStateListener() {
+    const auth = firebase.auth();
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            // Check last login time
+            const lastLogin = localStorage.getItem('lastLogin');
+            const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+            
+            if (!lastLogin || (Date.now() - parseInt(lastLogin)) < THIRTY_DAYS) {
+                // Auto-login valid
+                document.getElementById('auth-page').style.display = 'none';
+                document.getElementById('main-container').style.display = 'flex';
+                initParticles();
+                initTabSystem();
+                initFeedbackSystem();
+                initSettingsSystem();
+            } else {
+                auth.signOut();
+            }
+        }
+    });
+}
+
 function setAuthPersistence() {
     firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
         .catch((error) => {
@@ -2906,28 +2929,6 @@ async function handleAIInput() {
             sendFeedback();
         }
     });
-function initAuthStateListener() {
-    const auth = firebase.auth();
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            // Check last login time
-            const lastLogin = localStorage.getItem('lastLogin');
-            const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
-            
-            if (!lastLogin || (Date.now() - parseInt(lastLogin)) < THIRTY_DAYS) {
-                // Auto-login valid
-                document.getElementById('auth-page').style.display = 'none';
-                document.getElementById('main-container').style.display = 'flex';
-                initParticles();
-                initTabSystem();
-                initFeedbackSystem();
-                initSettingsSystem();
-            } else {
-                auth.signOut();
-            }
-        }
-    });
-}
 
 
 // Modify your login/signup success handlers to persist auth state:
