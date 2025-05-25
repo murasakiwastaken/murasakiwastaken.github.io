@@ -2171,6 +2171,152 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
     document.body.classList.add('dark-mode');
     document.getElementById('dark-mode-toggle').checked = true;
 }
+   // ======================
+            // TAB SYSTEM
+            // ======================
+            function initTabSystem() {
+                const tabs = document.querySelectorAll('.tab');
+                const gameCards = document.querySelectorAll('.game-card');
+                const chatContainer = document.getElementById('chatroom');
+                const aiContainer = document.getElementById('ai-assistant');
+                
+                // Function to switch tabs with animation
+                function switchTab(tab) {
+                    const category = tab.dataset.category;
+                    
+                    // Animate out current active content
+                    const currentActiveTab = document.querySelector('.tab.active');
+                    if (currentActiveTab) {
+                        currentActiveTab.classList.remove('active');
+                    }
+                    
+                    // Add active class to new tab with animation
+                    tab.classList.add('active');
+                    
+                    // Hide all containers first with fade out animation
+                    if (chatContainer.classList.contains('active')) {
+                        chatContainer.style.animation = 'fadeOut 0.3s ease-out forwards';
+                        setTimeout(() => {
+                            chatContainer.classList.remove('active');
+                            chatContainer.style.display = 'none';
+                            chatContainer.style.animation = '';
+                        }, 300);
+                    }
+                    
+                    if (aiContainer.classList.contains('active')) {
+                        aiContainer.style.animation = 'fadeOut 0.3s ease-out forwards';
+                        setTimeout(() => {
+                            aiContainer.classList.remove('active');
+                            aiContainer.style.display = 'none';
+                            aiContainer.style.animation = '';
+                        }, 300);
+                    }
+                    
+                    gameCards.forEach(card => {
+                        if (card.style.display === 'block') {
+                            card.style.animation = 'fadeOut 0.3s ease-out forwards';
+                            setTimeout(() => {
+                                card.style.display = 'none';
+                                card.style.animation = '';
+                            }, 300);
+                        }
+                    });
+                    
+                    // Show the selected container with fade in animation
+                    setTimeout(() => {
+                        if (category === 'chatroom') {
+                            chatContainer.style.display = 'block';
+                            setTimeout(() => {
+                                chatContainer.classList.add('active');
+                                chatContainer.style.animation = 'fadeIn 0.3s ease-out forwards';
+                                checkUsername();
+                            }, 10);
+                        } else if (category === 'ai-assistant') {
+                            aiContainer.style.display = 'block';
+                            setTimeout(() => {
+                                aiContainer.classList.add('active');
+                                aiContainer.style.animation = 'fadeIn 0.3s ease-out forwards';
+                                // Initialize AI if first time
+                                if (document.getElementById('ai-messages').children.length === 0) {
+                                    addAIMessage("Hello! I'm murasaki's AI assistant. How can I help you today?");
+                                    addAIMessage("For image analysis, this AI is currently unsupported, please use the attach button below to redirect yourself to another website. Thank you for your understanding.", false);
+                                }
+                            }, 10);
+                        } else {
+                            gameCards.forEach(card => {
+                                if (category === 'all' || card.dataset.category === category) {
+                                    card.style.display = 'none';
+                                    setTimeout(() => {
+                                        card.style.display = 'block';
+                                        card.style.animation = 'fadeIn 0.3s ease-out forwards';
+                                    }, 10);
+                                }
+                            });
+                        }
+                    }, 300);
+                }
+                
+                // Add click event to all tabs
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        switchTab(tab);
+                    });
+                });
+                
+                // Initialize first tab
+                const initialTab = document.querySelector('.tab.active');
+                if (initialTab) {
+                    switchTab(initialTab);
+                }
+                
+                // Replace the game modal code in initTabSystem() with:
+const modal = document.querySelector('.modal');
+const playBtns = document.querySelectorAll('.play-btn');
+const closeBtn = document.querySelector('.close-btn');
+const gameFrame = document.querySelector('.game-frame');
+
+playBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const gameUrl = btn.dataset.game;
+        if (!gameUrl) {
+            console.error('No game URL specified');
+            return;
+        }
+        
+        // Show loading state
+        gameFrame.src = '';
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Set iframe source after a small delay to allow animation
+        setTimeout(() => {
+            gameFrame.src = gameUrl;
+        }, 300);
+    });
+});
+
+// Close modal with escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+        closeGameModal();
+    }
+});
+
+function closeGameModal() {
+    modal.classList.remove('active');
+    gameFrame.src = '';
+    document.body.style.overflow = 'auto';
+}
+
+closeBtn.addEventListener('click', closeGameModal);
+
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        closeGameModal();
+    }
+});
+            }
 function initAuthStateListener() {
     const auth = firebase.auth();
     auth.onAuthStateChanged((user) => {
@@ -2373,152 +2519,6 @@ if (lastLogin && (Date.now() - parseInt(lastLogin)) > 30 * 24 * 60 * 60 * 1000) 
                 }
             }
             
-            // ======================
-            // TAB SYSTEM
-            // ======================
-            function initTabSystem() {
-                const tabs = document.querySelectorAll('.tab');
-                const gameCards = document.querySelectorAll('.game-card');
-                const chatContainer = document.getElementById('chatroom');
-                const aiContainer = document.getElementById('ai-assistant');
-                
-                // Function to switch tabs with animation
-                function switchTab(tab) {
-                    const category = tab.dataset.category;
-                    
-                    // Animate out current active content
-                    const currentActiveTab = document.querySelector('.tab.active');
-                    if (currentActiveTab) {
-                        currentActiveTab.classList.remove('active');
-                    }
-                    
-                    // Add active class to new tab with animation
-                    tab.classList.add('active');
-                    
-                    // Hide all containers first with fade out animation
-                    if (chatContainer.classList.contains('active')) {
-                        chatContainer.style.animation = 'fadeOut 0.3s ease-out forwards';
-                        setTimeout(() => {
-                            chatContainer.classList.remove('active');
-                            chatContainer.style.display = 'none';
-                            chatContainer.style.animation = '';
-                        }, 300);
-                    }
-                    
-                    if (aiContainer.classList.contains('active')) {
-                        aiContainer.style.animation = 'fadeOut 0.3s ease-out forwards';
-                        setTimeout(() => {
-                            aiContainer.classList.remove('active');
-                            aiContainer.style.display = 'none';
-                            aiContainer.style.animation = '';
-                        }, 300);
-                    }
-                    
-                    gameCards.forEach(card => {
-                        if (card.style.display === 'block') {
-                            card.style.animation = 'fadeOut 0.3s ease-out forwards';
-                            setTimeout(() => {
-                                card.style.display = 'none';
-                                card.style.animation = '';
-                            }, 300);
-                        }
-                    });
-                    
-                    // Show the selected container with fade in animation
-                    setTimeout(() => {
-                        if (category === 'chatroom') {
-                            chatContainer.style.display = 'block';
-                            setTimeout(() => {
-                                chatContainer.classList.add('active');
-                                chatContainer.style.animation = 'fadeIn 0.3s ease-out forwards';
-                                checkUsername();
-                            }, 10);
-                        } else if (category === 'ai-assistant') {
-                            aiContainer.style.display = 'block';
-                            setTimeout(() => {
-                                aiContainer.classList.add('active');
-                                aiContainer.style.animation = 'fadeIn 0.3s ease-out forwards';
-                                // Initialize AI if first time
-                                if (document.getElementById('ai-messages').children.length === 0) {
-                                    addAIMessage("Hello! I'm murasaki's AI assistant. How can I help you today?");
-                                    addAIMessage("For image analysis, this AI is currently unsupported, please use the attach button below to redirect yourself to another website. Thank you for your understanding.", false);
-                                }
-                            }, 10);
-                        } else {
-                            gameCards.forEach(card => {
-                                if (category === 'all' || card.dataset.category === category) {
-                                    card.style.display = 'none';
-                                    setTimeout(() => {
-                                        card.style.display = 'block';
-                                        card.style.animation = 'fadeIn 0.3s ease-out forwards';
-                                    }, 10);
-                                }
-                            });
-                        }
-                    }, 300);
-                }
-                
-                // Add click event to all tabs
-                tabs.forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        switchTab(tab);
-                    });
-                });
-                
-                // Initialize first tab
-                const initialTab = document.querySelector('.tab.active');
-                if (initialTab) {
-                    switchTab(initialTab);
-                }
-                
-                // Replace the game modal code in initTabSystem() with:
-const modal = document.querySelector('.modal');
-const playBtns = document.querySelectorAll('.play-btn');
-const closeBtn = document.querySelector('.close-btn');
-const gameFrame = document.querySelector('.game-frame');
-
-playBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const gameUrl = btn.dataset.game;
-        if (!gameUrl) {
-            console.error('No game URL specified');
-            return;
-        }
-        
-        // Show loading state
-        gameFrame.src = '';
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        
-        // Set iframe source after a small delay to allow animation
-        setTimeout(() => {
-            gameFrame.src = gameUrl;
-        }, 300);
-    });
-});
-
-// Close modal with escape key
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('active')) {
-        closeGameModal();
-    }
-});
-
-function closeGameModal() {
-    modal.classList.remove('active');
-    gameFrame.src = '';
-    document.body.style.overflow = 'auto';
-}
-
-closeBtn.addEventListener('click', closeGameModal);
-
-modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-        closeGameModal();
-    }
-});
-            }
             
             // ======================
             // CHAT SYSTEM
