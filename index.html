@@ -574,10 +574,11 @@ body.dark-mode #fps-value {
             box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
         }
     </style>
-    
+    <noscript id="deferred-styles">
+
     <!-- Non-critical CSS -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rubik:wght@400;700&display=swap" media="print" onload="this.media='all'">
-    
+    </noscript>
     <!-- Deferred scripts -->
     <script>
         // Redirect logic
@@ -2055,13 +2056,23 @@ window.addEventListener('resize', () => {
     }, 200);
 });
         // Load non-critical CSS
-        function loadDeferredStyles() {
-            const addStylesNode = document.getElementById("deferred-styles");
-            const replacement = document.createElement("div");
-            replacement.innerHTML = addStylesNode.textContent;
-            document.body.appendChild(replacement);
-            addStylesNode.parentElement.removeChild(addStylesNode);
-        }
+       function loadDeferredStyles() {
+    const addStylesNode = document.getElementById("deferred-styles");
+    
+    if (!addStylesNode) {
+        console.error('Deferred styles element not found');
+        return;
+    }
+
+    try {
+        const replacement = document.createElement("div");
+        replacement.innerHTML = addStylesNode.textContent;
+        document.body.appendChild(replacement);
+        addStylesNode.parentElement.removeChild(addStylesNode);
+    } catch (error) {
+        console.error('Error loading deferred styles:', error);
+    }
+}
         // Enable/disable about:blank cloaking
 function enableAboutBlank() {
     localStorage.setItem("aboutBlank", "enabled");
