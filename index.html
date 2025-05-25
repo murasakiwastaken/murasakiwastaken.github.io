@@ -2171,8 +2171,15 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
     document.body.classList.add('dark-mode');
     document.getElementById('dark-mode-toggle').checked = true;
 }
+function setAuthPersistence() {
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .catch((error) => {
+            console.error("Error setting auth persistence:", error);
+        });
+}
         // Main application initialization
         function initApplication() {
+        setAuthPersistence();
             initAuthStateListener();
             const auth = firebase.auth();
             const database = firebase.database();
@@ -2900,6 +2907,7 @@ async function handleAIInput() {
         }
     });
 function initAuthStateListener() {
+    const auth = firebase.auth();
     auth.onAuthStateChanged((user) => {
         if (user) {
             // Check last login time
@@ -2908,8 +2916,8 @@ function initAuthStateListener() {
             
             if (!lastLogin || (Date.now() - parseInt(lastLogin)) < THIRTY_DAYS) {
                 // Auto-login valid
-                authPage.style.display = 'none';
-                mainContainer.style.display = 'flex';
+                document.getElementById('auth-page').style.display = 'none';
+                document.getElementById('main-container').style.display = 'flex';
                 initParticles();
                 initTabSystem();
                 initFeedbackSystem();
