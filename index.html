@@ -1898,35 +1898,27 @@ function showGlobalError(message) {
         };
         
  // Fixed Firebase initialization
-    function initializeFirebase() {
-        try {
-            // Check if Firebase is loaded
-            if (typeof firebase === 'undefined') {
-                throw new Error('Firebase SDK not loaded');
-            }
-
-            // Initialize Firebase
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            
-            // Initialize services
-            const auth = firebase.auth();
-            const database = firebase.database();
-            const storage = firebase.storage();
-            
-            // Verify services
-            if (!auth || !database || !storage) {
-                throw new Error('Firebase services failed to initialize');
-            }
-            
-            return { auth, database, storage };
-        } catch (error) {
-            console.error('Firebase init error:', error);
-            showGlobalError('Service initialization failed - please refresh');
-            return null;
+function initializeFirebase() {
+    try {
+        if (typeof firebase === 'undefined') {
+            throw new Error('Firebase SDK not loaded');
         }
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        return {
+            auth: firebase.auth(),
+            database: firebase.database(),
+            storage: firebase.storage()
+        };
+    } catch (error) {
+        console.error('Firebase init error:', error);
+        showGlobalError('Service initialization failed - please refresh');
+        return null;
     }
+}
        
 
 let particlesInstance = null;
@@ -2803,29 +2795,23 @@ function resetCloak() {
       
 
 }
-  // Fixed auth state listener
-    function initAuthStateListener(auth) {
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                const lastLogin = localStorage.getItem('lastLogin');
-                const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
-                
-                if (lastLogin && (Date.now() - parseInt(lastLogin)) > THIRTY_DAYS) {
-                    auth.signOut();
-                    localStorage.removeItem('lastLogin');
-                    window.location.reload();
-                } else {
-                    // Proceed with showing UI
-                    document.getElementById('auth-page').style.display = 'none';
-                    document.getElementById('main-container').style.display = 'flex';
-                    initParticles();
-                    initTabSystem();
-                    initFeedbackSystem();
-                    initSettingsSystem();
-                }
-            }
-        });
-    }
+function initAuthStateListener(auth) {
+    auth.onAuthStateChanged((user) => {
+        const authPage = document.getElementById('auth-page');
+        const mainContainer = document.getElementById('main-container');
+        
+        if (user) {
+            // Handle valid user session
+            authPage.style.display = 'none';
+            mainContainer.style.display = 'flex';
+            initChatSystem();
+        } else {
+            // Handle logged out state
+            authPage.style.display = 'flex';
+            mainContainer.style.display = 'none';
+        }
+    });
+}
 
 function setAuthPersistence() {
     firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
@@ -3358,29 +3344,31 @@ document.addEventListener('DOMContentLoaded', () => {
         errorDiv.textContent = 'Error initializing application. Please refresh the page.';
         document.body.appendChild(errorDiv);
     }
-          // Initialize application with proper sequencing
-    document.addEventListener('DOMContentLoaded', async () => {
-        try {
-            const firebaseServices = initializeFirebase();
-            if (!firebaseServices) return;
-            
-            const { auth, database, storage } = firebaseServices;
-            
-            // Initialize systems in order
-            initAuthStateListener(auth);
-            initLogoutSystem(auth);
-            initTabSystem();
-            initFeedbackSystem();
-            initSettingsSystem();
-            
-            // Load remaining components
-            loadDeferredStyles();
-            initParticles();
-        } catch (error) {
-            console.error('Initialization error:', error);
-            showGlobalError('Failed to initialize application. Please refresh.');
-        }
-    });
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Initialize Firebase first
+        const firebaseServices = initializeFirebase();
+        if (!firebaseServices) return;
+        
+        const { auth, database, storage } = firebaseServices;
+        
+        // Set up auth state listener
+        initAuthStateListener(auth);
+        
+        // Initialize systems that don't require auth
+        loadDeferredStyles();
+        initParticles();
+        
+        // Set up core UI interactions
+        initTabSystem();
+        initFeedbackSystem();
+        initSettingsSystem(auth);
+        initLogoutSystem(auth);
+
+    } catch (error) {
+        console.error('Initialization error:', error);
+        showGlobalError('Failed to initialize application. Please refresh.');
+    }
 });
     </script>
     <div class="logout-confirm-modal" id="logout-confirm-modal">
