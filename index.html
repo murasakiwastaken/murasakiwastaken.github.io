@@ -10,7 +10,10 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rubik:wght@400;700&display=swap" as="style">
     <link rel="preload" href="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" as="script">
     <link rel="preload" href="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js" as="script">
-    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 
 
     <!-- Inline critical CSS -->
@@ -582,24 +585,20 @@ body.dark-mode #fps-value {
             window.location.href = 'https://murasakiwastaken.vercel.app';
         }
         
-        // Load non-critical resources after page load
-        function loadDeferredResources() {
-            const resources = [
-                'https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js',
-                'https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js',
-                'https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js',
-                'https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js',
-                'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js',
-                'https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js'
-            ];
-            
-            resources.forEach(src => {
-                const script = document.createElement('script');
-                script.src = src;
-                script.async = true;
-                document.body.appendChild(script);
-            });
-        }
+     function loadDeferredResources() {
+    const resources = [
+        // Remove Firebase scripts from here
+        'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js',
+        'https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js'
+    ];
+    
+    resources.forEach(src => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.async = true;
+        document.body.appendChild(script);
+    });
+}
         
         // Start loading deferred resources after DOM is parsed
         document.addEventListener('DOMContentLoaded', loadDeferredResources);
@@ -1865,10 +1864,30 @@ body.dark-mode #fps-value {
     
     <!-- Main JavaScript -->
     <script>
-// Add this at the top of your script
 let authListener = null;
 let chatRefListener = null;
 let feedbackRefListener = null;
+function showGlobalError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.style.position = 'fixed';
+    errorDiv.style.top = '0';
+    errorDiv.style.left = '0';
+    errorDiv.style.width = '100%';
+    errorDiv.style.padding = '20px';
+    errorDiv.style.backgroundColor = '#ff2d75';
+    errorDiv.style.color = 'white';
+    errorDiv.style.zIndex = '9999';
+    errorDiv.textContent = message;
+    document.body.appendChild(errorDiv);
+    
+    // Also show in auth status if available
+    const authStatus = document.getElementById('auth-status');
+    if (authStatus) {
+        authStatus.textContent = message;
+        authStatus.classList.add('error');
+        authStatus.style.display = 'block';
+    }
+}
         // Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBcrITBb6ZnwL8QLlBl30L580kJgJDue2k",
@@ -1880,17 +1899,22 @@ let feedbackRefListener = null;
             measurementId: "G-1113622WQQ"
         };
         
-        // Wait for Firebase to load
-function initializeFirebase() {
+  function initializeFirebase() {
     try {
-        if (firebase.apps.length === 0) {
-            const app = firebase.initializeApp(firebaseConfig);
-            
-            // Verify services are initialized
-            if (!app.auth || !app.database || !app.storage) {
-                throw new Error('Firebase services failed to initialize');
-            }
+        // Check if Firebase is available
+        if (typeof firebase === 'undefined') {
+            throw new Error('Firebase SDK not loaded');
         }
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        // Verify services are initialized
+        if (!firebase.auth || !firebase.database || !firebase.storage) {
+            throw new Error('Firebase services failed to initialize');
+        }
+        
         initApplication();
     } catch (error) {
         console.error('Firebase init error:', error);
