@@ -2326,6 +2326,9 @@ modal.addEventListener('click', (e) => {
 });
             }
 function initFeedbackSystem(database) {
+    const auth = firebase.auth();
+            const database = firebase.database();
+            const storage = firebase.storage();
     const feedbackBtn = document.getElementById('feedback-btn');
     const feedbackModal = document.getElementById('feedback-modal');
     const closeFeedback = document.querySelector('.close-feedback');
