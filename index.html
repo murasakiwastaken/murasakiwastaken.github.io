@@ -1908,6 +1908,9 @@ function showGlobalError(message) {
 
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+const auth = firebase.auth();
+            const storage = firebase.storage();
         }
         
         // Verify services are initialized
@@ -1921,7 +1924,6 @@ function showGlobalError(message) {
         showGlobalError('Service initialization failed - please refresh');
     }
 }
-        const database = firebase.database();
        
 
 let particlesInstance = null;
