@@ -56,6 +56,77 @@
                 background: rgba(0, 168, 255, 0.2);
                 transform: scale(1.05);
             }
+/* Invite Code Modal Styles */
+.invite-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+}
+
+.invite-content {
+    background: #0d1b2a;
+    padding: 30px;
+    border-radius: 15px;
+    border: 2px solid #00a8ff;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    animation: windowsFade 0.4s ease-out;
+}
+
+.invite-content h2 {
+    color: #00a8ff;
+    margin-bottom: 20px;
+}
+
+.invite-input {
+    width: 100%;
+    padding: 12px;
+    margin: 15px 0;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 168, 255, 0.3);
+    background: rgba(224, 225, 221, 0.1);
+    color: #e0e1dd;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.invite-input:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
+    border-color: #00a8ff;
+}
+
+.invite-btn {
+    padding: 12px 25px;
+    background: linear-gradient(90deg, #00a8ff, #ff2d75);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+    margin-top: 10px;
+}
+
+.invite-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(0, 168, 255, 0.5);
+}
+
+.invite-error {
+    color: #ff2d75;
+    margin-top: 10px;
+    display: none;
+}
 .logout-btn {
     width: 100%;
     padding: 10px;
@@ -608,6 +679,17 @@ body.dark-mode #fps-value {
 <div id="fps-counter" style="display: none;">
     FPS: <span id="fps-value">0</span>
 </div>
+<!-- Invite Code Modal -->
+<div class="invite-modal" id="invite-modal">
+    <div class="invite-content">
+        <h2>Enter Invite Code</h2>
+        <p>You need an invite code to access this website</p>
+        <input type="text" class="invite-input" id="invite-code-input" placeholder="Enter invite code">
+        <div class="invite-error" id="invite-error">Invalid code! Try again.</div>
+        <button class="invite-btn" id="invite-submit">Submit</button>
+    </div>
+</div>
+
     <!-- Auth Page (shown by default) -->
     <div class="auth-page" id="auth-page">
         <div class="auth-container">
@@ -1853,6 +1935,63 @@ body.dark-mode #fps-value {
     
     <!-- Main JavaScript -->
     <script>
+// Invite Code System
+const INVITE_CODE = "youpassed";
+const REDIRECT_URL = "https://getoutofmywebsite.vercel.app";
+
+// Check if invite code is already saved
+function checkInviteCode() {
+    const savedCode = localStorage.getItem('inviteCode');
+    if (savedCode === INVITE_CODE) {
+        document.getElementById('invite-modal').style.display = 'none';
+        return true;
+    }
+    return false;
+}
+
+// Initialize invite code system
+function initInviteSystem() {
+    const inviteModal = document.getElementById('invite-modal');
+    const inviteInput = document.getElementById('invite-code-input');
+    const inviteSubmit = document.getElementById('invite-submit');
+    const inviteError = document.getElementById('invite-error');
+
+    // Show modal if no valid code is saved
+    if (!checkInviteCode()) {
+        inviteModal.style.display = 'flex';
+        inviteInput.focus();
+    }
+
+    // Handle submit
+    inviteSubmit.addEventListener('click', () => {
+        const enteredCode = inviteInput.value.trim();
+        if (enteredCode === INVITE_CODE) {
+            localStorage.setItem('inviteCode', INVITE_CODE);
+            inviteModal.style.display = 'none';
+        } else {
+            inviteError.style.display = 'block';
+            inviteInput.value = '';
+            setTimeout(() => {
+                // Fullscreen redirect after wrong attempt
+                document.documentElement.requestFullscreen().then(() => {
+                    window.location.href = REDIRECT_URL;
+                }).catch(() => {
+                    window.location.href = REDIRECT_URL;
+                });
+            }, 1000);
+        }
+    });
+
+    // Also handle Enter key
+    inviteInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            inviteSubmit.click();
+        }
+    });
+}
+
+// Initialize invite system when DOM is loaded
+document.addEventListener('DOMContentLoaded', initInviteSystem);
 // Add this at the top of your script
 let authListener = null;
 let chatRefListener = null;
@@ -2118,6 +2257,8 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
 }
         // Main application initialization
         function initApplication() {
+    if (!checkInviteCode()) return;
+
             const auth = firebase.auth();
             const database = firebase.database();
             const storage = firebase.storage();
