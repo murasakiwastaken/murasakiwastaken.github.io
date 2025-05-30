@@ -592,7 +592,102 @@ input:checked + .slider:before {
             border-radius: 5px;
             cursor: pointer;
         }
+/* Invite Code Modal Styles */
+.invite-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+}
 
+.invite-content {
+    background: #0d1b2a;
+    padding: 30px;
+    border-radius: 15px;
+    border: 2px solid #00a8ff;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    animation: windowsFade 0.4s ease-out;
+}
+
+.invite-content h2 {
+    color: #00a8ff;
+    margin-bottom: 20px;
+}
+
+.invite-input {
+    width: 100%;
+    padding: 12px;
+    margin: 15px 0;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 168, 255, 0.3);
+    background: rgba(224, 225, 221, 0.1);
+    color: #e0e1dd;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.invite-input:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
+    border-color: #00a8ff;
+}
+
+.invite-btn {
+    padding: 12px 25px;
+    background: linear-gradient(90deg, #00a8ff, #ff2d75);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+    margin-top: 10px;
+}
+
+.invite-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(0, 168, 255, 0.5);
+}
+
+.invite-error {
+    color: #ff2d75;
+    margin-top: 10px;
+    display: none;
+}
+
+/* Fullscreen Redirect Styles */
+#fullscreen-redirect {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99999;
+    background: #0d1b2a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#fullscreen-redirect iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.redirect-loading {
+    color: white;
+    font-size: 1.5rem;
+}
         .color-picker-container button {
             padding: 5px 10px;
             background: rgba(0, 168, 255, 0.2);
@@ -706,6 +801,7 @@ body.dark-mode #fps-value {
         <button class="invite-btn" id="invite-submit">Submit</button>
     </div>
 </div>
+<div id="fullscreen-redirect" style="display:none;"></div>
 
     <!-- Auth Page (shown by default) -->
     <div class="auth-page" id="auth-page">
@@ -1969,131 +2065,101 @@ body.dark-mode #fps-value {
     
     <!-- Main JavaScript -->
     <script>
+// Invite Code System
 const INVITE_CODE = "youpassed";
 const REDIRECT_URL = "https://getoutofmywebsite.vercel.app";
-const FAILED_ATTEMPT_KEY = 'inviteFailed';
 
-function createFullscreenIframe(url) {
-    // Create container
-    const container = document.createElement('div');
-    container.className = 'fullscreen-iframe';
-    
-    // Add loading message
-    const loading = document.createElement('div');
-    loading.className = 'iframe-loading';
-    loading.textContent = 'Redirecting...';
-    container.appendChild(loading);
-    
-    // Add to document
-    document.body.innerHTML = '';
-    document.body.appendChild(container);
-    
-    // Create iframe
-    const iframe = document.createElement('iframe');
-    iframe.src = url;
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    iframe.style.border = 'none';
-    
-    // Replace loading with iframe when loaded
-    iframe.onload = function() {
-        container.removeChild(loading);
-        container.appendChild(iframe);
-    };
-    
-    // Enter fullscreen
-    document.documentElement.requestFullscreen()
-        .then(() => container.appendChild(iframe))
-        .catch(() => container.appendChild(iframe));
-    
-    // Prevent exiting fullscreen
-    document.addEventListener('fullscreenchange', () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-        }
-    });
+function showInviteModal() {
+    document.getElementById('invite-modal').style.display = 'flex';
+}
+
+function hideInviteModal() {
+    document.getElementById('invite-modal').style.display = 'none';
+}
+
+function showError(message) {
+    const errorEl = document.getElementById('invite-error');
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+}
+
+function hideError() {
+    document.getElementById('invite-error').style.display = 'none';
 }
 
 function redirectToFailPage() {
-    // Hide everything except the iframe
-    document.querySelectorAll('body > *').forEach(el => {
-        if (!el.classList.contains('fullscreen-iframe')) {
-            el.style.display = 'none';
-        }
-    });
+    const redirectContainer = document.getElementById('fullscreen-redirect');
+    const loadingMessage = document.createElement('div');
+    loadingMessage.className = 'redirect-loading';
+    loadingMessage.textContent = 'Redirecting...';
     
-    // Create and show the fullscreen iframe
-    createFullscreenIframe(REDIRECT_URL);
+    redirectContainer.innerHTML = '';
+    redirectContainer.appendChild(loadingMessage);
+    redirectContainer.style.display = 'flex';
     
-    // Additional protection against exiting
-    window.addEventListener('blur', () => {
-        window.focus();
-    });
+    // Attempt fullscreen
+    document.documentElement.requestFullscreen().catch(() => {});
     
-    // Prevent context menu
-    document.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        return false;
-    });
-    
-    // Block keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey || e.metaKey || e.altKey) {
-            e.preventDefault();
-            return false;
-        }
-    });
+    // Create iframe after a short delay
+    setTimeout(() => {
+        const iframe = document.createElement('iframe');
+        iframe.src = REDIRECT_URL;
+        redirectContainer.innerHTML = '';
+        redirectContainer.appendChild(iframe);
+        
+        // Prevent exiting fullscreen
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            }
+        });
+        
+        // Block keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey || e.altKey) {
+                e.preventDefault();
+            }
+        });
+    }, 1000);
 }
 
-// Initialize invite code system
 function initInviteSystem() {
-    const inviteModal = document.getElementById('invite-modal');
+    // Check if valid code exists in localStorage
+    if (localStorage.getItem('inviteCode') === INVITE_CODE) {
+        hideInviteModal();
+        return;
+    }
+    
+    // Show invite modal
+    showInviteModal();
+    
+    // Setup event listeners
     const inviteInput = document.getElementById('invite-code-input');
     const inviteSubmit = document.getElementById('invite-submit');
-    const inviteError = document.getElementById('invite-error');
-
-    // Check access first
-    if (checkAccess()) {
-        inviteModal.style.display = 'none';
-        return;
-    } else if (sessionStorage.getItem(FAILED_ATTEMPT_KEY) === 'true') {
-        // Already failed - redirect immediately
-        redirectToFailPage();
-        return;
-    }
-
-    // Show modal if no valid code is saved and no previous failure
-    inviteModal.style.display = 'flex';
-    inviteInput.focus();
-
-    // Handle submit
-inviteSubmit.addEventListener('click', () => {
-    const enteredCode = inviteInput.value.trim();
-    if (enteredCode === INVITE_CODE) {
-        localStorage.setItem('inviteCode', INVITE_CODE);
-        inviteModal.style.display = 'none';
-        location.reload();
-    } else {
-        sessionStorage.setItem(FAILED_ATTEMPT_KEY, 'true');
-        inviteError.style.display = 'block';
-        inviteInput.value = '';
-        
-        // Use the new fullscreen redirect
-        setTimeout(redirectToFailPage, 1000);
-    }
-});
-
-    // Also handle Enter key
+    
+    inviteSubmit.addEventListener('click', () => {
+        const enteredCode = inviteInput.value.trim();
+        if (enteredCode === INVITE_CODE) {
+            localStorage.setItem('inviteCode', INVITE_CODE);
+            hideInviteModal();
+            location.reload();
+        } else {
+            showError('Invalid code! Redirecting...');
+            setTimeout(redirectToFailPage, 1000);
+        }
+    });
+    
     inviteInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             inviteSubmit.click();
         }
     });
+    
+    inviteInput.focus();
 }
 
 // Initialize invite system when DOM is loaded
 document.addEventListener('DOMContentLoaded', initInviteSystem);
-// Add this at the top of your script
 let authListener = null;
 let chatRefListener = null;
 let feedbackRefListener = null;
@@ -2358,7 +2424,7 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
 }
         // Main application initialization
         function initApplication() {
- if (!checkAccess()) {
+     if (localStorage.getItem('inviteCode') !== INVITE_CODE) {
         return;
     }
             const auth = firebase.auth();
