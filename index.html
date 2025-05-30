@@ -1935,18 +1935,35 @@ body.dark-mode #fps-value {
     
     <!-- Main JavaScript -->
     <script>
-// Invite Code System
+// Invite Code System - Updated Version
 const INVITE_CODE = "youpassed";
 const REDIRECT_URL = "https://getoutofmywebsite.vercel.app";
+const FAILED_ATTEMPT_KEY = 'inviteFailed';
 
-// Check if invite code is already saved
-function checkInviteCode() {
-    const savedCode = localStorage.getItem('inviteCode');
-    if (savedCode === INVITE_CODE) {
-        document.getElementById('invite-modal').style.display = 'none';
+// Check if access should be granted
+function checkAccess() {
+    // First check if they previously failed
+    if (sessionStorage.getItem(FAILED_ATTEMPT_KEY) === 'true') {
+        redirectToFailPage();
+        return false;
+    }
+    
+    // Then check if they have a valid code
+    if (localStorage.getItem('inviteCode') === INVITE_CODE) {
         return true;
     }
+    
+    // If neither, show the invite modal
     return false;
+}
+
+// Redirect to failure page (with fullscreen attempt)
+function redirectToFailPage() {
+    document.documentElement.requestFullscreen().then(() => {
+        window.location.href = REDIRECT_URL;
+    }).catch(() => {
+        window.location.href = REDIRECT_URL;
+    });
 }
 
 // Initialize invite code system
@@ -1956,11 +1973,19 @@ function initInviteSystem() {
     const inviteSubmit = document.getElementById('invite-submit');
     const inviteError = document.getElementById('invite-error');
 
-    // Show modal if no valid code is saved
-    if (!checkInviteCode()) {
-        inviteModal.style.display = 'flex';
-        inviteInput.focus();
+    // Check access first
+    if (checkAccess()) {
+        inviteModal.style.display = 'none';
+        return;
+    } else if (sessionStorage.getItem(FAILED_ATTEMPT_KEY) === 'true') {
+        // Already failed - redirect immediately
+        redirectToFailPage();
+        return;
     }
+
+    // Show modal if no valid code is saved and no previous failure
+    inviteModal.style.display = 'flex';
+    inviteInput.focus();
 
     // Handle submit
     inviteSubmit.addEventListener('click', () => {
@@ -1968,17 +1993,15 @@ function initInviteSystem() {
         if (enteredCode === INVITE_CODE) {
             localStorage.setItem('inviteCode', INVITE_CODE);
             inviteModal.style.display = 'none';
+            location.reload(); // Refresh to load the actual site
         } else {
+            // Mark the failed attempt
+            sessionStorage.setItem(FAILED_ATTEMPT_KEY, 'true');
             inviteError.style.display = 'block';
             inviteInput.value = '';
-            setTimeout(() => {
-                // Fullscreen redirect after wrong attempt
-                document.documentElement.requestFullscreen().then(() => {
-                    window.location.href = REDIRECT_URL;
-                }).catch(() => {
-                    window.location.href = REDIRECT_URL;
-                });
-            }, 1000);
+            
+            // Redirect after short delay
+            setTimeout(redirectToFailPage, 1000);
         }
     });
 
@@ -2257,8 +2280,9 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
 }
         // Main application initialization
         function initApplication() {
-    if (!checkInviteCode()) return;
-
+ if (!checkAccess()) {
+        return;
+    }
             const auth = firebase.auth();
             const database = firebase.database();
             const storage = firebase.storage();
