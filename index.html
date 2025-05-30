@@ -38,7 +38,24 @@
     from { opacity: 1; transform: translateY(0); }
     to { opacity: 0; transform: translateY(-10px); }
 }
+.fullscreen-iframe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    z-index: 99999;
+    background: #0d1b2a;
+}
 
+.iframe-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 1.5rem;
+}
 .message {
     transition: all 0.3s ease;
 }
@@ -752,7 +769,7 @@ body.dark-mode #fps-value {
                 <img src="https://meximathurbanned.global.ssl.fastly.net/images/games/subwaysurfers.png" alt="Subway Surfers" loading="lazy">
                 <div class="game-info">
                     <h3>Subway Surfers: San Fransisco</h3>
-                    <p>You already know what this game is, stop reading this shit.</p>
+                    <p>I have to clear this out to not get flagged.</p>
                     <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/cdn/projects/subway-surfers/">PLAY NOW</a>
                 </div>
             </div>
@@ -760,7 +777,7 @@ body.dark-mode #fps-value {
                 <img src="https://meximathurbanned.global.ssl.fastly.net/images/games/fnaf1.png" alt="FNAF" loading="lazy">
                 <div class="game-info">
                     <h3>FNAF</h3>
-                    <p>Guy kills his friends daughter and they both go insane</p>
+                    <p>I have to clear this out to not get flagged.</p>
                     <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/fnaf1/">PLAY NOW</a>
                 </div>
             </div>
@@ -768,7 +785,7 @@ body.dark-mode #fps-value {
                 <img src="https://meximathurbanned.global.ssl.fastly.net/images/games/fnaf2.jpg" alt="FNAF 2" loading="lazy">
                 <div class="game-info">
                     <h3>FNAF 2</h3>
-                    <p>Ooooh lore! MatPat get some heroin and lean this shit gonna be fire</p>
+                    <p>I have to clear this out to not get flagged.</p>
                     <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/fnaf2/">PLAY NOW</a>
                 </div>
             </div>
@@ -776,7 +793,7 @@ body.dark-mode #fps-value {
                 <img src="https://meximathurbanned.global.ssl.fastly.net/images/games/fnaf3.jpg" alt="FNAF 3" loading="lazy">
                 <div class="game-info">
                     <h3>FNAF 3</h3>
-                    <p>Man burns in springtrap suit and is lusting for children's screams worse than EDP445</p>
+                    <p>I have to clear this out to not get flagged.</p>
                     <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/fnaf3/">PLAY NOW</a>
                 </div>
             </div>
@@ -784,7 +801,7 @@ body.dark-mode #fps-value {
                 <img src="https://meximathurbanned.global.ssl.fastly.net/images/games/fnaf4.png" alt="FNAF 4" loading="lazy">
                 <div class="game-info">
                     <h3>FNAF 4</h3>
-                    <p>Little kid is geeked and stoned, has hallucinations, and gets solo'd by a fatass in a springlock costume</p>
+                    <p>I have to clear this out to not get flagged.</p>
                     <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/fnaf4/">PLAY NOW</a>
                 </div>
             </div>
@@ -792,7 +809,7 @@ body.dark-mode #fps-value {
                 <img src="https://meximathurbanned.global.ssl.fastly.net/images/games/tube-jumpers.png" alt="Tube Jumpers" loading="lazy">
                 <div class="game-info">
                     <h3>Tube Jumpers</h3>
-                    <p>Jump off your tube and drown to death like a dumbass</p>
+                    <p>I have to clear this out to not get flagged.</p>
                     <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/cdn/projects/tube-jumpers/">PLAY NOW</a>
                 </div>
             </div>
@@ -800,7 +817,7 @@ body.dark-mode #fps-value {
                 <img src="https://meximathurbanned.global.ssl.fastly.net/images/games/crossyroad.jpg" alt="Crossy Roads" loading="lazy">
                 <div class="game-info">
                     <h3>Crossy Roads</h3>
-                    <p>Why did the chicken cross the road</p>
+                    <p>Why did the chicken cross the road?</p>
                     <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/crossyroad/">PLAY NOW</a>
                 </div>
             </div>
@@ -808,7 +825,7 @@ body.dark-mode #fps-value {
                 <img src="https://meximathurbanned.global.ssl.fastly.net/images/games/slowroads.jpg" alt="Slow Roads" loading="lazy">
                 <div class="game-info">
                     <h3>Slow Roads</h3>
-                    <p>Try not to crash with your Porsche (911)</p>
+                    <p>I have to clear this out to not get flagged.</p>
                     <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/slowroads/">PLAY NOW</a>
                 </div>
             </div>
@@ -816,7 +833,7 @@ body.dark-mode #fps-value {
                 <img src="https://meximathurbanned.global.ssl.fastly.net/images/games/dante.jpg" alt="Dante" loading="lazy">
                 <div class="game-info">
                     <h3>Dante</h3>
-                    <p>No we're not talking about the guy from Devil May Cry</p>
+                    <p>I have to clear this out to not get flagged.</p>
                     <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/dante/">PLAY NOW</a>
                 </div>
             </div>
@@ -824,7 +841,7 @@ body.dark-mode #fps-value {
                 <img src="https://meximathurbanned.global.ssl.fastly.net/images/games/stickman-hook.png" alt="Stickman Hook" loading="lazy">
                 <div class="game-info">
                     <h3>Stickman Hook</h3>
-                    <p>Swing around on stretchy cum</p>
+                    <p>I have to clear this out to not get flagged.</p>
                     <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/cdn/projects/stickman-hook/index.html">PLAY NOW</a>
                 </div>
             </div>
@@ -832,7 +849,7 @@ body.dark-mode #fps-value {
                 <img src="https://meximathurbanned.global.ssl.fastly.net/images/games/OvO.jpg" alt="OvO" loading="lazy">
                 <div class="game-info">
                     <h3>OvO</h3>
-                    <p>Just your ordinary fuckass platformer game</p>
+                    <p>Just your ordinary platformer game</p>
                     <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/cdn/projects/ovo/index.html">PLAY NOW</a>
                 </div>
             </div>
@@ -840,7 +857,7 @@ body.dark-mode #fps-value {
                 <img src="https://meximathurbanned.global.ssl.fastly.net/images/games/tomb-of-the-mask.png" alt="Tomb of the Mask" loading="lazy">
                 <div class="game-info">
                     <h3>Tomb of the Mask</h3>
-                    <p>Idfk what to put here nigga</p>
+                    <p>I have to clear this out to not get flagged.</p>
                     <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/math/chapters/chapter2/page2/tomb-of-the-mask.html">PLAY NOW</a>
                 </div>
             </div>
@@ -848,7 +865,7 @@ body.dark-mode #fps-value {
                 <img src="https://meximathurbanned.global.ssl.fastly.net/images/games/boxing-random.png" alt="Boxing Random" loading="lazy">
                 <div class="game-info">
                     <h3>Boxing Random</h3>
-                    <p>Beat other people and maybe you'll beat their dick too</p>
+                    <p>Beat other people up</p>
                     <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/compiled/boxing-random/">PLAY NOW</a>
                 </div>
             </div>
@@ -856,7 +873,7 @@ body.dark-mode #fps-value {
                 <img src="https://meximathurbanned.global.ssl.fastly.net/images/games/motox3m.png" alt="Moto X3M" loading="lazy">
                 <div class="game-info">
                     <h3>Moto X3M</h3>
-                    <p>Ride on a motorcycle up and down (while a dildo is stuck in your ass)</p>
+                    <p>Ride on a motorcycle against obstacles!</p>
                     <a href="#" class="play-btn" data-game="https://meximathurbanned.global.ssl.fastly.net/cdn/projects/motox3m/index.html">PLAY NOW</a>
                 </div>
             </div>
@@ -923,7 +940,7 @@ body.dark-mode #fps-value {
                 <img src="https://images.crazygames.com/games/soccer-random/cover_16x9-1732744645362.png?auto=format,compress&q=75&cs=strip" alt="Soccer Random" loading="lazy">
                 <div class="game-info">
                     <h3>Soccer Random</h3>
-                    <p>Fast paced ball kicking (kick my balls preferably too)!</p>
+                    <p>Fast paced ball kicking!</p>
                     <a href="#" class="play-btn" data-game="https://slope-game.github.io/new3723/soccer-random/">PLAY NOW</a>
                 </div>
             </div>
@@ -958,7 +975,24 @@ body.dark-mode #fps-value {
                 </div>
             </div>
         </div>
-        
+            <div class="game-card" data-category="action">
+                <img src="data:image/jpeg;base64,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" alt="Cluster Rush" loading="lazy">
+                <div class="game-info">
+                    <h3>Race Survival</h3>
+                    <p>Cuz y'all asked</p>
+                    <a href="#" class="play-btn" data-game="https://race-survival.com/gg/survival-race/">PLAY NOW</a>
+                </div>
+            </div>
+        </div>
+       <div class="game-card" data-category="action">
+                <img src="https://tcf.admeen.org/game/18000/17539/400x246/football-legends-2021.jpg" alt="Cluster Rush" loading="lazy">
+                <div class="game-info">
+                    <h3>Football Legends 2021</h3>
+                    <p>Genuinely good game bro</p>
+                    <a href="#" class="play-btn" data-game="https://html5.gamedistribution.com/rvvASMiM/ecd138ae69cf4e92b5f5cdd328b6b62e/index.html?gd_sdk_referrer_url=https%3A%2F%2Fwww.twoplayergames.org%2Fgame%2Ffootball-legends-2021&gd_zone_config=eyJwYXJlbnRVUkwiOiJodHRwczovL3d3dy50d29wbGF5ZXJnYW1lcy5vcmcvZ2FtZS9mb290YmFsbC1sZWdlbmRzLTIwMjEiLCJwYXJlbnREb21haW4iOiJ0d29wbGF5ZXJnYW1lcy5vcmciLCJ0b3BEb21haW4iOiJ0d29wbGF5ZXJnYW1lcy5vcmciLCJoYXNJbXByZXNzaW9uIjpmYWxzZSwibG9hZGVyRW5hYmxlZCI6dHJ1ZSwiaG9zdCI6Imh0bWw1LmdhbWVkaXN0cmlidXRpb24uY29tIiwidmVyc2lvbiI6IjEuNS4xNyJ9">PLAY NOW</a>
+                </div>
+            </div>
+        </div>
         <!-- Chatroom -->
         <div class="chat-container" id="chatroom">
             <div class="chat-header">
@@ -1935,34 +1969,79 @@ body.dark-mode #fps-value {
     
     <!-- Main JavaScript -->
     <script>
-// Invite Code System - Updated Version
 const INVITE_CODE = "youpassed";
 const REDIRECT_URL = "https://getoutofmywebsite.vercel.app";
 const FAILED_ATTEMPT_KEY = 'inviteFailed';
 
-// Check if access should be granted
-function checkAccess() {
-    // First check if they previously failed
-    if (sessionStorage.getItem(FAILED_ATTEMPT_KEY) === 'true') {
-        redirectToFailPage();
-        return false;
-    }
+function createFullscreenIframe(url) {
+    // Create container
+    const container = document.createElement('div');
+    container.className = 'fullscreen-iframe';
     
-    // Then check if they have a valid code
-    if (localStorage.getItem('inviteCode') === INVITE_CODE) {
-        return true;
-    }
+    // Add loading message
+    const loading = document.createElement('div');
+    loading.className = 'iframe-loading';
+    loading.textContent = 'Redirecting...';
+    container.appendChild(loading);
     
-    // If neither, show the invite modal
-    return false;
+    // Add to document
+    document.body.innerHTML = '';
+    document.body.appendChild(container);
+    
+    // Create iframe
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    
+    // Replace loading with iframe when loaded
+    iframe.onload = function() {
+        container.removeChild(loading);
+        container.appendChild(iframe);
+    };
+    
+    // Enter fullscreen
+    document.documentElement.requestFullscreen()
+        .then(() => container.appendChild(iframe))
+        .catch(() => container.appendChild(iframe));
+    
+    // Prevent exiting fullscreen
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        }
+    });
 }
 
-// Redirect to failure page (with fullscreen attempt)
 function redirectToFailPage() {
-    document.documentElement.requestFullscreen().then(() => {
-        window.location.href = REDIRECT_URL;
-    }).catch(() => {
-        window.location.href = REDIRECT_URL;
+    // Hide everything except the iframe
+    document.querySelectorAll('body > *').forEach(el => {
+        if (!el.classList.contains('fullscreen-iframe')) {
+            el.style.display = 'none';
+        }
+    });
+    
+    // Create and show the fullscreen iframe
+    createFullscreenIframe(REDIRECT_URL);
+    
+    // Additional protection against exiting
+    window.addEventListener('blur', () => {
+        window.focus();
+    });
+    
+    // Prevent context menu
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        return false;
+    });
+    
+    // Block keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey || e.altKey) {
+            e.preventDefault();
+            return false;
+        }
     });
 }
 
@@ -1988,22 +2067,21 @@ function initInviteSystem() {
     inviteInput.focus();
 
     // Handle submit
-    inviteSubmit.addEventListener('click', () => {
-        const enteredCode = inviteInput.value.trim();
-        if (enteredCode === INVITE_CODE) {
-            localStorage.setItem('inviteCode', INVITE_CODE);
-            inviteModal.style.display = 'none';
-            location.reload(); // Refresh to load the actual site
-        } else {
-            // Mark the failed attempt
-            sessionStorage.setItem(FAILED_ATTEMPT_KEY, 'true');
-            inviteError.style.display = 'block';
-            inviteInput.value = '';
-            
-            // Redirect after short delay
-            setTimeout(redirectToFailPage, 1000);
-        }
-    });
+inviteSubmit.addEventListener('click', () => {
+    const enteredCode = inviteInput.value.trim();
+    if (enteredCode === INVITE_CODE) {
+        localStorage.setItem('inviteCode', INVITE_CODE);
+        inviteModal.style.display = 'none';
+        location.reload();
+    } else {
+        sessionStorage.setItem(FAILED_ATTEMPT_KEY, 'true');
+        inviteError.style.display = 'block';
+        inviteInput.value = '';
+        
+        // Use the new fullscreen redirect
+        setTimeout(redirectToFailPage, 1000);
+    }
+});
 
     // Also handle Enter key
     inviteInput.addEventListener('keypress', (e) => {
