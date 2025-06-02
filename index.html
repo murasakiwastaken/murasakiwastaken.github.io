@@ -3614,17 +3614,14 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 </div>
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    if ('Notification' in window) {
-        if (Notification.permission === 'default') {
-            Notification.requestPermission().then(function(permission) {
-                if(permission === 'granted') {
-                    console.log('Notifications enabled!');
-                }
-            });
-        }
-    }
-});
+if ('Notification' in window) {
+  if (Notification.permission === 'default') {
+    Notification.requestPermission().then(function(permission) {
+      // You can store the user's permission if needed
+      console.log('User selected:', permission);
+    });
+  }
+}
 </script>
 </body>
 </html>
