@@ -21,6 +21,7 @@ module.exports = async (req, res) => {
   "stream": true,
   "stop": null
     messages: [{ role: 'user', content: question }],
+    model: "gpt-3.5-turbo"
     messages: messages,
             },
             {
