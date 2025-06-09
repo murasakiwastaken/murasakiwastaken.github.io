@@ -25,8 +25,8 @@ module.exports = async (req, res) => {
   "max_completion_tokens": 1024,
   "top_p": 1,
   "stream": true,
-  "stop": null
-                messages: messages // Pass the messages array from the client
+  "stop": null,
+    messages: messages // Pass the messages array from the client
             },
             {
                 headers: {
