@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
                 temperature: 0.6,
                 max_tokens: 4096, // Use 'max_tokens', not 'max_completion_tokens'
                 top_p: 0.95,
-                stream: false, // Set to false if you want a one-shot response
+                stream: true, // Set to false if you want a one-shot response
                 stop: null,    // Optional, can remove if not using
                 messages: messages // Pass the messages array from the client
             },
