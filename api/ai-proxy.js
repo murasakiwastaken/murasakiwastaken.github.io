@@ -20,6 +20,7 @@ module.exports = async (req, res) => {
   "top_p": 0.95,
   "stream": true,
   "stop": null
+"messages"
             },
             {
                 headers: {
