@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
   "top_p": 0.95,
   "stream": true,
   "stop": null
-    messages: [{ role: 'user', content: question }],Add commentMore actions
+    messages: [{ role: 'user', content: question }],
     messages: messages,
             },
             {
