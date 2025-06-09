@@ -1113,6 +1113,12 @@ body.dark-mode #fps-value {
     <button id="ai-attach-btn" class="media-upload-btn" style="margin-right: 1rem;">
         📎 Attach (redirects to different website) 
     </button>
+            <div class="toggle-container">
+    <label>
+        <input type="checkbox" id="show-thoughts-toggle"> DeepThought (R1)
+    </label>
+</div>
+
     <button class="ai-send-btn" id="ai-send-btn">Send</button>
 </div>
             <div id="ai-media-preview" class="media-preview"></div>
@@ -2996,7 +3002,10 @@ function addAIMessage(text, isUser = false) {
                 ]
             })
         });
-        
+               if(showThoughts){
+          messages.push({role: "assistant", content: "Thinking..."})
+          messages.push({role: "assistant", content: response.data.choices[0].text})
+        }
         if (!response.ok) {
             throw new Error(`API error: ${response.status}`);
         }
@@ -3019,15 +3028,18 @@ async function handleAIInput() {
     const question = document.getElementById('ai-input').value.trim();
     if (!question) return;
     
+    const showThoughtsCheckbox = document.getElementById('show-thoughts-toggle');
+    const showThoughts = showThoughtsCheckbox.checked;
+  
     // Display user message
     addAIMessage(question, true);
-    
+  
     // Clear input and show typing indicator
     document.getElementById('ai-input').value = '';
     const typingDiv = showTypingIndicator();
-    
+  
     try {
-        const response = await getAIResponse(question);
+        const response = await getAIResponse(question, showThoughts);
         removeTypingIndicator();
         addAIMessage(response);
     } catch (error) {
@@ -3035,8 +3047,6 @@ async function handleAIInput() {
         addAIMessage("Sorry, I couldn't process your request. Please try again.");
     }
 }
-            // Clear conversation when switching tabs or reloading
-
 
             // Event listeners
             document.getElementById('ai-send-btn').addEventListener('click', handleAIInput);
