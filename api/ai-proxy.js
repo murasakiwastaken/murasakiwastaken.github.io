@@ -14,19 +14,13 @@ module.exports = async (req, res) => {
         const response = await axios.post(
             'https://api.groq.com/openai/v1/chat/completions',
             {
-         "messages": [
-    {
-      "role": "user",
-      "content": ""
-    }
-  ],
-  "model": "compound-beta",
-  "temperature": 1,
-  "max_completion_tokens": 1024,
-  "top_p": 1,
-  "stream": true,
-  "stop": null,
-    messages: messages // Pass the messages array from the client
+                model: "deepseek-r1-distill-llama-70b", // Set your desired model here
+                temperature: 0.6,
+                max_tokens: 4096, // Use 'max_tokens', not 'max_completion_tokens'
+                top_p: 0.95,
+                stream: true, // Set to false if you want a one-shot response
+                stop: null,    // Optional, can remove if not using
+                messages: messages // Pass the messages array from the client
             },
             {
                 headers: {
