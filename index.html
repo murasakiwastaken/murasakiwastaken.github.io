@@ -606,7 +606,210 @@ input:checked + .slider:before {
     z-index: 9999;
     backdrop-filter: blur(5px);
 }
-
+   /* Performance mode */
+    body.performance-mode .bg-animation {
+        animation-duration: 60s !important;
+    }
+    
+    body.performance-mode .game-card:hover {
+        transform: translateY(-5px) scale(1.01);
+    }
+    
+    /* Tools container */
+    .tools-container {
+        max-width: 800px;
+        width: 100%;
+        margin: 2rem auto;
+        background: rgba(13, 27, 42, 0.8);
+        border-radius: 15px;
+        border: 2px solid var(--primary);
+        box-shadow: 0 5px 15px rgba(0, 168, 255, 0.2);
+        overflow: hidden;
+        animation: windowsFade 0.5s ease-out both;
+        padding: 20px;
+    }
+    
+    .tools-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .tool-card {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        padding: 15px;
+        border: 1px solid rgba(0, 168, 255, 0.2);
+    }
+    
+    .tool-card h3 {
+        color: var(--primary);
+        margin-bottom: 15px;
+    }
+    
+    /* Calculator styles */
+    .calculator {
+        background: rgba(224, 225, 221, 0.1);
+        border-radius: 10px;
+        padding: 10px;
+    }
+    
+    .calculator-display input {
+        width: 100%;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(0, 168, 255, 0.3);
+        border-radius: 5px;
+        color: var(--light);
+        text-align: right;
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+    
+    .calculator-buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
+    }
+    
+    .calc-btn {
+        padding: 10px;
+        background: rgba(0, 168, 255, 0.1);
+        border: 1px solid rgba(0, 168, 255, 0.2);
+        color: var(--light);
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .calc-btn:hover {
+        background: rgba(0, 168, 255, 0.2);
+    }
+    
+    .calc-btn.equals {
+        grid-column: span 2;
+        background: rgba(0, 168, 255, 0.3);
+    }
+    
+    /* Text humanizer styles */
+    #ai-humanizer-input {
+        width: 100%;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(0, 168, 255, 0.3);
+        border-radius: 5px;
+        color: var(--light);
+        margin-bottom: 10px;
+        resize: vertical;
+    }
+    
+    #humanize-btn {
+        padding: 8px 15px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-bottom: 15px;
+    }
+    
+    .humanizer-result {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid rgba(0, 168, 255, 0.2);
+    }
+    
+    .humanizer-result h4 {
+        color: var(--primary);
+        margin-bottom: 10px;
+    }
+    
+    #humanizer-output {
+        min-height: 100px;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 5px;
+    }
+    
+    /* Exploitation container */
+    .exploit-container {
+        max-width: 600px;
+        width: 100%;
+        margin: 2rem auto;
+        background: rgba(13, 27, 42, 0.8);
+        border-radius: 15px;
+        border: 2px solid var(--secondary);
+        box-shadow: 0 5px 15px rgba(255, 45, 117, 0.2);
+        overflow: hidden;
+        animation: windowsFade 0.5s ease-out both;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .exploit-header {
+        margin-bottom: 20px;
+    }
+    
+    .exploit-header h2 {
+        color: var(--secondary);
+    }
+    
+    .exploit-content {
+        margin-top: 30px;
+    }
+    
+    .exploit-content p {
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+    }
+    
+    #countdown {
+        font-weight: bold;
+        color: var(--secondary);
+        font-size: 1.2rem;
+    }
+    
+    #cancel-redirect, #redirect-now {
+        padding: 10px 20px;
+        margin: 0 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.2s;
+    }
+    
+    #cancel-redirect {
+        background: rgba(0, 0, 0, 0.3);
+        color: var(--light);
+        border: 1px solid var(--primary);
+    }
+    
+    #redirect-now {
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        color: white;
+    }
+    
+    #cancel-redirect:hover {
+        background: rgba(0, 168, 255, 0.2);
+    }
+    
+    #redirect-now:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 10px rgba(255, 45, 117, 0.5);
+    }
+    
+    /* Feedback scroll fix */
+    .feedback-messages {
+        max-height: 300px;
+        overflow-y: auto;
+    }
 .invite-content {
     background: #0d1b2a;
     padding: 30px;
@@ -2125,6 +2328,571 @@ function redirectToFailPage() {
         });
     }, 1000);
 }
+function initGameOptimization() {
+    const optimizationToggle = document.createElement('div');
+    optimizationToggle.className = 'settings-option';
+    optimizationToggle.innerHTML = `
+        <h4>Game Performance Optimization</h4>
+        <div class="toggle-container">
+            <label class="switch">
+                <input type="checkbox" id="game-optimization-toggle">
+                <span class="slider round"></span>
+            </label>
+            <span id="game-optimization-status">Disabled</span>
+        </div>
+        <p class="setting-description">Enable for better performance while playing games (reduces background effects)</p>
+    `;
+    
+    // Add to settings
+    const appearanceSection = document.querySelector('.settings-section');
+    appearanceSection.appendChild(optimizationToggle);
+    
+    // Load saved setting
+    const optimizationEnabled = localStorage.getItem('gameOptimization') === 'true';
+    document.getElementById('game-optimization-toggle').checked = optimizationEnabled;
+    document.getElementById('game-optimization-status').textContent = 
+        optimizationEnabled ? 'Enabled' : 'Disabled';
+    
+    // Apply optimization if enabled
+    if (optimizationEnabled) {
+        applyGameOptimization();
+    }
+    
+    // Toggle event
+    document.getElementById('game-optimization-toggle').addEventListener('change', function() {
+        const enabled = this.checked;
+        document.getElementById('game-optimization-status').textContent = 
+            enabled ? 'Enabled' : 'Disabled';
+        localStorage.setItem('gameOptimization', enabled);
+        
+        if (enabled) {
+            applyGameOptimization();
+        } else {
+            removeGameOptimization();
+        }
+    });
+}
+
+function applyGameOptimization() {
+    // Reduce particles
+    if (particlesInstance && particlesInstance.pJS) {
+        particlesInstance.pJS.particles.number.value = 20;
+        particlesInstance.pJS.fn.particlesRefresh();
+    }
+    
+    // Reduce animations
+    document.documentElement.style.setProperty('--animation-speed', '0.5s');
+    
+    // Add performance class to body
+    document.body.classList.add('performance-mode');
+}
+
+function removeGameOptimization() {
+    // Restore particles
+    if (particlesInstance && particlesInstance.pJS) {
+        particlesInstance.pJS.particles.number.value = 60;
+        particlesInstance.pJS.fn.particlesRefresh();
+    }
+    
+    // Restore animations
+    document.documentElement.style.setProperty('--animation-speed', '1s');
+    
+    // Remove performance class
+    document.body.classList.remove('performance-mode');
+}
+
+// Previously Played Games System
+function initPreviouslyPlayedGames() {
+    // Get previously played games from localStorage
+    const playedGames = JSON.parse(localStorage.getItem('previouslyPlayed') || '[]');
+    
+    if (playedGames.length > 0) {
+        // Create "Previously Played" tab
+        const prevPlayedTab = document.createElement('div');
+        prevPlayedTab.className = 'tab';
+        prevPlayedTab.dataset.category = 'previously-played';
+        prevPlayedTab.textContent = 'Previously Played';
+        
+        // Add to tabs container
+        const tabsContainer = document.querySelector('.tabs');
+        tabsContainer.appendChild(prevPlayedTab);
+        
+        // Create game cards for previously played games
+        playedGames.forEach(game => {
+            const gameCard = createGameCard(game);
+            gameCard.dataset.category = 'previously-played';
+            gameCard.style.display = 'none'; // Hidden by default
+            
+            // Add to game grid
+            const gameGrid = document.querySelector('.game-grid');
+            gameGrid.appendChild(gameCard);
+        });
+        
+        // Add event listener for the new tab
+        prevPlayedTab.addEventListener('click', () => {
+            switchTab(prevPlayedTab);
+        });
+    }
+}
+
+function createGameCard(game) {
+    const card = document.createElement('div');
+    card.className = 'game-card';
+    card.innerHTML = `
+        <img src="${game.image}" alt="${game.title}" loading="lazy">
+        <div class="game-info">
+            <h3>${game.title}</h3>
+            <p>Last played: ${new Date(game.timestamp).toLocaleDateString()}</p>
+            <a href="#" class="play-btn" data-game="${game.url}">PLAY NOW</a>
+        </div>
+    `;
+    return card;
+}
+
+function recordGamePlayed(gameUrl, gameTitle, gameImage) {
+    const playedGames = JSON.parse(localStorage.getItem('previouslyPlayed') || '[]');
+    
+    // Remove if already exists to avoid duplicates
+    const existingIndex = playedGames.findIndex(game => game.url === gameUrl);
+    if (existingIndex !== -1) {
+        playedGames.splice(existingIndex, 1);
+    }
+    
+    // Add to beginning of array
+    playedGames.unshift({
+        url: gameUrl,
+        title: gameTitle,
+        image: gameImage,
+        timestamp: Date.now()
+    });
+    
+    // Keep only the last 5 games
+    if (playedGames.length > 5) {
+        playedGames.pop();
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('previouslyPlayed', JSON.stringify(playedGames));
+}
+
+// Update the game play button event listeners to record played games
+function updateGamePlayListeners() {
+    const playBtns = document.querySelectorAll('.play-btn');
+    playBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const gameUrl = btn.dataset.game;
+            const gameCard = btn.closest('.game-card');
+            const gameTitle = gameCard.querySelector('h3').textContent;
+            const gameImage = gameCard.querySelector('img').src;
+            
+            // Record this game as played
+            recordGamePlayed(gameUrl, gameTitle, gameImage);
+            
+            // Rest of the existing play game code...
+            const modal = document.querySelector('.modal');
+            const gameFrame = document.querySelector('.game-frame');
+            
+            // Show loading state
+            gameFrame.src = '';
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Set iframe source after a small delay to allow animation
+            setTimeout(() => {
+                gameFrame.src = gameUrl;
+            }, 300);
+        });
+    });
+}
+
+// Fix Feedback Scroll Issue
+function fixFeedbackScroll() {
+    const feedbackMessages = document.getElementById('feedback-messages');
+    if (feedbackMessages) {
+        feedbackMessages.style.maxHeight = '300px';
+        feedbackMessages.style.overflowY = 'auto';
+    }
+}
+
+// Update Chat to Use Auth Username
+function updateChatUsername() {
+    // This will use the auth username instead of a separate chat username
+    const user = firebase.auth().currentUser;
+    if (user) {
+        // Use the email username part (before @)
+        const username = user.email.split('@')[0];
+        localStorage.setItem('chatUsername', username);
+        chatUsername = username;
+    }
+}
+
+// Tools Tab Implementation
+function initToolsTab() {
+    // Create Tools tab
+    const toolsTab = document.createElement('div');
+    toolsTab.className = 'tab';
+    toolsTab.dataset.category = 'tools';
+    toolsTab.textContent = 'Tools';
+    
+    // Add to tabs container
+    const tabsContainer = document.querySelector('.tabs');
+    tabsContainer.appendChild(toolsTab);
+    
+    // Create Tools container
+    const toolsContainer = document.createElement('div');
+    toolsContainer.className = 'tools-container';
+    toolsContainer.id = 'tools';
+    toolsContainer.style.display = 'none';
+    
+    toolsContainer.innerHTML = `
+        <div class="tools-header">
+            <h2>Utility Tools</h2>
+            <p>Useful tools for various tasks</p>
+        </div>
+        <div class="tools-grid">
+            <div class="tool-card" data-tool="calculator">
+                <h3>Calculator</h3>
+                <div class="calculator">
+                    <div class="calculator-display">
+                        <input type="text" id="calc-display" readonly>
+                    </div>
+                    <div class="calculator-buttons">
+                        <button class="calc-btn" data-value="C">C</button>
+                        <button class="calc-btn" data-value="←">←</button>
+                        <button class="calc-btn" data-value="%">%</button>
+                        <button class="calc-btn" data-value="/">/</button>
+                        
+                        <button class="calc-btn" data-value="7">7</button>
+                        <button class="calc-btn" data-value="8">8</button>
+                        <button class="calc-btn" data-value="9">9</button>
+                        <button class="calc-btn" data-value="*">×</button>
+                        
+                        <button class="calc-btn" data-value="4">4</button>
+                        <button class="calc-btn" data-value="5">5</button>
+                        <button class="calc-btn" data-value="6">6</button>
+                        <button class="calc-btn" data-value="-">-</button>
+                        
+                        <button class="calc-btn" data-value="1">1</button>
+                        <button class="calc-btn" data-value="2">2</button>
+                        <button class="calc-btn" data-value="3">3</button>
+                        <button class="calc-btn" data-value="+">+</button>
+                        
+                        <button class="calc-btn" data-value="0">0</button>
+                        <button class="calc-btn" data-value=".">.</button>
+                        <button class="calc-btn equals" data-value="=">=</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tool-card" data-tool="humanizer">
+                <h3>AI Text Humanizer</h3>
+                <textarea id="ai-humanizer-input" placeholder="Paste AI-generated text here..." rows="6"></textarea>
+                <button id="humanize-btn">Humanize Text</button>
+                <div class="humanizer-result">
+                    <h4>Humanized Result:</h4>
+                    <div id="humanizer-output"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add to main container
+    const mainContainer = document.getElementById('main-container');
+    mainContainer.appendChild(toolsContainer);
+    
+    // Initialize calculator
+    initCalculator();
+    
+    // Initialize text humanizer
+    initTextHumanizer();
+    
+    // Add event listener for the tools tab
+    toolsTab.addEventListener('click', () => {
+        switchTab(toolsTab);
+    });
+}
+
+function initCalculator() {
+    const display = document.getElementById('calc-display');
+    let currentInput = '';
+    let operator = '';
+    let previousInput = '';
+    
+    document.querySelectorAll('.calc-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const value = button.dataset.value;
+            
+            if (value === 'C') {
+                // Clear
+                currentInput = '';
+                previousInput = '';
+                operator = '';
+                display.value = '';
+            } else if (value === '←') {
+                // Backspace
+                currentInput = currentInput.slice(0, -1);
+                display.value = currentInput;
+            } else if (value === '=') {
+                // Calculate
+                if (previousInput && operator && currentInput) {
+                    const result = calculate(
+                        parseFloat(previousInput),
+                        parseFloat(currentInput),
+                        operator
+                    );
+                    display.value = result;
+                    currentInput = result.toString();
+                    previousInput = '';
+                    operator = '';
+                }
+            } else if (['+', '-', '*', '/', '%'].includes(value)) {
+                // Operator
+                if (currentInput) {
+                    if (previousInput && operator) {
+                        // Calculate previous operation first
+                        const result = calculate(
+                            parseFloat(previousInput),
+                            parseFloat(currentInput),
+                            operator
+                        );
+                        previousInput = result.toString();
+                    } else {
+                        previousInput = currentInput;
+                    }
+                    operator = value;
+                    currentInput = '';
+                    display.value = '';
+                }
+            } else {
+                // Number or decimal
+                if (value === '.' && currentInput.includes('.')) return;
+                currentInput += value;
+                display.value = currentInput;
+            }
+        });
+    });
+    
+    function calculate(a, b, op) {
+        switch (op) {
+            case '+': return a + b;
+            case '-': return a - b;
+            case '*': return a * b;
+            case '/': return a / b;
+            case '%': return a % b;
+            default: return b;
+        }
+    }
+}
+
+function initTextHumanizer() {
+    const humanizeBtn = document.getElementById('humanize-btn');
+    const input = document.getElementById('ai-humanizer-input');
+    const output = document.getElementById('humanizer-output');
+    
+    humanizeBtn.addEventListener('click', () => {
+        const text = input.value.trim();
+        if (!text) {
+            output.textContent = 'Please enter some text first.';
+            return;
+        }
+        
+        output.textContent = 'Humanizing...';
+        
+        // Simulate AI processing with a timeout
+        setTimeout(() => {
+            // Simple text transformation as a placeholder for real AI
+            const humanized = humanizeText(text);
+            output.textContent = humanized;
+        }, 1000);
+    });
+    
+    function humanizeText(text) {
+        // Simple transformations to make text more "human"
+        return text
+            .replace(/\bhowever\b/gi, 'but')
+            .replace(/\bfurthermore\b/gi, 'also')
+            .replace(/\butilize\b/gi, 'use')
+            .replace(/\bcommence\b/gi, 'start')
+            .replace(/\bterminate\b/gi, 'end')
+            .replace(/\bapproximately\b/gi, 'about')
+            .replace(/\bprior to\b/gi, 'before')
+            .replace(/\bsubsequent to\b/gi, 'after')
+            .replace(/\bin order to\b/gi, 'to')
+            + " (This is a simulated humanization. A real AI service would provide better results.)";
+    }
+}
+
+// Exploitation Tab Implementation
+function initExploitationTab() {
+    // Create Exploitation tab
+    const exploitTab = document.createElement('div');
+    exploitTab.className = 'tab';
+    exploitTab.dataset.category = 'exploitation';
+    exploitTab.textContent = 'GoGuardian Timeout Exploit';
+    
+    // Add to tabs container
+    const tabsContainer = document.querySelector('.tabs');
+    tabsContainer.appendChild(exploitTab);
+    
+    // Create Exploitation container
+    const exploitContainer = document.createElement('div');
+    exploitContainer.className = 'exploit-container';
+    exploitContainer.id = 'exploitation';
+    exploitContainer.style.display = 'none';
+    
+    exploitContainer.innerHTML = `
+        <div class="exploit-header">
+            <h2>GoGuardian Timeout Exploit</h2>
+            <p>Redirecting to external exploit resource</p>
+        </div>
+        <div class="exploit-content">
+            <p>You will be redirected to an external website in <span id="countdown">5</span> seconds.</p>
+            <button id="cancel-redirect">Cancel Redirect</button>
+            <button id="redirect-now">Go Now</button>
+        </div>
+    `;
+    
+    // Add to main container
+    const mainContainer = document.getElementById('main-container');
+    mainContainer.appendChild(exploitContainer);
+    
+    let countdown = 5;
+    let countdownInterval;
+    
+    // Add event listener for the exploitation tab
+    exploitTab.addEventListener('click', () => {
+        switchTab(exploitTab);
+        startCountdown();
+    });
+    
+    function startCountdown() {
+        countdown = 5;
+        document.getElementById('countdown').textContent = countdown;
+        
+        countdownInterval = setInterval(() => {
+            countdown--;
+            document.getElementById('countdown').textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                redirectToExploit();
+            }
+        }, 1000);
+    }
+    
+    function redirectToExploit() {
+        window.location.href = 'https://extprint3r.github.io';
+    }
+    
+    // Cancel redirect button
+    document.getElementById('cancel-redirect').addEventListener('click', () => {
+        clearInterval(countdownInterval);
+        document.getElementById('countdown').textContent = 'Cancelled';
+    });
+    
+    // Redirect now button
+    document.getElementById('redirect-now').addEventListener('click', redirectToExploit);
+}
+
+// Update the switchTab function to handle the new tabs
+function switchTab(tab) {
+    const category = tab.dataset.category;
+    
+    // Animate out current active content
+    const currentActiveTab = document.querySelector('.tab.active');
+    if (currentActiveTab) {
+        currentActiveTab.classList.remove('active');
+    }
+    
+    // Add active class to new tab with animation
+    tab.classList.add('active');
+    
+    // Handle special cases first
+    if (category === 'exploitation') {
+        // Show the exploitation container
+        document.getElementById('exploitation').style.display = 'block';
+        return;
+    }
+    
+    // Hide all containers first with fade out animation
+    const containers = [
+        'chatroom', 'ai-assistant', 'tools', 'exploitation'
+    ];
+    
+    containers.forEach(containerId => {
+        const container = document.getElementById(containerId);
+        if (container && container.classList.contains('active')) {
+            container.style.animation = 'fadeOut 0.3s ease-out forwards';
+            setTimeout(() => {
+                container.classList.remove('active');
+                container.style.display = 'none';
+                container.style.animation = '';
+            }, 300);
+        }
+    });
+    
+    gameCards.forEach(card => {
+        if (card.style.display === 'block') {
+            card.style.animation = 'fadeOut 0.3s ease-out forwards';
+            setTimeout(() => {
+                card.style.display = 'none';
+                card.style.animation = '';
+            }, 300);
+        }
+    });
+    
+    // Show the selected container with fade in animation
+    setTimeout(() => {
+        if (category === 'chatroom') {
+            chatContainer.style.display = 'block';
+            setTimeout(() => {
+                chatContainer.classList.add('active');
+                chatContainer.style.animation = 'fadeIn 0.3s ease-out forwards';
+                checkUsername();
+            }, 10);
+        } else if (category === 'ai-assistant') {
+            aiContainer.style.display = 'block';
+            setTimeout(() => {
+                aiContainer.classList.add('active');
+                aiContainer.style.animation = 'fadeIn 0.3s ease-out forwards';
+                // Initialize AI if first time
+                if (document.getElementById('ai-messages').children.length === 0) {
+                    addAIMessage("Hello! I'm murasaki's AI assistant. How can I help you today?");
+                    addAIMessage("For image analysis, this AI is currently unsupported, please use the attach button below to redirect yourself to another website. Thank you for your understanding.", false);
+                }
+            }, 10);
+        } else if (category === 'tools') {
+            const toolsContainer = document.getElementById('tools');
+            toolsContainer.style.display = 'block';
+            setTimeout(() => {
+                toolsContainer.classList.add('active');
+                toolsContainer.style.animation = 'fadeIn 0.3s ease-out forwards';
+            }, 10);
+        } else {
+            gameCards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'none';
+                    setTimeout(() => {
+                        card.style.display = 'block';
+                        card.style.animation = 'fadeIn 0.3s ease-out forwards';
+                    }, 10);
+                }
+            });
+        }
+    }, 300);
+}
+
+// Initialize all new features
+function initAllFeatures() {
+    initGameOptimization();
+    initPreviouslyPlayedGames();
+    fixFeedbackScroll();
+    updateChatUsername();
+    initToolsTab();
+    initExploitationTab();
+    updateGamePlayListeners();
+}
 
 function initInviteSystem() {
     // Check if valid code exists in localStorage
@@ -2407,6 +3175,7 @@ function checkAboutBlank() {
 
 // Call this when the page loads
 document.addEventListener('DOMContentLoaded', checkAboutBlank);
+            setTimeout(initAllFeatures, 1000);
         function checkPopupBlocker() {
     const blankerCheck = localStorage.getItem("aboutBlank");
     if (blankerCheck === "enabled") {
